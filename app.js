@@ -3,8 +3,8 @@ const conf = require('./conf');
 const umeng = new push.client();
 
 const redis = require('redis');
-const client = redis.createClient(conf['redis.port'], conf['redis.host'], { password: conf['redis.password'] });
-const copyed = redis.createClient(conf['redis.port'], conf['redis.host'], { password: conf['redis.password'] });
+const client = redis.createClient(conf['redis.port'], conf['redis.host'], { password: conf['redis.password'], prefix: conf['redis.prefix'] });
+const copyed = redis.createClient(conf['redis.port'], conf['redis.host'], { password: conf['redis.password'], prefix: conf['redis.prefix'] });
 
 var Push = {
 
@@ -96,15 +96,17 @@ var Push = {
 				Push.sendIPhone(msg);
 
 				//消息数自减，同时更新消息状态
-				var ret = copyed.decrby(conf['redis.prefix'] + msg.tag, 1, function (err, len) {
+				var ret = copyed.decrby(msg.tag, 1, function (err, len) {
 
-					console.log(err, len);
+					//消息长度
+					console.log('decrby', err, msg.tag, len);
+
 					if (!err) {
 
 						var status = { 'popid': msg.msgid, 'length': len, 'pushing_time': (new Date).getTime() / 1000 };
 						status = JSON.stringify(status);
 
-						copyed.set(conf['redis.prefix'] + msg.tag + '_status', status);
+						copyed.set(msg.tag + '_status', status);
 					}
 
 				});
