@@ -48,7 +48,6 @@ var Push = {
 
 		ret.then(function (result) {
 			console.log('Android', '#' + msg.msgid, 'Alias ' + msg.alias, result ? '成功' : '失败');
-			console.log('set DEBUG=* & node app.js');
 		}).catch(function (reason) {
 			console.log('Android', '#' + msg.msgid, reason);
 		});
@@ -76,9 +75,9 @@ var Push = {
 		var ret = umeng.send(Push.ios);
 
 		ret.then(function (result) {
-			console.log(msg.msgid, 'iPhone 成功');
+			console.log('iPhone', '#' + msg.msgid, 'Alias ' + msg.alias, result ? '成功' : '失败');
 		}).catch(function (reason) {
-			console.log(msg.msgid, 'iPhone 失败');
+			console.log('iPhone', '#' + msg.msgid, reason);
 		});
 
 	},
@@ -86,11 +85,18 @@ var Push = {
 	send: function () {
 
 		client.on('message', function (channel, message) {
-			//console.log(channel, message)    // test channel-message:"channel message test"
+
 			var msgs = JSON.parse(message);
 
 			msgs.forEach(msg => {
+
+				//消息数自减
+				client.decrby(msg.tag, 1, function (err) {
+
+				});
+
 				Push.sendAndroid(msg);
+
 				Push.sendIPhone(msg);
 			});
 
@@ -102,12 +108,9 @@ var Push = {
 
 }
 
-//var p = new Push({ 'android': { 'appkey': '123', 'sss': '1111' }, 'iphone': { 'appkey': '123', 'sss': '1111' } });
-
 Push.setAliasType(conf.aliastype);
 
 Push.setKey('iphone', conf.iphone[0], conf.iphone[1]);
-
 Push.setKey('android', conf.android[0], conf.android[1]);
 
 Push.send();
