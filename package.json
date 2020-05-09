@@ -30,6 +30,7 @@
 	},
 	"dependencies": {
 		"redis": "*",
-		"umeng-push-server-sdk": "*",
+		"pm2": "*",
+		"umeng-push-server-sdk": "*"
 	}
 }

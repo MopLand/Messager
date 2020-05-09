@@ -104,10 +104,10 @@ var Push = {
 
 //var p = new Push({ 'android': { 'appkey': '123', 'sss': '1111' }, 'iphone': { 'appkey': '123', 'sss': '1111' } });
 
-Push.setAliasType('guodong_alias');
+Push.setAliasType(conf.aliastype);
 
-Push.setKey('iphone', '5c075ba2f1f55691f90002aa', '1su76s7veecgz0jr7iwbbys4jg7xsh6j');
+Push.setKey('iphone', conf.iphone[0], conf.iphone[1]);
 
-Push.setKey('android', '5c075c04b465f599ba000466', 'uq6l3gcmd0juqszj05ga31c8euvokckp');
+Push.setKey('android', conf.android[0], conf.android[1]);
 
 Push.send();
