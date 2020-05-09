@@ -4,6 +4,7 @@ const umeng = new push.client();
 
 const redis = require('redis');
 const client = redis.createClient(conf['redis.port'], conf['redis.host'], { password: conf['redis.password'] });
+const copyed = redis.createClient(conf['redis.port'], conf['redis.host'], { password: conf['redis.password'] });
 
 var Push = {
 
@@ -90,14 +91,24 @@ var Push = {
 
 			msgs.forEach(msg => {
 
-				//消息数自减
-				client.decrby(msg.tag, 1, function (err) {
-
-				});
-
 				Push.sendAndroid(msg);
 
 				Push.sendIPhone(msg);
+
+				//消息数自减，同时更新消息状态
+				var ret = copyed.decrby(conf['redis.prefix'] + msg.tag, 1, function (err, len) {
+
+					console.log(err, len);
+					if (!err) {
+
+						var status = { 'popid': msg.msgid, 'length': len, 'pushing_time': (new Date).getTime() / 1000 };
+						status = JSON.stringify(status);
+
+						copyed.set(conf['redis.prefix'] + msg.tag + '_status', status);
+					}
+
+				});
+
 			});
 
 		})
