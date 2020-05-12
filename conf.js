@@ -9,17 +9,4 @@ var conf = {
 	'redis.prefix': '',
 }
 
-/////////////////////////////
-
-try {
-	var exts = require('./extend');
-	for (k in exts) {
-		conf[k] = exts[k];
-	}
-	console.log('Loaded module extend.js');
-	console.log(exts);
-} catch (error) {
-	console.log('Not found extend.js');
-}
-
 module.exports = conf;

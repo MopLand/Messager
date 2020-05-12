@@ -1,6 +1,7 @@
 # Messager
 
 # Test
+	node app.js -debug 1
 	set DEBUG=* & node app.js
 
 # Run

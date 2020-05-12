@@ -1,9 +1,9 @@
 {
-	"name": "umeng-push-server-sdk",
-	"version": "0.0.3",
+	"name": "messager",
+	"version": "0.0.1",
 	"license": "MIT",
-	"description": "Umeng Push Server SDK for Nodejs",
-	"author": "LnsooXD <lnsooxd@gmail.com>",
+	"description": "Umeng Push Server",
+	"author": "Lay <veryide@qq.com>",
 	"files": [
 		"lib",
 		"LICENSE",
@@ -29,8 +29,9 @@
 		"node": ">= 4"
 	},
 	"dependencies": {
-		"redis": "*",
 		"pm2": "*",
-		"umeng-push-server-sdk": "*"
+		"redis": "*",
+		"umeng-push-server-sdk": "*",
+		"callback-promise-union": "^1.0.1"
 	}
 }
