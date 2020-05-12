@@ -1,4 +1,3 @@
-'use strict'
 
 const System = require('./lib/system');
 const Messager = require('./lib/messager');
