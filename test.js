@@ -167,3 +167,128 @@ if( step == 'getpop' ){
 		});
 
 }
+
+/*
+	消息过滤器
+*/
+var filter = function( AddMsgs, where = {}, size = -1 ){
+
+	var msgs = [];
+
+	for( let i = 0; i < AddMsgs.length; i++ ){
+
+		var idx = 0;
+		var msg = AddMsgs[i];
+
+		for( let w in where ){
+			if( msg[ w ].String == where[ w ] ){
+				idx ++;
+			}
+		};
+
+		//满足所有条件
+		if( idx == Object.keys( where ).length ){
+			msgs.push( msg );
+		}
+	};
+
+	if( size == 1 ){
+		return msgs.length ? msgs[0] : null;
+	}else{
+		return msgs;
+	}
+
+}
+
+if( step == 'group' ){
+
+	let wxid = System.getArgv( 'wxid' );
+	let text = System.getArgv( 'text', '好' );
+
+	var fn = wx.SyncMessage( wxid );
+
+		fn.then( ret => {
+			//console.log( ret );
+
+			var group_id = '';
+
+			var chat_room = filter( ret.AddMsgs, { Content : text, FromUserName : wxid }, 1 );
+
+			if( chat_room ){
+				group_id = chat_room.ToUserName.String;
+			}
+
+			console.log( chat_room, group_id );
+
+		}).catch( msg => {
+			console.log( msg );
+		});
+
+}
+
+if( step == 'syncmsg' ){
+
+	let wxid = System.getArgv( 'wxid' );
+	let gpid = System.getArgv( 'gpid' );
+
+	var fn = wx.SyncMessage( wxid );
+
+		fn.then( ret => {
+			//console.log( ret );
+
+			var group_id = '';
+
+			var msgs = filter( ret.AddMsgs, { ToUserName : gpid, FromUserName : wxid } );
+
+			/////////////
+
+			console.log( 'msgs', msgs );
+			console.log( '------------------------' );
+
+			for( let i = 0; i < msgs.length; i++ ){
+
+				var msg = msgs[i];
+
+				//文字
+				if( msg.MsgType == 1 ){
+					wx.SendTxtMessage( wxid, [ gpid ], msg.Content.String );
+				}
+
+				//图片
+				if( msg.MsgType == 3 ){
+				//	wx.SendImageMessage( wxid, [ gpid ], msg.ImgBuf.Buffer );
+				}
+
+				//视频
+				if( msg.MsgType == 4 ){
+				//	wx.SendVideoMessage( wxid, [ gpid ], msg.ImgBuf.Buffer );
+				}
+
+				//声音
+				//if( msg.MsgType >= 5 ){
+					//msg.Content.String
+					//wx.SendVoiceMessage( wxid, [ gpid ], msg.Content.String );
+				//}
+
+				if( msg.Content.String.indexOf('<') == 0 ){
+
+					var fn = wx.SendXmlMessage( wxid, [ gpid ], msg.Content.String );
+
+					fn.then( ret => {
+						console.log( ret );
+					}).catch( msg => {
+						console.log( msg );
+					});
+				}
+
+				console.log( '------------------------' );
+
+			}
+
+		}).catch( msg => {
+			console.log( msg );
+		});
+
+	/////////////////
+
+}

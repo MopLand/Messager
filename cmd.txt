@@ -1,0 +1,7 @@
+node test -step login
+
+node test -step check -uuid xxx
+
+node test -step getpop -wxid veryide -toWxid guodongzhushou
+
+node test -step syncmsg -wxid veryide
