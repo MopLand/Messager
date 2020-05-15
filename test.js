@@ -1,9 +1,9 @@
 
-const System = require('./lib/system');
+const Common = require('./lib/common');
 const Weixin = require('./lib/weixin');
 
-let conf = System.getConf( __dirname );
-let step = System.getArgv( 'step' );
+let conf = Common.getConf( __dirname );
+let step = Common.getArgv( 'step' );
 
 //var wx = new Weixin( 'http://180.97.238.53:5432/api/' );
 var wx = new Weixin( 'http://localhost:62677/api/' );
@@ -14,7 +14,7 @@ if( step == 'login' ){
 	
 		fn.then( ret => {
 			console.log( ret );
-			System.SavePic( decodeURIComponent( ret.QrBase64 ), 'qr.png' );
+			Common.SavePic( decodeURIComponent( ret.QrBase64 ), 'qr.png' );
 		}).catch( msg => {
 			console.log( msg );
 		});
@@ -23,12 +23,18 @@ if( step == 'login' ){
 
 if( step == 'check' ){
 
-	let id = System.getArgv( 'uuid' );
+	let id = Common.getArgv( 'uuid' );
 
 	var fn = wx.CheckLogin( id );
 
 		fn.then( ret => {
+
 			console.log( ret );
+
+			if( ret.State <= 0 ){
+				console.log( '请完成扫码登录' );
+			}
+
 		}).catch( msg => {
 			console.log( msg );
 		});
@@ -37,9 +43,9 @@ if( step == 'check' ){
 
 if( step == 'moment' ){
 
-	let wxid = System.getArgv( 'wxid' );
-	let type = System.getArgv( 'type', 0 );
-	let content = System.getArgv( 'content' );
+	let wxid = Common.getArgv( 'wxid' );
+	let type = Common.getArgv( 'type', 0 );
+	let content = Common.getArgv( 'content' );
 
 	console.log( content );
 
@@ -55,9 +61,9 @@ if( step == 'moment' ){
 
 if( step == 'getpop' ){
 
-	let wxid = System.getArgv( 'wxid' );
-	let toWxId = System.getArgv( 'toWxId', 'wxid_ig5bgx8ydlbp22' );
-	let maxid = System.getArgv( 'maxid', 0 );
+	let wxid = Common.getArgv( 'wxid' );
+	let toWxId = Common.getArgv( 'toWxId', 'wxid_ig5bgx8ydlbp22' );
+	let maxid = Common.getArgv( 'maxid', 0 );
 
 	var fn = wx.GetFriendCircleDetail( wxid, toWxId, maxid );
 
@@ -65,7 +71,7 @@ if( step == 'getpop' ){
 			
 			//console.log( ret.ObjectList[0] );
 			let post = posts.ObjectList[6];
-			//let body = System.parseXml( post.objectDesc.buffer );
+			//let body = Common.parseXml( post.objectDesc.buffer );
 
 			//console.log( post  );
 			//return;
@@ -202,8 +208,8 @@ var filter = function( AddMsgs, where = {}, size = -1 ){
 
 if( step == 'group' ){
 
-	let wxid = System.getArgv( 'wxid' );
-	let text = System.getArgv( 'text', '好' );
+	let wxid = Common.getArgv( 'wxid' );
+	let text = Common.getArgv( 'text', '好' );
 
 	var fn = wx.SyncMessage( wxid );
 
@@ -228,8 +234,8 @@ if( step == 'group' ){
 
 if( step == 'syncmsg' ){
 
-	let wxid = System.getArgv( 'wxid' );
-	let gpid = System.getArgv( 'gpid' );
+	let wxid = Common.getArgv( 'wxid' );
+	let gpid = Common.getArgv( 'gpid' );
 
 	var fn = wx.SyncMessage( wxid );
 
@@ -242,12 +248,14 @@ if( step == 'syncmsg' ){
 
 			/////////////
 
-			console.log( 'msgs', msgs );
-			console.log( '------------------------' );
+			//console.log( 'msgs', msgs );
+			//console.log( '------------------------' );
 
 			for( let i = 0; i < msgs.length; i++ ){
 
 				var msg = msgs[i];
+
+				console.log( msg, '------------------------' );
 
 				//文字
 				if( msg.MsgType == 1 ){
@@ -270,15 +278,46 @@ if( step == 'syncmsg' ){
 					//wx.SendVoiceMessage( wxid, [ gpid ], msg.Content.String );
 				//}
 
-				if( msg.Content.String.indexOf('<') == 0 ){
-
-					var fn = wx.SendXmlMessage( wxid, [ gpid ], msg.Content.String );
+				//图片
+				if( msg.MsgType == 3 && msg.Content.String.indexOf('<') == 0 ){
+							
+					var fn = wx.SendForwardImg( wxid, [ gpid ], msg.Content.String );
 
 					fn.then( ret => {
-						console.log( ret );
-					}).catch( msg => {
-						console.log( msg );
+						console.log( 'ret', ret );
+					}).catch( err => {
+						console.log( 'msg', err );
 					});
+
+				}
+
+				//视频
+				if( msg.MsgType == 43 && msg.Content.String.indexOf('<') == 0 ){
+							
+					var fn = wx.SendForwardVideo( wxid, [ gpid ],msg.Content.String );
+
+					fn.then( ret => {
+						console.log( 'ret', ret );
+					}).catch( err => {
+						console.log( 'msg', err );
+					});
+
+				}
+
+				//表情
+				if( msg.MsgType == 47 && msg.Content.String.indexOf('<') == 0 ){
+
+					var len = msg.Content.String.match(/len="(.+?)"/)[1];
+					var md5 = msg.Content.String.match(/md5="(.+?)"/)[1];
+							
+					var fn = wx.SendForwardEmoji( wxid, [ gpid ], len, md5 );
+
+					fn.then( ret => {
+						console.log( 'ret', ret );
+					}).catch( err => {
+						console.log( 'msg', err );
+					});
+
 				}
 
 				console.log( '------------------------' );
