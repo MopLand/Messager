@@ -7,7 +7,37 @@
 const wx = require('../lib/weixin');
 const com = require('../lib/common');
 
-class Group {
+class Groups {
+
+    /**
+     * 构造函数
+     */
+	constructor(conf) {
+
+		this.wx = new wx(conf.weixin);
+
+		this.conf = conf;
+
+		var self = this;
+
+		//每分钟获取一次朋友圈
+		setInterval(function () {
+
+			let pm = this.wx.SyncMessage(wxid);
+
+			pm.then(ret => {
+
+				//获取最新消息
+				var msgs = self.filterMessage(ret.AddMsgs, { ToUserName: group_id, FromUserName: wxid });
+
+				self.send(msgs);
+
+			}).catch(err => {
+
+			});
+
+		}, 60 * 1000);
+	}
 
 	/**
 	 * 获取微信群
@@ -158,30 +188,6 @@ class Group {
 
 	}
 
-	init() {
-
-		var self = this;
-
-		this.conf = conf;
-
-		//每分钟获取一次朋友圈
-		setInterval(function () {
-
-			let pm = this.wx.SyncMessage(wxid);
-
-			pm.then(ret => {
-
-				//获取最新消息
-				var msgs = self.filterMessage(ret.AddMsgs, { ToUserName: group_id, FromUserName: wxid });
-
-				self.send(msgs);
-
-			}).catch(err => {
-
-			});
-
-		}, 60 * 1000);
-
-	}
-
 }
+
+module.exports = Groups;

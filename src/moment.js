@@ -12,8 +12,29 @@ class Moment {
     /**
      * 构造函数
      */
-	constructor() {
-		this.wx = new wx('http://localhost:62677/api/');
+	constructor(conf) {
+
+		this.wx = new wx(conf.weixin);
+
+		var self = this;
+
+		//每分钟获取一次朋友圈
+		setInterval(function () {
+
+			let pm = self.fetchMoment('veryide', 'wxid_ig5bgx8ydlbp22');
+
+			pm.then(ret => {
+
+				var post = ret.ObjectList[0];
+
+				//转发朋友圈
+				self.send(post);
+
+			}).catch(err => {
+
+			});
+
+		}, 60 * 1000);
 	}
 
 	/**
@@ -56,9 +77,9 @@ class Moment {
 
 		let buffer = post.objectDesc.buffer;
 
-		var texts = /<contentDesc><\!\[CDATA\[(.+?)\]\]><\/contentDesc>/s.exec(buffer)[1];
+		let texts = /<contentDesc><\!\[CDATA\[(.+?)\]\]><\/contentDesc>/.exec(buffer)[1];
 
-		var media = /<mediaList>(.+?)<\/mediaList>/.exec(buffer)[1];
+		let media = /<mediaList>(.+?)<\/mediaList>/.exec(buffer)[1];
 
 		let pm = this.wx.SendFriendCircle(wxid, 9, texts, media);
 
@@ -127,28 +148,6 @@ class Moment {
 
 	}
 
-	init() {
-
-		var self = this;
-
-		//每分钟获取一次朋友圈
-		setInterval(function () {
-
-			let pm = self.fetchMoment('veryide', 'wxid_ig5bgx8ydlbp22');
-
-			pm.then(ret => {
-
-				var post = ret.ObjectList[0];
-
-				//转发朋友圈
-				self.send(post);
-
-			}).catch(err => {
-
-			});
-
-		}, 60 * 1000);
-
-	}
-
 }
+
+module.exports = Moment;
