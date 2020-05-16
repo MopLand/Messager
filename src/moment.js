@@ -5,7 +5,7 @@
  */
 
 const wx = require('../lib/weixin');
-const cm = require('../lib/common');
+const com = require('../lib/common');
 
 class Moment {
 
@@ -107,13 +107,9 @@ class Moment {
 	/**
      * 创建 Redis 连接
      */
-	redis() {
-		return redis.createClient(this.conf['redis.port'], this.conf['redis.host'], { password: this.conf['redis.password'], prefix: this.conf['redis.prefix'] });
-	}
-
 	send(post) {
 
-		let redis = this.redis();
+		let redis = com.redis();
 
 		redis.smembers("key", function (err, res) {
 

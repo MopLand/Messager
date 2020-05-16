@@ -5,8 +5,7 @@
  */
 
 const wx = require('../lib/weixin');
-const cm = require('../lib/common');
-const redis = require('redis');
+const com = require('../lib/common');
 
 class Group {
 
@@ -139,13 +138,9 @@ class Group {
 	/**
      * 创建 Redis 连接
      */
-	redis() {
-		return redis.createClient(this.conf['redis.port'], this.conf['redis.host'], { password: this.conf['redis.password'], prefix: this.conf['redis.prefix'] });
-	}
-
 	send(msgs) {
 
-		let redis = this.redis();
+		let redis = com.redis();
 
 		redis.smembers("key", function (err, res) {
 
