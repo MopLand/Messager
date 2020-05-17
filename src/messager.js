@@ -103,8 +103,8 @@ class Messager {
 	batch(test, report) {
 
 		var self = this;
-		var client = common.redis();
-		var copyed = common.redis();
+		var client = common.redis(this.conf.redis);
+		var copyed = common.redis(this.conf.redis);
 
 		report && report('init', {});
 

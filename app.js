@@ -8,8 +8,8 @@ const Messager = require('./src/messager');
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
 
-//消息推送
-if (func == '' || func == 'messager') {
+//消息推送，默认方法
+if (!func || func == 'messager') {
 
 	let test = Common.getArgv('debug');
 

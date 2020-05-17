@@ -5,10 +5,12 @@ var conf = {
 	'activity': 'com.guodongbaohe.app.activity.MipushTestActivity',
 	'weixin': 'http://localhost:62677/api/',
 	'report': 'http://api.example.com/report',
-	'redis.host': '127.0.0.1',
-	'redis.port': 6379,
-	'redis.password': '',
-	'redis.prefix': '',
+	'redis': {
+		'host': '127.0.0.1',
+		'port': 6379,
+		'password': '',
+		'prefix': '',
+	}
 }
 
 module.exports = conf;

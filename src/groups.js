@@ -14,11 +14,12 @@ class Groups {
      */
 	constructor(conf) {
 
-		this.wx = new wx(conf.weixin);
-
 		this.conf = conf;
 
 		var self = this;
+
+		this.wx = new wx(conf.weixin);
+		this.redis = com.redis(conf.redis);
 
 		//每分钟获取一次朋友圈
 		setInterval(function () {
@@ -170,9 +171,7 @@ class Groups {
      */
 	send(msgs) {
 
-		let redis = com.redis();
-
-		redis.smembers("key", function (err, res) {
+		this.redis.smembers("key", function (err, res) {
 
 			for (let i = 0; i < res.length; i++) {
 
