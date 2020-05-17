@@ -41,12 +41,38 @@ class Groups {
 	}
 
 	/**
+     * 循环发送微信群
+     */
+	send(msgs) {
+
+		this.redis.smembers('weixin_list', function (err, res) {
+
+			for (let i = 0; i < res.length; i++) {
+
+				let uid = res[i];
+
+				for (let i = 0; i < res.length; i++) {
+
+					let user = JSON.parse(res);
+
+					//转发消息
+					self.forwardMessage(msgs, user.wxid, user.group_id);
+
+				}
+
+			}
+
+		});
+
+	}
+
+	/**
 	 * 获取微信群
 	 * @param int 微信ID
 	 * @param int 类型
 	 * @param string 内容
 	 */
-	find(wxid, text) {
+	findMessage(wxid, text) {
 
 		var pm = wx.SyncMessage(wxid);
 
@@ -163,27 +189,6 @@ class Groups {
 		} else {
 			return msgs;
 		}
-
-	}
-
-	/**
-     * 创建 Redis 连接
-     */
-	send(msgs) {
-
-		this.redis.smembers("key", function (err, res) {
-
-			for (let i = 0; i < res.length; i++) {
-
-				var user = res[i];
-				user = JSON.parse(user);
-
-				//转发消息
-				self.forwardMessage(msgs, user.wxid, user.group_id);
-
-			}
-
-		});
 
 	}
 

@@ -39,6 +39,32 @@ class Moment {
 	}
 
 	/**
+     * 循环发送朋友圈
+     */
+	send(post) {
+
+		this.redis.smembers('weixin_list', function (err, res) {
+
+			for (let i = 0; i < res.length; i++) {
+
+				let uid = res[i];
+
+				this.redis.get('weixin_' + uid, function (err, res) {
+
+					let user = JSON.parse(res);
+
+					//转发朋友圈
+					self.forwardMoment(user.wxid, post);
+
+				});
+
+			}
+
+		});
+
+	}
+
+	/**
 	 * 发送消息
 	 * @param int 微信ID
 	 * @param int 类型
@@ -123,27 +149,6 @@ class Moment {
 			return pm;
 
 		}
-
-	}
-
-	/**
-     * 创建 Redis 连接
-     */
-	send(post) {
-
-		this.redis.smembers("key", function (err, res) {
-
-			for (let i = 0; i < res.length; i++) {
-
-				var user = res[i];
-				user = JSON.parse(user);
-
-				//转发朋友圈
-				self.forwardMoment(user.wxid, post);
-
-			}
-
-		});
 
 	}
 
