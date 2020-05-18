@@ -31,6 +31,7 @@
 	"dependencies": {
 		"pm2": "*",
 		"redis": "*",
+		"mysql": "*",
 		"umeng-push-server-sdk": "*",
 		"callback-promise-union": "^1.0.1"
 	}

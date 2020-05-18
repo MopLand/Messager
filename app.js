@@ -3,6 +3,7 @@ const Common = require('./lib/common');
 const Request = require('./lib/request');
 const Groups = require('./src/groups');
 const Moment = require('./src/moment');
+const Account = require('./src/account');
 const Messager = require('./src/messager');
 
 let conf = Common.getConf(__dirname);
@@ -35,5 +36,12 @@ if (func == 'moment') {
 if (func == 'groups') {
 
 	let klas = new Groups(conf);
+
+}
+
+//账号
+if (func == 'account') {
+
+	let klas = new Account(conf);
 
 }

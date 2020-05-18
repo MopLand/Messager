@@ -9,7 +9,45 @@ class Account {
      * 构造函数
      */
 	constructor(conf) {
+
+		//实例化微信
 		this.wx = new wx(conf.weixin);
+		
+		var uuid = '';
+		var self = this;
+
+		let pm = this.login();
+
+		pm.then( ret => {
+
+			uuid = ret.Uuid;
+
+			console.log( 'uuid', ret.Uuid );
+			console.log( 'expi', ret.ExpiredTime );
+		} );
+
+		var clok = setInterval(() => {
+
+			if( uuid ){
+
+				let pm = self.check( uuid );
+
+				pm.then(ret=>{
+
+					if (ret.State <= 0) {
+						//console.log('请完成扫码登录');
+					}else{
+						clearInterval( clok );
+						console.log( ret );
+					}
+
+				}).catch(msg => {
+					console.log(msg);
+				});
+
+			}
+
+		}, 3000 );
 	}
 
     /**
@@ -18,12 +56,6 @@ class Account {
      */
 	login(member_id = '') {
 
-		//var ret = await this.wx.GetLoginQrCode();
-
-		//return ret;
-
-		//return await this.wx.GetLoginQrCode();
-
 		var pm = this.wx.GetLoginQrCode();
 
 		pm.then(ret => {
@@ -31,27 +63,6 @@ class Account {
 		});
 
 		return pm;
-
-		//return res.then();
-
-		/*
-		try{
-
-			var ret = await this.wx.GetLoginQrCode();
-		
-			//	cm.SavePic( decodeURIComponent( ret.QrBase64 ), 'qr.png' );
-
-			console.log( typeof ret );
-
-			return ret;
-
-		}catch( err ){
-
-			console.log( err );
-			
-			return err;
-		}
-		*/
 
 	}
 
@@ -64,14 +75,17 @@ class Account {
 
 		var pm = this.wx.CheckLogin(uuid);
 
+		/*
 		pm.then(ret => {
 			console.log(ret);
 		}).catch(err => {
 			console.log(err);
 		});
+		*/
 
 		return pm;
 
+		/*
 		fn.then(ret => {
 
 			console.log(ret);
@@ -83,6 +97,7 @@ class Account {
 		}).catch(msg => {
 			console.log(msg);
 		});
+		*/
 	}
 
 }
