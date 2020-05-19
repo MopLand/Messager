@@ -6,6 +6,7 @@
 
 const wx = require('../lib/weixin');
 const com = require('../lib/common');
+const req = require('../lib/request');
 
 class Groups {
 
@@ -18,31 +19,52 @@ class Groups {
 
 		this.conf = conf;
 		this.wx = new wx(conf.weixin);
-		this.redis = com.redis(conf.redis);
-		this.mysql = com.redis(conf.mysql);
+		//this.redis = com.redis(conf.redis);
+		this.mysql = com.mysql(conf.mysql);
+		var keybuf = '';
 
 		//每分钟获取一次群消息
-		setInterval(function () {
+		setInterval(() => {
 
-			let pm = this.wx.SyncMessage( conf.wechat );
+			let pm = self.wx.NewSync( conf.wechat, keybuf );
+
+			//let pm = this.wx.InitContact( conf.wechat );
 
 			pm.then(ret => {
 
+				//console.log( 'ret', ret );
+				//console.log( '--------' );
+				//console.log( 'ret', ret.cmdList.list );
+				
+				
+				console.log( 'msgsize', ret.cmdList.count );
+
 				//获取最新消息
-				var msgs = self.filterMessage(ret.AddMsgs, { ToUserName: conf.follow.groups_id, FromUserName: conf.follow.groups });
+				//var msgs = self.filterMessage(ret.cmdList.list, { toUserName: conf.follow.groups_id, fromUserName: conf.follow.groups });
+				var msgs = self.filterMessage(ret.cmdList.list, { });
+
+				console.log( 'follows', conf.follow.groups_id, conf.follow.groups );
+
+				console.log( 'message', msgs );
+
+				console.log( '--------------------------' );
 
 				self.send(msgs);
+				
+				keybuf = ret.keyBuf.buffer;
+
+				//console.log( 'keybuf', keybuf );
 
 			}).catch(err => {
 
 			});
 
-		}, 60 * 1000 * 3 );
+		}, 30 * 1000 );
 
 		///////////////
 
-		//每分钟获取一次群消息
-		setInterval( this.findCommand, 60 * 500 );
+		//每3分钟心跳一次
+		setInterval( this.Heartbeat.bind(this), 60 * 1000 * 3 );
 
 	}
 
@@ -56,6 +78,12 @@ class Groups {
 
 		//this.redis.smembers('weixin_list', function (err, res) {
 		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 ORDER BY auto_id ASC', function (err, res) {
+
+			if( err ){
+				console.log( err );
+			}else{
+				console.log( '本次发群：' + res.length + ' 人' );
+			}
 
 			for (let i = 0; i < res.length; i++) {
 
@@ -139,6 +167,43 @@ class Groups {
 	}
 
 	/**
+	 * 同步心跳
+	 */
+	Heartbeat() {
+
+		var self = this;
+
+		//this.mysql = com.mysql(this.conf.mysql);
+
+		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` ORDER BY auto_id ASC', function (err, res) {
+
+			for (let i = 0; i < res.length; i++) {
+
+				let row = res[i];
+
+				//获取群消息
+				let pm = self.wx.Heartbeat( row.weixin_id );
+
+				pm.then(ret => {
+
+					//更新群发设置
+					//self.mysql.query('UPDATE `pre_member_weixin` SET groups_list = ?, groups_num, heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ JSON.stringify( gps ), num, row.member_id ] );
+					
+					//wx.SendTxtMessage(member.weixin_id, gid, gid + ' 设置成功');
+
+					console.log( '心跳成功', row.weixin_id );
+
+				}).catch( err => {
+
+				} );
+
+			}
+
+		});
+
+	}
+
+	/**
 	 * 消息过滤器
 	 * @param object 消息数据
 	 * @param object 过滤条件
@@ -151,10 +216,15 @@ class Groups {
 		for (let i = 0; i < AddMsgs.length; i++) {
 
 			var idx = 0;
-			var msg = AddMsgs[i];
+			var msg = AddMsgs[i].cmdBuf;
+
+			//群消息，过滤 xxx:\n
+			if( /@chatroom$/.test( msg.fromUserName.string ) ){
+				msg.content.string = msg.content.string.replace(/^[0-9a-zA-Z_\-]{1,}:\n/,'');
+			}
 
 			for (let w in where) {
-				if (msg[w].String == where[w]) {
+				if (msg[w].string == where[w]) {
 					idx++;
 				}
 			};
@@ -215,7 +285,7 @@ class Groups {
 		for (let i = 0; i < msgs.length; i++) {
 
 			var msg = msgs[i];
-			var detail = msg.Content.String;
+			var detail = msg.content.string;
 			var struct = detail.indexOf('<') == 0;
 
 			var groups = JSON.parse( member.groups_list );
@@ -231,10 +301,12 @@ class Groups {
 			console.log(msg, '------------------------');
 
 			//文字
-			if (msg.MsgType == 1) {				
+			if (msg.msgType == 1) {				
 
 				//转链
 				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : detail }, (code, body) => {
+
+					console.log( 'body', body );
 
 					var data = JSON.parse( body );
 					
@@ -245,12 +317,12 @@ class Groups {
 						return;
 					}
 
-					let pm = wx.SendTxtMessage(member.weixin_id, roomid, body);
+					let pm = self.wx.NewSendMsg(member.weixin_id, roomid, body, msg.msgSource);
 
 					pm.then(ret => {
-						console.log('评论成功', ret);
+						console.log('发群成功', ret);
 					}).catch(msg => {
-						console.log('SendFriendCircleComment', msg);
+						console.log('NewSendMsg', msg);
 					});
 
 				}, ( data ) =>{
@@ -267,9 +339,11 @@ class Groups {
 			}
 
 			//图片
-			if (msg.MsgType == 3 && struct) {
+			if (msg.msgType == 3 && struct) {
 
-				var fn = wx.SendForwardImg(member.weixin_id, roomid, detail);
+				for( let i = 0; i < roomid.length; i++ ){
+					var fn = self.wx.UploadMsgImgXml(member.weixin_id, roomid[i], detail);
+				}
 
 				fn.then(ret => {
 					console.log('ret', ret);
@@ -280,9 +354,11 @@ class Groups {
 			}
 
 			//视频
-			if (msg.MsgType == 43 && struct) {
+			if (msg.msgType == 43 && struct) {
 
-				var fn = wx.SendForwardVideo(member.weixin_id, roomid, detail);
+				for( let i = 0; i < roomid.length; i++ ){
+					var fn = self.wx.UploadVideoXml(member.weixin_id, roomid[i], detail);
+				}
 
 				fn.then(ret => {
 					console.log('ret', ret);
@@ -293,12 +369,14 @@ class Groups {
 			}
 
 			//表情
-			if (msg.MsgType == 47 && struct) {
+			if (msg.msgType == 47 && struct) {
 
-				var len = detail.match(/len="(.+?)"/)[1];
-				var md5 = detail.match(/md5="(.+?)"/)[1];
+				//var len = detail.match(/len="(.+?)"/)[1];
+				//var md5 = detail.match(/md5="(.+?)"/)[1];
 
-				var fn = wx.SendForwardEmoji(member.weixin_id, roomid, len, md5);
+				for( let i = 0; i < roomid.length; i++ ){
+					var fn = self.wx.SendEmojiXml(member.weixin_id, roomid[i], detail);
+				}
 
 				fn.then(ret => {
 					console.log('ret', ret);

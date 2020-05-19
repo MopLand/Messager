@@ -20,12 +20,17 @@ class Account {
 
 		pm.then( ret => {
 
-			uuid = ret.Uuid;
+			uuid = ret.uuid;
 
-			console.log( 'uuid', ret.Uuid );
-			console.log( 'expi', ret.ExpiredTime );
+			console.log( 'uuid', ret.uuid );
+			console.log( 'expi', ret.expiredTime );
+			console.log('等待完成扫码');
+
 		} );
 
+		////////////
+
+		var init = 0;
 		var clok = setInterval(() => {
 
 			if( uuid ){
@@ -34,11 +39,23 @@ class Account {
 
 				pm.then(ret=>{
 
-					if (ret.State <= 0) {
-						//console.log('请完成扫码登录');
-					}else{
+					//扫码成功
+					if (ret.notify.status == 2) {
+
 						clearInterval( clok );
-						console.log( ret );
+
+						console.log( ret.notify );
+
+						////////
+
+						let pm = self.submit( ret.notify.userName );
+
+						pm.then(ret=>{
+							console.log( ret );
+						}).catch(err=>{
+							console.log( err );
+						});
+						
 					}
 
 				}).catch(msg => {
@@ -47,7 +64,15 @@ class Account {
 
 			}
 
+			if( init >= 10 ){
+				clearInterval( clok );
+				console.log('扫码登录超时，请重试');
+			}else{
+				init++;
+			}
+
 		}, 3000 );
+
 	}
 
     /**
@@ -59,11 +84,20 @@ class Account {
 		var pm = this.wx.GetLoginQrCode();
 
 		pm.then(ret => {
-			cm.SavePic(decodeURIComponent(ret.QrBase64), 'qr.png');
+			cm.SavePic(decodeURIComponent(ret.qrcode.buffer), 'qr.png');
 		});
 
 		return pm;
 
+	}
+
+    /**
+     * 提交登录
+     * @param string wxId 微信Id
+     */
+	submit(wxid) {
+		var pm = this.wx.ManualAuth( wxid );
+		return pm;
 	}
 
     /**

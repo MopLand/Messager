@@ -3,9 +3,9 @@ var conf = {
 	'android': ['', ''],
 	'aliastype': '',
 	'activity': 'com.guodongbaohe.app.activity.MipushTestActivity',
-	'weixin': 'http://localhost:62677/api/',
+	'weixin': 'http://gdwechat.free.idcfengye.com/',
 	'report': 'http://api.example.com/report',
-	'convert': 'http://api.example.com/convert',
+	'convert': 'https://proxy.guodongbaohe.com/share/transtxt',
 	'tbtoken': /(¥|￥|\$|£|₤|€|₴|¢|₳|@|《|》|\()([a-zA-Z0-9]{11})(\1|\))/,
 	'redis': {
 		'host': '127.0.0.1',
@@ -14,25 +14,25 @@ var conf = {
 		'prefix': '',
 	},
 	mysql: {
-		host     : 'localhost',
-		user     : 'me',
-		password : 'secret',
-		database : 'my_db'
+		host     : '127.0.0.1',
+		user     : 'root',
+		password : 'root',
+		database : 'project_jellybox'
 	},
 
 	//当前微信号
-	wechat: '',
+	wechat: 'veryide',
 
 	//关注的微信号
 	follow: {
-		//朋友圈
+		//朋友圈来源
 		moment		: 'wxid_ig5bgx8ydlbp22',
 		
-		//微信群
-		groups		: 'me',
+		//微信群来源
+		groups		: 'wxid_35ipm1ssbbbc22',
 		
 		//微信群ID
-		groups_id	: 'me',
+		groups_id	: '18030716674@chatroom',
 	}
 }
 

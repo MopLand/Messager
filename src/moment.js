@@ -18,26 +18,34 @@ class Moment {
 		var self = this;
 
 		this.wx = new wx(conf.weixin);
-		this.redis = com.redis(conf.redis);
-		this.mysql = com.redis(conf.mysql);
+		//this.redis = com.redis(conf.redis);
+		this.mysql = com.mysql(conf.mysql);
+
+		var maxid = 0;
 
 		//每分钟获取一次朋友圈
-		setInterval(function () {
+		//setInterval(function () {
 
-			let pm = self.fetchMoment( conf.wechat, conf.follow.moment );
+			let pm = self.fetchMoment( conf.wechat, conf.follow.moment, maxid );
 
 			pm.then(ret => {
 
-				var post = ret.ObjectList[0];
+				//console.log( ret );
+
+				var post = ret.objectList[0];
 
 				//转发朋友圈
 				self.send(post);
 
+				maxid = post.id;
+
 			}).catch(err => {
+
+				console.log( err );
 
 			});
 
-		}, 60 * 1000 * 3);
+		//}, 60 * 1000 * 3);
 	}
 
 	/**
@@ -50,6 +58,12 @@ class Moment {
 		var self = this;
 
 		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 ORDER BY auto_id ASC', function (err, res) {
+
+			if( err ){
+				console.log( err );
+			}else{
+				console.log( '本次发圈：' + res.length + ' 人' );
+			}
 
 			for (let i = 0; i < res.length; i++) {
 
@@ -98,9 +112,10 @@ class Moment {
 	 * @param string 微信ID
 	 * @param int 好友ID
 	 * @param int 上一次消息ID
+	 * @param int 来源ID
 	 */
-	fetchMoment(wxid, toWxId, maxid = 0) {
-		var pm = this.wx.GetFriendCircleDetail(wxid, toWxId, maxid);
+	fetchMoment(wxid, toWxId, maxid = 0, source = 0) {
+		var pm = this.wx.SnsUserPage(wxid, toWxId, maxid, source);
 		return pm;
 	}
 
