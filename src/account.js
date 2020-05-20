@@ -129,7 +129,16 @@ class Account {
      * @param string wxId 微信Id
      */
 	submit(wxid) {
+
 		var pm = this.wx.ManualAuth( wxid );
+
+		//删除二维码
+		pm.then( ret => {			
+			cm.DelFile( 'qr.png' );
+		} ).catch( err => {
+
+		} );
+
 		return pm;
 	}
 

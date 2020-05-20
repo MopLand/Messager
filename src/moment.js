@@ -64,7 +64,7 @@ class Moment {
 				console.log( err );
 				return;
 			}else{
-				console.log( '本次发圈', res.length + ' 人', '评论', post.commentUserList.length + ' 条' );
+				console.log( '本次发圈', res.length + ' 人，评论', post.commentUserList.length + ' 条' );
 			}
 
 			for (let i = 0; i < res.length; i++) {

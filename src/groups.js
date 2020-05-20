@@ -59,7 +59,7 @@ class Groups {
 				console.log( err );
 			});
 
-		}, 30 * 1000 );
+		}, 60 * 1000 );
 
 		///////////////
 
@@ -192,9 +192,11 @@ class Groups {
 					
 					//wx.SendTxtMessage(member.weixin_id, gid, gid + ' 设置成功');
 
-					console.log( '心跳成功', row.weixin_id );
+					console.log( '心跳成功', row.weixin_id, ret );
 
 				}).catch( err => {
+
+					console.log( err );
 
 				} );
 
@@ -246,7 +248,6 @@ class Groups {
 		}
 
 	}
-
 
 	/**
 	 * 获取微信群
