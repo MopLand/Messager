@@ -40,9 +40,13 @@ class Moment {
 
 				maxid = post.id;
 
+				req.status(conf.report, 'MM_Moment', maxid, body.baseResponse);
+
 			}).catch(err => {
 
 				console.log( err );
+
+				req.status(conf.report, 'MM_Moment', maxid, err);
 
 			});
 

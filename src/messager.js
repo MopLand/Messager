@@ -1,10 +1,80 @@
 'use strict'
 
 const common = require('../lib/common');
+const request = require('../lib/request');
 const umsdk = require('umeng-push-server-sdk');
 const umeng = new umsdk.client();
 
 class Messager {
+
+	/**
+     * 构造函数
+     * @param object conf 配置信息
+     * @param boolean test 是否测试
+     */
+	constructor(conf, test) {
+
+		this.conf = conf;
+
+		this.setAliasType(conf.aliastype);
+
+		console.log('----------------------------');
+
+		this.setKey('iphone', conf.iphone[0], conf.iphone[1]);
+		this.setKey('android', conf.android[0], conf.android[1]);
+
+		this.batch(test);
+
+	}
+
+	/**
+     * 批量推送消息
+     * @param boolean test 是否测试
+     */
+	batch(test) {
+
+		var self = this;
+		var client = common.redis(this.conf.redis);
+		var copyed = common.redis(this.conf.redis);
+
+		request.status(this.conf.report, 'Messager', 0, {});
+
+		client.on('message', function (channel, message) {
+
+			var msgs = JSON.parse(message);
+
+			if (test) {
+				console.log(msgs);
+			}
+
+			!test && msgs.forEach(msg => {
+
+				self.sendAndroid(msg);
+
+				self.sendIPhone(msg);
+
+				//消息数自减，同时更新消息状态
+				var ret = copyed.decrby(msg.tag, 1, function (err, len) {
+
+					if (!err) {
+
+						var status = { 'popid': msg.msgid, 'length': len, 'pushing_time': (new Date).getTime() / 1000 };
+
+						copyed.set(msg.tag + '_status', JSON.stringify(status));
+
+						//一定机率上报日志
+						request.status(this.conf.report, 'Messager', status, msg, null, 0.01 );
+					}
+
+				});
+
+			});
+
+		})
+
+		client.subscribe('dora_msg_list');
+
+	}
 
 	/**
      * 设置各平台 Key
@@ -92,77 +162,6 @@ class Messager {
 		}).catch(function (reason) {
 			console.log('iPhone', '#' + msg.msgid, reason);
 		});
-
-	}
-
-	/**
-     * 批量推送消息
-     * @param boolean test 是否测试
-     * @param function report 日志上报
-     */
-	batch(test, report) {
-
-		var self = this;
-		var client = common.redis(this.conf.redis);
-		var copyed = common.redis(this.conf.redis);
-
-		report && report('init', {});
-
-		client.on('message', function (channel, message) {
-
-			var msgs = JSON.parse(message);
-
-			if (test) {
-				console.log(msgs);
-			}
-
-			!test && msgs.forEach(msg => {
-
-				self.sendAndroid(msg);
-
-				self.sendIPhone(msg);
-
-				//消息数自减，同时更新消息状态
-				var ret = copyed.decrby(msg.tag, 1, function (err, len) {
-
-					if (!err) {
-
-						var status = { 'popid': msg.msgid, 'length': len, 'pushing_time': (new Date).getTime() / 1000 };
-
-						copyed.set(msg.tag + '_status', JSON.stringify(status));
-
-						//一定机率上报日志
-						report && report(status, msg, 0.01);
-					}
-
-				});
-
-			});
-
-		})
-
-		client.subscribe('dora_msg_list');
-
-	}
-
-	/**
-     * 构造函数
-     * @param object conf 配置信息
-     * @param boolean test 是否测试
-     * @param function report 日志上报
-     */
-	constructor(conf, test, report) {
-
-		this.conf = conf;
-
-		this.setAliasType(conf.aliastype);
-
-		console.log('----------------------------');
-
-		this.setKey('iphone', conf.iphone[0], conf.iphone[1]);
-		this.setKey('android', conf.android[0], conf.android[1]);
-
-		this.batch(test, report);
 
 	}
 

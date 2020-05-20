@@ -40,10 +40,9 @@ class Groups {
 
 				//获取最新消息
 				var msgs = self.filterMessage(ret.cmdList.list, { fromUserName: conf.follow.groups_id, content: conf.follow.groups + ':\n'  });
+				//var msgs = self.filterMessage(ret.cmdList.list, { });
 				
 				console.log( '原始消息', ret.cmdList.count, '过滤消息', msgs.length );
-
-				//var msgs = self.filterMessage(ret.cmdList.list, { });
 
 				console.log( '监听群组', conf.follow.groups_id, '消息作者', conf.follow.groups );
 
@@ -53,10 +52,14 @@ class Groups {
 				
 				keybuf = ret.keyBuf.buffer;
 
-				//console.log( 'keybuf', keybuf );
+				req.status(conf.report, 'MM_Groups', msgs.length, keybuf);
 
 			}).catch(err => {
+
 				console.log( err );
+
+				req.status(conf.report, 'MM_Groups', keybuf, err);
+
 			});
 
 		}, 60 * 1000 );
