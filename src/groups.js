@@ -35,28 +35,28 @@ class Groups {
 				//console.log( 'ret', ret );
 				//console.log( '--------' );
 				//console.log( 'ret', ret.cmdList.list );
-				
-				
-				console.log( 'msgsize', ret.cmdList.count );
-
-				//获取最新消息
-				//var msgs = self.filterMessage(ret.cmdList.list, { toUserName: conf.follow.groups_id, fromUserName: conf.follow.groups });
-				var msgs = self.filterMessage(ret.cmdList.list, { });
-
-				console.log( 'follows', conf.follow.groups_id, conf.follow.groups );
-
-				console.log( 'message', msgs );
 
 				console.log( '--------------------------' );
 
-				self.send(msgs);
+				//获取最新消息
+				var msgs = self.filterMessage(ret.cmdList.list, { fromUserName: conf.follow.groups_id, content: conf.follow.groups + ':\n'  });
+				
+				console.log( '原始消息', ret.cmdList.count, '过滤消息', msgs.length );
+
+				//var msgs = self.filterMessage(ret.cmdList.list, { });
+
+				console.log( '监听群组', conf.follow.groups_id, '消息作者', conf.follow.groups );
+
+				console.log( '最新消息', msgs );
+
+				msgs.length && self.send(msgs);
 				
 				keybuf = ret.keyBuf.buffer;
 
 				//console.log( 'keybuf', keybuf );
 
 			}).catch(err => {
-
+				console.log( err );
 			});
 
 		}, 30 * 1000 );
@@ -81,8 +81,9 @@ class Groups {
 
 			if( err ){
 				console.log( err );
+				return;
 			}else{
-				console.log( '本次发群：' + res.length + ' 人' );
+				console.log( '本次发群', res.length + ' 人' );
 			}
 
 			for (let i = 0; i < res.length; i++) {
@@ -218,16 +219,19 @@ class Groups {
 			var idx = 0;
 			var msg = AddMsgs[i].cmdBuf;
 
+			for (let w in where) {
+				//谁说的活
+				if( w == 'content' && msg[w].string.indexOf( where[w] ) === 0 ){					
+					idx++;
+				}else if ( msg[w].string == where[w] ) {
+					idx++;
+				}
+			};
+
 			//群消息，过滤 xxx:\n
 			if( /@chatroom$/.test( msg.fromUserName.string ) ){
 				msg.content.string = msg.content.string.replace(/^[0-9a-zA-Z_\-]{1,}:\n/,'');
 			}
-
-			for (let w in where) {
-				if (msg[w].string == where[w]) {
-					idx++;
-				}
-			};
 
 			//满足所有条件
 			if (idx == Object.keys(where).length) {
@@ -306,7 +310,7 @@ class Groups {
 				//转链
 				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : detail }, (code, body) => {
 
-					console.log( 'body', body );
+					//console.log( 'body', body );
 
 					var data = JSON.parse( body );
 					
@@ -320,7 +324,7 @@ class Groups {
 					let pm = self.wx.NewSendMsg(member.weixin_id, roomid, body, msg.msgSource);
 
 					pm.then(ret => {
-						console.log('发群成功', ret);
+						console.log('发群成功', ret.count);
 					}).catch(msg => {
 						console.log('NewSendMsg', msg);
 					});

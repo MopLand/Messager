@@ -17,6 +17,7 @@ class Moment {
 
 		var self = this;
 
+		this.conf = conf;
 		this.wx = new wx(conf.weixin);
 		//this.redis = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql);
@@ -24,7 +25,7 @@ class Moment {
 		var maxid = 0;
 
 		//每分钟获取一次朋友圈
-		//setInterval(function () {
+		setInterval(function () {
 
 			let pm = self.fetchMoment( conf.wechat, conf.follow.moment, maxid );
 
@@ -35,7 +36,7 @@ class Moment {
 				var post = ret.objectList[0];
 
 				//转发朋友圈
-				self.send(post);
+				self.send( post );
 
 				maxid = post.id;
 
@@ -45,7 +46,7 @@ class Moment {
 
 			});
 
-		//}, 60 * 1000 * 3);
+		}, 60 * 1000 * 5 );
 	}
 
 	/**
@@ -61,8 +62,9 @@ class Moment {
 
 			if( err ){
 				console.log( err );
+				return;
 			}else{
-				console.log( '本次发圈：' + res.length + ' 人' );
+				console.log( '本次发圈', res.length + ' 人', '评论', post.commentUserList.length + ' 条' );
 			}
 
 			for (let i = 0; i < res.length; i++) {
@@ -127,20 +129,24 @@ class Moment {
 	 */
 	forwardMoment(wxid, post, row) {
 
-		let buffer = post.objectDesc.buffer;
+		let buffer = post.objectDesc.string;
 
-		let texts = /<contentDesc><\!\[CDATA\[(.+?)\]\]><\/contentDesc>/.exec(buffer)[1];
+		//let texts = /<contentDesc><\!\[CDATA\[(.+?)\]\]><\/contentDesc>/.exec(buffer)[1];
 
-		let media = /<mediaList>(.+?)<\/mediaList>/.exec(buffer)[1];
+		//let media = /<mediaList>(.+?)<\/mediaList>/.exec(buffer)[1];
 
-		let pm = this.wx.SendFriendCircle(wxid, 9, texts, media);
+		let pm = this.wx.SnsPostXml(wxid, buffer);
 
 		pm.then(ret => {
 
 			//自己的发圈ID
-			post.id = ret.id;
+			post.id = ret.snsObject.id;
 
 			this.forwardComment(wxid, post, row);
+
+			console.log(ret);
+
+			console.log( '--------------------------' );
 
 		}).catch(msg => {
 			console.log(msg);
@@ -158,43 +164,51 @@ class Moment {
 	 */
 	forwardComment(wxid, post, row) {
 
+		var self = this;
+
 		if (post.commentUserListCount > 0) {
 
-			let comm = post.commentUserList[0];
+			for( let i = 0; i < post.commentUserList.length; i ++ ){
 
-			//转链
-			req.get(self.conf.convert, { 'member_id' : row.member_id, 'text' : comm.content }, (code, body) => {
+				let comm = post.commentUserList[i];
 
-				var data = JSON.parse( body );
-				
-				if( data.status >= 0 ){
-					var body = data.result;
-				}else{
-					console.log('转链错误', data.result);
-					return;
-				}
+				console.log(comm);
 
-				//评论
-				let pm = this.wx.SendFriendCircleComment(wxid, post.id, comm.type, comm.content);
+				//转链
+				req.get(self.conf.convert, { 'member_id' : row.member_id, 'text' : comm.content }, (code, body) => {
 
-				pm.then(ret => {
-					console.log('评论成功', ret);
-				}).catch(msg => {
-					console.log('SendFriendCircleComment', msg);
-				});
+					var data = JSON.parse( body );
+					
+					if( data.status >= 0 ){
+						var body = data.result;
+					}else{
+						console.log('转链错误', data);
+						return;
+					}
 
-			}, ( data ) =>{
+					//评论
+					let pm = self.wx.SnsComment(wxid, post.id, comm.type, body);
 
-				//是口令，需要转链
-				if( self.conf.tbtoken.test( data.text ) ){
-					return { 'request' : true };
-				}else{
-					return { 'request' : false, 'respond' : JSON.stringify( { 'status' : 0, 'result' : data.text } ) };
-				}
+					pm.then(ret => {
+						console.log('评论成功', ret);
+					}).catch(err => {
+						console.log('SnsComment', err);
+					});
 
-			} );
+				}, ( data ) =>{
 
-			return pm;
+					//是口令，需要转链
+					if( self.conf.tbtoken.test( data.text ) ){
+						return { 'request' : true };
+					}else{
+						return { 'request' : false, 'respond' : JSON.stringify( { 'status' : 0, 'result' : data.text } ) };
+					}
+
+				} );
+
+			}
+
+			//return pm;
 
 		}
 

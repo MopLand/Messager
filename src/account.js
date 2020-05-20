@@ -92,18 +92,8 @@ class Account {
 	}
 
     /**
-     * 提交登录
-     * @param string wxId 微信Id
-     */
-	submit(wxid) {
-		var pm = this.wx.ManualAuth( wxid );
-		return pm;
-	}
-
-    /**
      * 检查登录状态
-     * @param string wxId 微信Id  必填True 
-     * @param string appId 公众号AppId  必填True 
+     * @param string wxId 微信Id
      */
 	check(uuid) {
 
@@ -132,6 +122,15 @@ class Account {
 			console.log(msg);
 		});
 		*/
+	}
+
+    /**
+     * 提交登录
+     * @param string wxId 微信Id
+     */
+	submit(wxid) {
+		var pm = this.wx.ManualAuth( wxid );
+		return pm;
 	}
 
 }
