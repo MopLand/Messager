@@ -25,6 +25,7 @@ if (func == 'groups') {
 }
 
 //账号
-if (func == 'account') {
-	let klas = new Account(conf);
+if (func == 'account') {	
+	let save = Common.getArgv('save', './');
+	let klas = new Account(conf, save);
 }

@@ -1,0 +1,7 @@
+{
+  "name"			: "WeixinAccount",
+  "script"			: "app.js",
+  "args"			: "groups -save /disk/www/url.baohe.com/public/",
+  "cwd"				: "/disk/www/Messager",
+  "log_date_format" : "YYYY-MM-DD HH:mm Z"
+}

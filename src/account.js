@@ -8,7 +8,7 @@ class Account {
     /**
      * 构造函数
      */
-	constructor(conf) {
+	constructor(conf, save) {
 
 		//实例化微信
 		this.wx = new wx(conf.weixin);
@@ -16,7 +16,7 @@ class Account {
 		var uuid = '';
 		var self = this;
 
-		let pm = this.login();
+		let pm = this.login( save );
 
 		pm.then( ret => {
 
@@ -48,7 +48,7 @@ class Account {
 
 						////////
 
-						let pm = self.submit( ret.notify.userName );
+						let pm = self.submit( ret.notify.userName, save );
 
 						pm.then(ret=>{
 							console.log( ret );
@@ -77,14 +77,14 @@ class Account {
 
     /**
      * 登录
-     * @param string member_id 用户ID
+     * @param string 图片存储位置
      */
-	login(member_id = '') {
+	login( save ) {
 
 		var pm = this.wx.GetLoginQrCode();
 
 		pm.then(ret => {
-			cm.SavePic(decodeURIComponent(ret.qrcode.buffer), 'qr.png');
+			cm.SavePic(decodeURIComponent(ret.qrcode.buffer), save + 'qr.png');
 		});
 
 		return pm;
@@ -127,14 +127,15 @@ class Account {
     /**
      * 提交登录
      * @param string wxId 微信Id
+     * @param string 图片存储位置
      */
-	submit(wxid) {
+	submit(wxid, save ) {
 
 		var pm = this.wx.ManualAuth( wxid );
 
 		//删除二维码
 		pm.then( ret => {			
-			cm.DelFile( 'qr.png' );
+			cm.DelFile( save + 'qr.png' );
 		} ).catch( err => {
 
 		} );

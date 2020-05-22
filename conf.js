@@ -1,18 +1,36 @@
 var conf = {
+
+	//友盟 APPID/Key
 	'iphone': ['', ''],
 	'android': ['', ''],
-	'aliastype': '',
-	'activity': 'com.guodongbaohe.app.activity.MipushTestActivity',
-	'weixin': 'http://47.116.18.66/',
-	'report': 'http://api.example.com/report',
-	'convert': 'https://proxy.guodongbaohe.com/share/transtxt',
-	'tbtoken': /(¥|￥|\$|£|₤|€|₴|¢|₳|@|《|》|\()([a-zA-Z0-9]{11})(\1|\))/,
-	'redis': {
-		'host': '127.0.0.1',
-		'port': 6379,
-		'password': '',
-		'prefix': '',
+
+	//小米推送
+	activity: 'com.guodongbaohe.app.activity.MipushTestActivity',
+
+	//别名标识
+	aliastype: '',
+
+	//状态上报
+	report: 'http://api.example.com/report',
+
+	//口令规则
+	tbtoken: /(¥|￥|\$|£|₤|€|₴|¢|₳|@|《|》|\()([a-zA-Z0-9]{11})(\1|\))/,
+
+	//转链接口
+	convert: 'https://proxy.guodongbaohe.com/share/transtxt',
+
+	//微信通信
+	weixin: 'http://127.0.0.1/',
+
+	//Redis
+	redis: {
+		host     : '127.0.0.1',
+		port     : 6379,
+		password : '',
+		prefix   : '',
 	},
+
+	//MySQL
 	mysql: {
 		host     : '127.0.0.1',
 		user     : 'root',
