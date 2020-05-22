@@ -40,7 +40,7 @@ class Moment {
 
 				maxid = post.id;
 
-				req.status(conf.report, 'MM_Moment', maxid, body.baseResponse);
+				req.status(conf.report, 'MM_Moment', maxid, ret.baseResponse);
 
 			}).catch(err => {
 
@@ -68,7 +68,7 @@ class Moment {
 				console.log( err );
 				return;
 			}else{
-				console.log( '本次发圈', res.length + ' 人，评论', post.commentUserList.length + ' 条' );
+				console.log( '本次发圈', res.length + ' 人，评论', post.commentUserListCount + ' 条' );
 			}
 
 			for (let i = 0; i < res.length; i++) {

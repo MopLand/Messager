@@ -1,0 +1,12 @@
+{
+  "name"			: "Messager",
+  "script"			: "app.js",
+  "args"			: "messager",
+  "cwd"				: "/disk/www/Messager",
+  "error_file"		: "./logs/wx_messager_err.log",
+  "out_file"		: "./logs/wx_messager_out.log",
+  "merge_logs"		: true,
+  "autorestart"		: true,
+  "watch"			: true,
+  "log_date_format" : "YYYY-MM-DD HH:mm Z"
+}

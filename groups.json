@@ -1,0 +1,12 @@
+{
+  "name"			: "WeixinGroups",
+  "script"			: "app.js",
+  "args"			: "groups",
+  "cwd"				: "/disk/www/Messager",
+  "error_file"		: "./logs/wx_groups_err.log",
+  "out_file"		: "./logs/wx_groups_out.log",
+  "merge_logs"		: true,
+  "autorestart"		: true,
+  "watch"			: true,
+  "log_date_format" : "YYYY-MM-DD HH:mm Z"
+}

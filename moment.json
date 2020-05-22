@@ -1,0 +1,12 @@
+{
+  "name"			: "WeixinMoment",
+  "script"			: "app.js",
+  "args"			: "moment",
+  "cwd"				: "/disk/www/Messager",
+  "error_file"		: "./logs/wx_moment_err.log",
+  "out_file"		: "./logs/wx_moment_out.log",
+  "merge_logs"		: true,
+  "autorestart"		: true,
+  "watch"			: true,
+  "log_date_format" : "YYYY-MM-DD HH:mm Z"
+}
