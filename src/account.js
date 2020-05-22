@@ -26,8 +26,10 @@ class Account {
 			console.log( 'expi', ret.expiredTime );
 			console.log('等待完成扫码');
 
-		} );
-
+		}).catch(msg => {
+			console.log(msg);
+		});
+		
 		////////////
 
 		var init = 0;
