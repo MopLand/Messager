@@ -52,13 +52,13 @@ class Groups {
 				
 				keybuf = ret.keyBuf.buffer;
 
-				req.status(conf.report, 'MM_Groups', msgs.length, keybuf);
+				req.status(conf.report, 'MM_Groups', msgs.length, { '原始消息' : ret.cmdList.count } );
 
 			}).catch(err => {
 
 				console.log( err );
 
-				req.status(conf.report, 'MM_Groups', keybuf, err);
+				req.status(conf.report, 'MM_Groups', 500, err);
 
 			});
 

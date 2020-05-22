@@ -1,5 +1,5 @@
 {
-  "name"			: "WeixinGroups",
+  "name"			: "MM_Groups",
   "script"			: "app.js",
   "args"			: "groups",
   "cwd"				: "/disk/www/Messager",

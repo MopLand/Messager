@@ -1,5 +1,5 @@
 {
-  "name"			: "WeixinMoment",
+  "name"			: "MM_Moment",
   "script"			: "app.js",
   "args"			: "moment",
   "cwd"				: "/disk/www/Messager",
