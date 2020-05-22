@@ -1,14 +1,21 @@
 var conf = {
 
 	//友盟 APPID/Key
-	'iphone': ['', ''],
-	'android': ['', ''],
+	iphone: {
+		appid: '',
+		appkey: '',
+	},
+	
+	android: {
+		appid: '',
+		appkey: '',
+	},
 
 	//小米推送
 	activity: 'com.guodongbaohe.app.activity.MipushTestActivity',
 
 	//别名标识
-	aliastype: '',
+	aliastag: '',
 
 	//状态上报
 	report: 'http://api.example.com/report',

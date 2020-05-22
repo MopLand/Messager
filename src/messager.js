@@ -16,14 +16,39 @@ class Messager {
 
 		this.conf = conf;
 
-		this.setAliasType(conf.aliastype);
+		this.setAlias(conf.aliastag);
+		
+		this.setKey('iphone', conf.iphone);
+		this.setKey('android', conf.android);
 
 		console.log('----------------------------');
 
-		this.setKey('iphone', conf.iphone[0], conf.iphone[1]);
-		this.setKey('android', conf.android[0], conf.android[1]);
-
 		this.batch(test);
+
+	}
+
+	/**
+     * 设置别名类型
+     * @param string 别名标识
+     */
+	setAlias(type) {
+		this.type = type;
+	}
+
+	/**
+     * 设置各平台 Key
+     * @param string 平台标识
+     * @param object 应用配置
+     */
+	setKey(plat, app) {
+
+		if (plat == 'iphone') {
+			this.ios = new umsdk.ios.customizedcast(app.appid, app.appkey);
+		}
+
+		if (plat == 'android') {
+			this.and = new umsdk.android.customizedcast(app.appid, app.appkey);
+		}
 
 	}
 
@@ -34,10 +59,11 @@ class Messager {
 	batch(test) {
 
 		var self = this;
-		var client = common.redis(this.conf.redis);
-		var copyed = common.redis(this.conf.redis);
+		var conf = this.conf;
+		var client = common.redis(self.conf.redis);
+		var copyed = common.redis(self.conf.redis);
 
-		request.status(this.conf.report, 'Messager', 0, {});
+		request.status(conf.report, 'Messager', 0, {});
 
 		client.on('message', function (channel, message) {
 
@@ -63,7 +89,7 @@ class Messager {
 						copyed.set(msg.tag + '_status', JSON.stringify(status));
 
 						//一定机率上报日志
-						request.status(this.conf.report, 'Messager', status, msg, null, 0.01 );
+						request.status(conf.report, 'Messager', status, msg, null, 0.01 );
 					}
 
 				});
@@ -74,32 +100,6 @@ class Messager {
 
 		client.subscribe('dora_msg_list');
 
-	}
-
-	/**
-     * 设置各平台 Key
-     * @param string plat 平台标识
-     * @param string appid APPID
-     * @param string appkey 密钥
-     */
-	setKey(plat, appid, appkey) {
-
-		if (plat == 'iphone') {
-			this.ios = new umsdk.ios.customizedcast(appid, appkey);
-		}
-
-		if (plat == 'android') {
-			this.and = new umsdk.android.customizedcast(appid, appkey);
-		}
-
-	}
-
-	/**
-     * 设置别名类型
-     * @param string type 别名标识
-     */
-	setAliasType(type) {
-		this.type = type;
 	}
 
 	/**
