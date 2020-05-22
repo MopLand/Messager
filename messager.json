@@ -8,5 +8,6 @@
   "merge_logs"		: true,
   "autorestart"		: true,
   "watch"			: true,
+  "ignore_watch"	: [".git","logs"],
   "log_date_format" : "YYYY-MM-DD HH:mm Z"
 }
