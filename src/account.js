@@ -12,6 +12,9 @@ class Account {
 
 		//实例化微信
 		this.wx = new wx(conf.weixin);
+
+		//二维码位置
+		this.code = save + 'qr.png';
 		
 		var uuid = '';
 		var self = this;
@@ -26,10 +29,8 @@ class Account {
 			console.log( 'expi', ret.expiredTime );
 			console.log('等待完成扫码');
 
-		}).catch(msg => {
-			console.log(msg);
 		});
-		
+
 		////////////
 
 		var init = 0;
@@ -50,7 +51,7 @@ class Account {
 
 						////////
 
-						let pm = self.submit( ret.notify.userName, save );
+						let pm = self.submit( ret.notify.userName );
 
 						pm.then(ret=>{
 							console.log( ret );
@@ -68,6 +69,7 @@ class Account {
 
 			if( init >= 10 ){
 				clearInterval( clok );
+				cm.DelFile( self.code );
 				console.log('扫码登录超时，请重试');
 			}else{
 				init++;
@@ -78,15 +80,17 @@ class Account {
 	}
 
     /**
-     * 登录
-     * @param string 图片存储位置
+     * 获取登录二维码
      */
-	login( save ) {
+	login( ) {
 
 		var pm = this.wx.GetLoginQrCode();
+		var self = this;
 
 		pm.then(ret => {
-			cm.SavePic(decodeURIComponent(ret.qrcode.buffer), save + 'qr.png');
+			cm.SavePic(decodeURIComponent(ret.qrcode.buffer), self.code );		
+		}).catch( msg => {
+			console.log( msg );
 		});
 
 		return pm;
@@ -97,7 +101,7 @@ class Account {
      * 检查登录状态
      * @param string wxId 微信Id
      */
-	check(uuid) {
+	check ( uuid ) {
 
 		var pm = this.wx.CheckLogin(uuid);
 
@@ -131,16 +135,17 @@ class Account {
      * @param string wxId 微信Id
      * @param string 图片存储位置
      */
-	submit(wxid, save ) {
+	submit( wxid ) {
 
 		var pm = this.wx.ManualAuth( wxid );
+		var self = this;
 
 		//删除二维码
-		pm.then( ret => {			
-			cm.DelFile( save + 'qr.png' );
-		} ).catch( err => {
-
-		} );
+		pm.then( ret => {
+			cm.DelFile( self.code );
+		}).catch( msg => {
+			console.log( msg );
+		});
 
 		return pm;
 	}
