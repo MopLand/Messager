@@ -177,8 +177,6 @@ class Groups {
 
 		var self = this;
 
-		//this.mysql = com.mysql(this.conf.mysql);
-
 		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` ORDER BY auto_id ASC', function (err, res) {
 
 			for (let i = 0; i < res.length; i++) {
@@ -191,9 +189,7 @@ class Groups {
 				pm.then(ret => {
 
 					//更新群发设置
-					//self.mysql.query('UPDATE `pre_member_weixin` SET groups_list = ?, groups_num, heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ JSON.stringify( gps ), num, row.member_id ] );
-					
-					//wx.SendTxtMessage(member.weixin_id, gid, gid + ' 设置成功');
+					self.mysql.query('UPDATE `pre_member_weixin` SET groups_list = ?, groups_num, heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ JSON.stringify( gps ), num, row.member_id ] );
 
 					console.log( '心跳成功', row.weixin_id, ret );
 

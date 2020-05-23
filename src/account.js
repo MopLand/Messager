@@ -8,29 +8,39 @@ class Account {
     /**
      * 构造函数
      */
-	constructor(conf, save) {
+	constructor(conf, save = './') {
 
 		//实例化微信
 		this.wx = new wx(conf.weixin);
 
 		//二维码位置
 		this.code = save + 'qr.png';
-		
+
+		return this;
+
+	}
+
+	/**
+     * 引导扫码登录
+     * @param string wxId 微信Id
+     */
+	init( wxid = '' ){
+
 		var uuid = '';
 		var self = this;
-
-		let pm = this.login( save );
+		var pm = this.login( wxid );
 
 		pm.then( ret => {
 
 			uuid = ret.uuid;
 
-			console.log( 'uuid', ret.uuid );
-			console.log( 'expi', ret.expiredTime );
-			console.log('等待完成扫码');
+			console.log( 'UUID', ret.uuid );
+			console.log( '过期', ret.expiredTime );
+
+			console.log('等待完成扫码 或 登录');
 
 		});
-
+		
 		////////////
 
 		var init = 0;
@@ -81,14 +91,17 @@ class Account {
 
     /**
      * 获取登录二维码
+     * @param string wxId 微信Id
      */
-	login( ) {
+	login( wxid ) {
 
-		var pm = this.wx.GetLoginQrCode();
+		var pm = wxid ? this.wx.PushLoginUrl( wxid ) : this.wx.GetLoginQrCode();
 		var self = this;
 
 		pm.then(ret => {
-			cm.SavePic(decodeURIComponent(ret.qrcode.buffer), self.code );		
+			if( !wxid && ret.qrcode ){
+				cm.SavePic(decodeURIComponent(ret.qrcode.buffer), self.code );
+			}
 		}).catch( msg => {
 			console.log( msg );
 		});
@@ -133,7 +146,6 @@ class Account {
     /**
      * 提交登录
      * @param string wxId 微信Id
-     * @param string 图片存储位置
      */
 	submit( wxid ) {
 

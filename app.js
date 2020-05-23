@@ -27,5 +27,7 @@ if (func == 'groups') {
 //账号
 if (func == 'account') {	
 	let save = Common.getArgv('save', './');
+	let wxid = Common.getArgv('wxid');
 	let klas = new Account(conf, save);
+		klas.init( wxid );
 }
