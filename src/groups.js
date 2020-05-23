@@ -7,6 +7,7 @@
 const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const req = require('../lib/request');
+const Account = require('./account');
 
 class Groups {
 
@@ -15,16 +16,31 @@ class Groups {
      */
 	constructor(conf) {
 
-		var self = this;
-
 		this.conf = conf;
 		this.wx = new wx(conf.weixin);
-		//this.redis = com.redis(conf.redis);
+		this.redis = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql);
-		var keybuf = '';
 
-		//每分钟获取一次群消息
-		setInterval(() => {
+		this.channel = 'mm_groups';
+		this.lastmsg = com.getTime();
+	}
+
+	init(){
+
+		var self = this;
+		var conf = this.conf;
+		var keybuf = '';
+		var locked = false;
+
+		//处理 Redis 消息
+		this.redis.on('message', function (channel, message) {
+
+			//正在读取消息
+			if( locked ){
+				return;
+			}else{
+				locked = true;
+			}
 
 			let pm = self.wx.NewSync( conf.wechat, keybuf );
 
@@ -52,9 +68,13 @@ class Groups {
 				
 				keybuf = ret.keyBuf.buffer;
 
+				locked = false;
+
 				req.status(conf.report, 'MM_Groups', msgs.length, { '原始消息' : ret.cmdList.count } );
 
 			}).catch(err => {
+
+				locked = false;
 
 				console.log( err );
 
@@ -62,7 +82,13 @@ class Groups {
 
 			});
 
-		}, 60 * 1000 );
+			//最后一次消息时间
+			self.lastmsg = com.getTime();
+
+		});
+
+		//订阅 Redis 频道消息
+		this.redis.subscribe( this.channel );
 
 		///////////////
 
@@ -176,8 +202,16 @@ class Groups {
 	Heartbeat() {
 
 		var self = this;
+		var klas = new Account(this.conf);
 
 		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` ORDER BY auto_id ASC', function (err, res) {
+
+			if( err ){
+				console.log( err );
+				return;
+			}else{
+				console.log( '本次心跳', res.length + ' 人' );
+			}
 
 			for (let i = 0; i < res.length; i++) {
 
@@ -195,13 +229,38 @@ class Groups {
 
 				}).catch( err => {
 
-					console.log( err );
+					console.log( 'Heartbeat', err );
+
+					if( err.indexOf('退出微信登录') > -1 ){
+						klas.init( row.weixin_id );
+					}
 
 				} );
 
 			}
 
 		});
+
+		///////////////
+
+		//工作时段
+		var date = new Date();
+		var work = date.format('h') >= 8;
+		var time = com.getTime();
+
+		console.log( 'date.format', date.format('h') );
+
+		//上次消息过去了多少分钟
+		var diff = ( time - self.lastmsg ) / 60; 
+
+		//长时间没有读取消息
+		if( work && diff > 15 ){
+			let redis = com.redis( this.conf.redis );
+				redis.publish( this.channel, time );
+				console.log( '主动拉取消息', time );
+		}
+
+		console.log( '--------------------------' );
 
 	}
 

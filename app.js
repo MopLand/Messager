@@ -8,6 +8,8 @@ const Messager = require('./src/messager');
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
 
+console.log( '--------------------------' );
+
 //消息推送，默认方法
 if (!func || func == 'messager') {
 	let test = Common.getArgv('debug');
@@ -17,11 +19,13 @@ if (!func || func == 'messager') {
 //朋友圈
 if (func == 'moment') {
 	let klas = new Moment(conf);
+		klas.init();
 }
 
 //微信群
 if (func == 'groups') {
 	let klas = new Groups(conf);
+		klas.init();
 }
 
 //账号

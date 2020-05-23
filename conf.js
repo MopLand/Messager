@@ -48,6 +48,9 @@ var conf = {
 	//当前微信号：清清
 	wechat: 'wxid_okvkiyguz1yh22',
 
+	//忽略标识符
+	ignore: 'SKIP',
+
 	//关注的微信号
 	follow: {
 		//朋友圈：小助手

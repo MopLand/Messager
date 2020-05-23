@@ -16,8 +16,6 @@ class Account {
 		//二维码位置
 		this.code = save + 'qr.png';
 
-		return this;
-
 	}
 
 	/**
@@ -39,7 +37,11 @@ class Account {
 
 			console.log('等待完成扫码 或 登录');
 
+		}).catch( err => {
+			console.log('ACCOUNT_LOGIN', err);
 		});
+
+		console.log( '--------------------------' );
 		
 		////////////
 
@@ -50,7 +52,9 @@ class Account {
 
 				let pm = self.check( uuid );
 
-				pm.then(ret=>{
+				pm.then( ret =>{
+
+					//console.log( ret );
 
 					//扫码成功
 					if (ret.notify.status == 2) {
@@ -75,6 +79,8 @@ class Account {
 					console.log(msg);
 				});
 
+				console.log( '--------------------------' );
+
 			}
 
 			if( init >= 10 ){
@@ -95,8 +101,12 @@ class Account {
      */
 	login( wxid ) {
 
-		var pm = wxid ? this.wx.PushLoginUrl( wxid ) : this.wx.GetLoginQrCode();
 		var self = this;
+		var pm = wxid ? this.wx.PushLoginUrl( wxid ) : this.wx.GetLoginQrCode();
+
+		if( wxid ){
+			console.log('登录推送', wxid);
+		}
 
 		pm.then(ret => {
 			if( !wxid && ret.qrcode ){

@@ -15,12 +15,16 @@ class Moment {
      */
 	constructor(conf) {
 
-		var self = this;
-
 		this.conf = conf;
 		this.wx = new wx(conf.weixin);
 		//this.redis = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql);
+		
+	}
+
+	init(){
+
+		var self = this;
 
 		var maxid = 0;
 
@@ -51,6 +55,7 @@ class Moment {
 			});
 
 		}, 60 * 1000 * 5 );
+
 	}
 
 	/**
@@ -60,9 +65,23 @@ class Moment {
 
 		//this.redis.smembers('weixin_list', function (err, res) {
 
+		var send = true;
+
+		//需要忽略的发圈
+		if( post.commentUserListCount ){
+			for( let i = 0; i < post.commentUserList.length; i ++ ){
+				let comm = post.commentUserList[i].content;
+				if( comm == this.conf.ignore ){
+					send = false;
+				}
+			}
+		}
+
+		///////////////////
+
 		var self = this;
 
-		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 ORDER BY auto_id ASC', function (err, res) {
+		send && this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 ORDER BY auto_id ASC', function (err, res) {
 
 			if( err ){
 				console.log( err );
