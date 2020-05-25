@@ -25,7 +25,7 @@ class Moment {
 	init(){
 
 		var self = this;
-
+		var conf = this.conf;
 		var maxid = 0;
 
 		//每分钟获取一次朋友圈
@@ -70,9 +70,10 @@ class Moment {
 		//需要忽略的发圈
 		if( post.commentUserListCount ){
 			for( let i = 0; i < post.commentUserList.length; i ++ ){
-				let comm = post.commentUserList[i].content;
+				let comm = post.commentUserList[i].content.toLocaleUpperCase();
 				if( comm == this.conf.ignore ){
 					send = false;
+					console.log( '跳过发圈', comm );
 				}
 			}
 		}

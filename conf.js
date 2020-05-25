@@ -60,7 +60,7 @@ var conf = {
 		groups		: 'wxid_35ipm1ssbbbc22',
 		
 		//微信群ID
-		groups_id	: '17330885326@chatroom',
+		groups_id	: '22997642011@chatroom',
 	}
 }
 

@@ -95,6 +95,9 @@ class Groups {
 		//每3分钟心跳一次
 		setInterval( this.Heartbeat.bind(this), 60 * 1000 * 3 );
 
+		//每1分钟同步一次
+		setInterval( this.AutoSync.bind(this), 60 * 1000 );
+
 	}
 
 	/**
@@ -241,7 +244,12 @@ class Groups {
 
 		});
 
-		///////////////
+	}
+
+	/**
+	 * 主动同步
+	 */
+	AutoSync() {
 
 		//工作时段
 		var date = new Date();
@@ -251,7 +259,7 @@ class Groups {
 		console.log( 'date.format', date.format('h') );
 
 		//上次消息过去了多少分钟
-		var diff = ( time - self.lastmsg ) / 60; 
+		var diff = ( time - this.lastmsg ) / 60; 
 
 		//长时间没有读取消息
 		if( work && diff > 15 ){

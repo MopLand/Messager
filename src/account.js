@@ -16,6 +16,8 @@ class Account {
 		//二维码位置
 		this.code = save + 'qr.png';
 
+		this.conf = conf;
+
 	}
 
 	/**
@@ -52,6 +54,8 @@ class Account {
 
 				let pm = self.check( uuid );
 
+				console.log( '--------------------------' );
+
 				pm.then( ret =>{
 
 					//console.log( ret );
@@ -75,11 +79,9 @@ class Account {
 						
 					}
 
-				}).catch(msg => {
-					console.log(msg);
+				}).catch(err => {
+					console.log(err);
 				});
-
-				console.log( '--------------------------' );
 
 			}
 
@@ -164,7 +166,33 @@ class Account {
 
 		//删除二维码
 		pm.then( ret => {
+			//cm.DelFile( self.code );
+		}).catch( err => {
+			//console.log( err );
+		}).finally( () => {
 			cm.DelFile( self.code );
+		} );
+
+		return pm;
+	}
+
+	 /**
+     * 提交登录
+     * @param string wxId 微信Id
+     * @param string room 微信群Id
+     */
+	groups( wxid, room ) {
+
+		var wxid = wxid || this.conf.wechat;
+
+		if( room ){
+			var pm = this.wx.GetChatroomMemberDetail( wxid, room );
+		}else{
+			var pm = this.wx.InitContact( wxid, 999999999 );
+		}
+
+		pm.then( ret => {			
+			console.log( ret );
 		}).catch( msg => {
 			console.log( msg );
 		});

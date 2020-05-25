@@ -29,9 +29,21 @@ if (func == 'groups') {
 }
 
 //账号
-if (func == 'account') {	
+if (func == 'account') {
+
 	let save = Common.getArgv('save', './');
 	let wxid = Common.getArgv('wxid');
+	let func = Common.getArgv('func');
+	let room = Common.getArgv('room');
+
 	let klas = new Account(conf, save);
+
+	if( func == 'groups' ){
+		klas.groups( wxid, room );
+	}
+
+	if( !func ){
 		klas.init( wxid );
+	}
+		
 }
