@@ -1,5 +1,6 @@
 
 const Common = require('./lib/common');
+const Loader = require('./lib/loader');
 const Groups = require('./src/groups');
 const Moment = require('./src/moment');
 const Account = require('./src/account');
@@ -14,6 +15,15 @@ console.log( '--------------------------' );
 if (!func || func == 'messager') {
 	let test = Common.getArgv('debug');
 	let klas = new Messager(conf, test);
+}
+
+//生成文件加载器
+if (func == 'loader') {
+	let html = Common.getArgv('html', 'index.html');
+	let dist = Common.getArgv('dist', 'dist.js');
+
+	let klas = new Loader();
+		klas.init( html, dist );
 }
 
 //朋友圈
@@ -32,18 +42,20 @@ if (func == 'groups') {
 if (func == 'account') {
 
 	let save = Common.getArgv('save', './');
-	let wxid = Common.getArgv('wxid');
 	let func = Common.getArgv('func');
 	let room = Common.getArgv('room');
+
+	let weixin = Common.getArgv('weixin');
+	let device = Common.getArgv('device');
 
 	let klas = new Account(conf, save);
 
 	if( func == 'groups' ){
-		klas.groups( wxid, room );
+		klas.groups( weixin, room );
 	}
 
 	if( !func ){
-		klas.init( wxid );
+		klas.init( weixin, device );
 	}
 		
 }

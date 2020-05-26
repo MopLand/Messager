@@ -20,9 +20,6 @@ var conf = {
 	//状态上报
 	report: 'http://api.example.com/report',
 
-	//口令规则
-	tbtoken: /(¥|￥|\$|£|₤|€|₴|¢|₳|@|《|》|\()([a-zA-Z0-9]{11})(\1|\))/,
-
 	//转链接口
 	convert: 'https://proxy.guodongbaohe.com/share/transtxt',
 
@@ -50,6 +47,9 @@ var conf = {
 
 	//忽略标识符
 	ignore: 'SKIP',
+
+	//迟延标识符
+	retard: '分割线',
 
 	//关注的微信号
 	follow: {

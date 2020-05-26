@@ -7,6 +7,7 @@
 const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const req = require('../lib/request');
+const act = require('../lib/activity');
 const Account = require('./account');
 
 class Groups {
@@ -226,7 +227,7 @@ class Groups {
 				pm.then(ret => {
 
 					//更新群发设置
-					self.mysql.query('UPDATE `pre_member_weixin` SET groups_list = ?, groups_num, heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ JSON.stringify( gps ), num, row.member_id ] );
+					self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
 
 					console.log( '心跳成功', row.weixin_id, ret );
 
@@ -256,8 +257,6 @@ class Groups {
 		var work = date.format('h') >= 8;
 		var time = com.getTime();
 
-		console.log( 'date.format', date.format('h') );
-
 		//上次消息过去了多少分钟
 		var diff = ( time - this.lastmsg ) / 60; 
 
@@ -265,7 +264,7 @@ class Groups {
 		if( work && diff > 15 ){
 			let redis = com.redis( this.conf.redis );
 				redis.publish( this.channel, time );
-				console.log( '主动拉取消息', time );
+				console.log( '主动拉取', time );
 		}
 
 		console.log( '--------------------------' );
@@ -352,6 +351,7 @@ class Groups {
 	forwardMessage(msgs, member) {
 
 		var self = this;
+		var stag = [];
 
 		for (let i = 0; i < msgs.length; i++) {
 
@@ -370,6 +370,12 @@ class Groups {
 			}
 
 			console.log(msg, '------------------------');
+
+			//延迟消息，不是最后一条消息时
+			if( detail.indexOf( self.retard ) > -1 && i < msgs.length - 1 ){
+				stag.push( { type: msg.msgType, detail : detail, source : msg.msgSource } );
+				continue;
+			}
 
 			//文字
 			if (msg.msgType == 1) {				
@@ -396,10 +402,28 @@ class Groups {
 						console.log('NewSendMsg', msg);
 					});
 
+					//////////////
+
+					if( stag.length ){
+					
+						console.log('迟延消息', stag.length);
+	
+						//处理迟延消息
+						for( let i = 0; i < stag.length; i++ ){
+							var news = stag.pop();
+							self.wx.NewSendMsg(member.weixin_id, roomid, news.detail, news.source, news.type);
+						}
+
+					}
+
 				}, ( data ) =>{
 
+					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );
+					
+					console.log('是否转链', conv, data.text );
+
 					//是口令，需要转链
-					if( self.conf.tbtoken.test( data.text ) ){
+					if( conv ){
 						return { 'request' : true };
 					}else{
 						return { 'request' : false, 'respond' : JSON.stringify( { 'status' : 0, 'result' : data.text } ) };
@@ -456,6 +480,8 @@ class Groups {
 				});
 
 			}
+
+			console.log(msg, '------------------------');
 
 		}
 

@@ -22,13 +22,14 @@ class Account {
 
 	/**
      * 引导扫码登录
-     * @param string wxId 微信Id
+     * @param string weixin 微信Id
+     * @param string device 设备Id
      */
-	init( wxid = '' ){
+	init( wxid = '', device = '' ){
 
 		var uuid = '';
 		var self = this;
-		var pm = this.login( wxid );
+		var pm = this.login( wxid, device );
 
 		pm.then( ret => {
 
@@ -98,17 +99,16 @@ class Account {
 	}
 
     /**
-     * 获取登录二维码
-     * @param string wxId 微信Id
+     * 处理用户登录（获取二维码或推送登录）
+     * @param string weixin 微信Id
+     * @param string device 设备Id
      */
-	login( wxid ) {
+	login( wxid = '', device = '' ) {
 
 		var self = this;
-		var pm = wxid ? this.wx.PushLoginUrl( wxid ) : this.wx.GetLoginQrCode();
+		var pm = wxid ? this.wx.PushLoginUrl( wxid ) : this.wx.GetLoginQrCode( device );
 
-		if( wxid ){
-			console.log('登录推送', wxid);
-		}
+		console.log('登录方式', wxid, wxid ? 'Push' : 'Qrcode' );
 
 		pm.then(ret => {
 			if( !wxid && ret.qrcode ){

@@ -7,6 +7,7 @@
 const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const req = require('../lib/request');
+const act = require('../lib/activity');
 
 class Moment {
 
@@ -214,15 +215,19 @@ class Moment {
 					let pm = self.wx.SnsComment(wxid, post.id, comm.type, body);
 
 					pm.then(ret => {
-						console.log('评论成功', ret);
+						console.log('评论成功', ret.snsObject.objectDesc.commentUserList);
 					}).catch(err => {
 						console.log('SnsComment', err);
 					});
 
 				}, ( data ) =>{
 
+					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );
+
+					console.log('是否转链', conv, data.text );
+
 					//是口令，需要转链
-					if( self.conf.tbtoken.test( data.text ) ){
+					if( conv ){
 						return { 'request' : true };
 					}else{
 						return { 'request' : false, 'respond' : JSON.stringify( { 'status' : 0, 'result' : data.text } ) };
