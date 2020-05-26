@@ -20,8 +20,9 @@ class Groups {
 		this.conf = conf;
 		this.wx = new wx(conf.weixin);
 		this.redis = com.redis(conf.redis);
+		this.sider = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql);
-
+		this.stamp = 'mm_groups_id';
 		this.channel = 'mm_groups';
 		this.lastmsg = com.getTime();
 	}
@@ -32,6 +33,13 @@ class Groups {
 		var conf = this.conf;
 		var keybuf = '';
 		var locked = false;
+
+		///////////////
+
+		//最近一次微信群消息ID
+		this.sider.get( this.stamp, ( err, ret ) => {
+			keybuf = ret || keybuf;
+		} );
 
 		//处理 Redis 消息
 		this.redis.on('message', function (channel, message) {
@@ -49,15 +57,10 @@ class Groups {
 
 			pm.then(ret => {
 
-				//console.log( 'ret', ret );
-				//console.log( '--------' );
-				//console.log( 'ret', ret.cmdList.list );
-
 				console.log( '--------------------------' );
 
 				//获取最新消息
 				var msgs = self.filterMessage(ret.cmdList.list, { fromUserName: conf.follow.groups_id, content: conf.follow.groups + ':\n'  });
-				//var msgs = self.filterMessage(ret.cmdList.list, { });
 				
 				console.log( '原始消息', ret.cmdList.count, '过滤消息', msgs.length );
 
@@ -65,10 +68,14 @@ class Groups {
 
 				console.log( '最新消息', msgs );
 
+				//获取到新消息
 				msgs.length && self.send(msgs);
 				
+				//记录消息标记
 				keybuf = ret.keyBuf.buffer;
+				self.sider.set( self.stamp, keybuf );
 
+				//解除读消息锁
 				locked = false;
 
 				req.status(conf.report, 'MM_Groups', msgs.length, { '原始消息' : ret.cmdList.count } );
@@ -94,10 +101,10 @@ class Groups {
 		///////////////
 
 		//每3分钟心跳一次
-		setInterval( this.Heartbeat.bind(this), 60 * 1000 * 3 );
+		setInterval( this.heartBeat.bind(this), 60 * 1000 * 3 );
 
 		//每1分钟同步一次
-		setInterval( this.AutoSync.bind(this), 60 * 1000 );
+		setInterval( this.timedPull.bind(this), 60 * 1000 );
 
 	}
 
@@ -203,7 +210,7 @@ class Groups {
 	/**
 	 * 同步心跳
 	 */
-	Heartbeat() {
+	heartBeat() {
 
 		var self = this;
 		var klas = new Account(this.conf);
@@ -250,7 +257,7 @@ class Groups {
 	/**
 	 * 主动同步
 	 */
-	AutoSync() {
+	timedPull() {
 
 		//工作时段
 		var date = new Date();
@@ -262,9 +269,8 @@ class Groups {
 
 		//长时间没有读取消息
 		if( work && diff > 15 ){
-			let redis = com.redis( this.conf.redis );
-				redis.publish( this.channel, time );
-				console.log( '主动拉取', time );
+			this.sider.publish( this.channel, time );
+			console.log( '主动拉取', time );
 		}
 
 		console.log( '--------------------------' );

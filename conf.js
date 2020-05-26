@@ -42,14 +42,14 @@ var conf = {
 		database : 'project_jellybox'
 	},
 
-	//当前微信号：清清
-	wechat: 'wxid_okvkiyguz1yh22',
-
 	//忽略标识符
 	ignore: 'SKIP',
 
 	//迟延标识符
 	retard: '分割线',
+
+	//当前微信号：清清
+	wechat: 'wxid_okvkiyguz1yh22',
 
 	//关注的微信号
 	follow: {

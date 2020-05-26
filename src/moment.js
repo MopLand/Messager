@@ -18,8 +18,9 @@ class Moment {
 
 		this.conf = conf;
 		this.wx = new wx(conf.weixin);
-		//this.redis = com.redis(conf.redis);
+		this.redis = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql);
+		this.stamp = 'mm_moment_id';
 		
 	}
 
@@ -29,21 +30,29 @@ class Moment {
 		var conf = this.conf;
 		var maxid = 0;
 
+		///////////////
+
+		//最近一次朋友圈消息ID
+		this.redis.get( this.stamp, ( err, ret ) => {
+			maxid = ret || maxid;
+		} );
+
 		//每分钟获取一次朋友圈
 		setInterval(function () {
 
-			let pm = self.fetchMoment( conf.wechat, conf.follow.moment, maxid );
+			let pm = self.fetchMoment( conf.wechat, conf.follow.moment );
 
 			pm.then(ret => {
-
-				//console.log( ret );
 
 				var post = ret.objectList[0];
 
 				//转发朋友圈
-				self.send( post );
+				if( post.id > maxid ){
+					self.send( post );
+					maxid = post.id;
+				}
 
-				maxid = post.id;
+				self.redis.set( self.stamp, post.id );
 
 				req.status(conf.report, 'MM_Moment', maxid, ret.baseResponse);
 
