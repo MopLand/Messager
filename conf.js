@@ -48,6 +48,9 @@ var conf = {
 	//迟延标识符
 	retard: '分割线',
 
+	//工作时间段
+	worked: 8,
+
 	//当前微信号：清清
 	wechat: 'wxid_okvkiyguz1yh22',
 

@@ -261,7 +261,7 @@ class Groups {
 
 		//工作时段
 		var date = new Date();
-		var work = date.format('h') >= 8;
+		var work = date.format('h') >= this.conf.worked;
 		var time = com.getTime();
 
 		//上次消息过去了多少分钟

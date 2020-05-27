@@ -40,6 +40,12 @@ class Moment {
 		//每分钟获取一次朋友圈
 		setInterval(function () {
 
+			//工作时段
+			var date = new Date();
+			var work = date.format('h') >= conf.worked;
+
+			if( !work ) return;
+
 			let pm = self.fetchMoment( conf.wechat, conf.follow.moment );
 
 			pm.then(ret => {
