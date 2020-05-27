@@ -130,17 +130,11 @@ class Groups {
 
 				let row = res[i];
 
-				//for (let i = 0; i < res.length; i++) {
+				//转发群消息
+				self.forwardMessage(msgs, row);
 
-					//let user = JSON.parse(res);
-
-					//转发群消息
-					self.forwardMessage(msgs, row);
-
-					//更新发群时间
-					self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
-
-				//}
+				//更新发群时间
+				self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
 
 			}
 
@@ -273,8 +267,6 @@ class Groups {
 			console.log( '主动拉取', time );
 		}
 
-		console.log( '--------------------------' );
-
 	}
 
 	/**
@@ -375,19 +367,26 @@ class Groups {
 				break;
 			}
 
-			console.log(msg, '------------------------');
-
-			//延迟消息，不是最后一条消息时
-			if( detail.indexOf( self.retard ) > -1 && i < msgs.length - 1 ){
-				stag.push( { type: msg.msgType, detail : detail, source : msg.msgSource } );
-				continue;
-			}
+			console.log('------------------------');
 
 			//文字
-			if (msg.msgType == 1) {				
+			if (msg.msgType == 1) {
+
+				//延迟消息，不是最后一条消息时
+
+				var lazy = detail.indexOf( self.retard ) > -1 && i > 0 && msgs[i - 1].send != true;
+
+				console.log('推迟消息', lazy);
+
+				if( lazy ){
+					stag.push( { type: msg.msgType, detail : detail, source : msg.msgSource } );
+					continue;
+				}
 
 				//转链
 				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : detail }, (code, body) => {
+
+					msg.send = true;
 
 					//console.log( 'body', body );
 
@@ -404,6 +403,7 @@ class Groups {
 
 					pm.then(ret => {
 						console.log('发群成功', ret.count);
+						console.log('------------------------');
 					}).catch(msg => {
 						console.log('NewSendMsg', msg);
 					});
@@ -415,7 +415,7 @@ class Groups {
 						console.log('迟延消息', stag.length);
 	
 						//处理迟延消息
-						for( let i = 0; i < stag.length; i++ ){
+						for( let x = 0; x < stag.length; x++ ){
 							var news = stag.pop();
 							self.wx.NewSendMsg(member.weixin_id, roomid, news.detail, news.source, news.type);
 						}
@@ -426,7 +426,8 @@ class Groups {
 
 					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );
 					
-					console.log('是否转链', conv, data.text );
+					console.log( data.text );
+					console.log('是否转链', conv);
 
 					//是口令，需要转链
 					if( conv ){
@@ -447,6 +448,7 @@ class Groups {
 				}
 
 				fn.then(ret => {
+					msg.send = true;
 					console.log('ret', ret);
 				}).catch(err => {
 					console.log('msg', err);
@@ -462,6 +464,7 @@ class Groups {
 				}
 
 				fn.then(ret => {
+					msg.send = true;
 					console.log('ret', ret);
 				}).catch(err => {
 					console.log('msg', err);
@@ -480,14 +483,13 @@ class Groups {
 				}
 
 				fn.then(ret => {
+					msg.send = true;
 					console.log('ret', ret);
 				}).catch(err => {
 					console.log('msg', err);
 				});
 
 			}
-
-			console.log(msg, '------------------------');
 
 		}
 

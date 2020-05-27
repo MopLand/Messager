@@ -56,6 +56,8 @@ class Moment {
 				if( post.id > maxid ){
 					self.send( post );
 					maxid = post.id;
+				}else{					
+					console.log( '暂无发圈', post.id );
 				}
 
 				self.redis.set( self.stamp, post.id );
@@ -78,8 +80,6 @@ class Moment {
      * 循环发送朋友圈
      */
 	send(post) {
-
-		//this.redis.smembers('weixin_list', function (err, res) {
 
 		var send = true;
 
@@ -111,17 +111,11 @@ class Moment {
 
 				let row = res[i];
 
-				//this.redis.get('weixin_' + uid, function (err, res) {
+				//转发朋友圈
+				self.forwardMoment(row.weixin_id, post, row);
 
-					//let user = JSON.parse(res);
-
-					//转发朋友圈
-					self.forwardMoment(row.weixin_id, post, row);
-
-					//更新发圈时间
-					self.mysql.query('UPDATE `pre_member_weixin` SET moment_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
-
-				//});
+				//更新发圈时间
+				self.mysql.query('UPDATE `pre_member_weixin` SET moment_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
 
 			}
 
@@ -212,7 +206,7 @@ class Moment {
 
 				let comm = post.commentUserList[i];
 
-				console.log(comm);
+				//console.log(comm);
 
 				//转链
 				req.get(self.conf.convert, { 'member_id' : row.member_id, 'text' : comm.content }, (code, body) => {
@@ -230,7 +224,8 @@ class Moment {
 					let pm = self.wx.SnsComment(wxid, post.id, comm.type, body);
 
 					pm.then(ret => {
-						console.log('评论成功', ret.snsObject.objectDesc.commentUserList);
+						//console.log('评论成功', ret.snsObject.objectDesc.commentUserList);
+						console.log('评论成功', ret);
 					}).catch(err => {
 						console.log('SnsComment', err);
 					});
