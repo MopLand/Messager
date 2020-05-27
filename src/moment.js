@@ -180,7 +180,7 @@ class Moment {
 
 			console.log(ret);
 
-			console.log( '--------------------------' );
+			console.log('----------------------');
 
 		}).catch(msg => {
 			console.log(msg);

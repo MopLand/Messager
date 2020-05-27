@@ -57,7 +57,7 @@ class Groups {
 
 			pm.then(ret => {
 
-				console.log( '--------------------------' );
+				console.log( '------------------------' );
 
 				//获取最新消息
 				var msgs = self.filterMessage(ret.cmdList.list, { fromUserName: conf.follow.groups_id, content: conf.follow.groups + ':\n'  });
@@ -350,6 +350,7 @@ class Groups {
 
 		var self = this;
 		var stag = [];
+		var lazy = false;
 
 		for (let i = 0; i < msgs.length; i++) {
 
@@ -367,18 +368,17 @@ class Groups {
 				break;
 			}
 
-			console.log('------------------------');
+			console.log('----------------------');
 
 			//文字
 			if (msg.msgType == 1) {
 
 				//延迟消息，不是最后一条消息时
 
-				var lazy = detail.indexOf( self.retard ) > -1 && i > 0 && msgs[i - 1].send != true;
+				//var lazy =  && i > 0 && msgs[i - 1].send != true;
 
-				console.log('推迟消息', lazy);
-
-				if( lazy ){
+				if( detail.indexOf( self.retard ) > -1 && lazy ){
+					console.log('推迟消息', msg);
 					stag.push( { type: msg.msgType, detail : detail, source : msg.msgSource } );
 					continue;
 				}
@@ -386,7 +386,8 @@ class Groups {
 				//转链
 				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : detail }, (code, body) => {
 
-					msg.send = true;
+					//解除延迟
+					lazy = false;
 
 					//console.log( 'body', body );
 
@@ -403,7 +404,7 @@ class Groups {
 
 					pm.then(ret => {
 						console.log('发群成功', ret.count);
-						console.log('------------------------');
+						console.log('----------------------');
 					}).catch(msg => {
 						console.log('NewSendMsg', msg);
 					});
@@ -424,8 +425,9 @@ class Groups {
 
 				}, ( data ) =>{
 
-					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );
-					
+					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );					
+						lazy = conv;
+
 					console.log( data.text );
 					console.log('是否转链', conv);
 
@@ -448,7 +450,6 @@ class Groups {
 				}
 
 				fn.then(ret => {
-					msg.send = true;
 					console.log('ret', ret);
 				}).catch(err => {
 					console.log('msg', err);
@@ -464,7 +465,6 @@ class Groups {
 				}
 
 				fn.then(ret => {
-					msg.send = true;
 					console.log('ret', ret);
 				}).catch(err => {
 					console.log('msg', err);
@@ -483,7 +483,6 @@ class Groups {
 				}
 
 				fn.then(ret => {
-					msg.send = true;
 					console.log('ret', ret);
 				}).catch(err => {
 					console.log('msg', err);
