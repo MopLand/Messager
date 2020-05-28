@@ -21,7 +21,7 @@ class Groups {
 		this.wx = new wx(conf.weixin);
 		this.redis = com.redis(conf.redis);
 		this.sider = com.redis(conf.redis);
-		this.mysql = com.mysql(conf.mysql);
+		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 		this.stamp = 'mm_groups_id';
 		this.channel = 'mm_groups';
 		this.lastmsg = com.getTime();
@@ -66,7 +66,7 @@ class Groups {
 
 				console.log( '监听群组', conf.follow.groups_id, '消息作者', conf.follow.groups );
 
-				console.log( '最新消息', msgs );
+				//console.log( '最新消息', msgs );
 
 				//获取到新消息
 				msgs.length && self.send(msgs);
@@ -123,7 +123,7 @@ class Groups {
 				console.log( err );
 				return;
 			}else{
-				console.log( '本次发群', res.length + ' 人' );
+				console.log( '本次发群', '', res.length + ' 人' );
 			}
 
 			for (let i = 0; i < res.length; i++) {
@@ -359,27 +359,25 @@ class Groups {
 			var struct = detail.indexOf('<') == 0;
 
 			var groups = JSON.parse( member.groups_list );
-			var groups = com.filter( groups, val => {
-				return val == 'ON';
-			} );
-			var roomid = Object.keys( groups );
+			var roomid = groups.map( ele => { return ele.userName } );
 
 			if( roomid.length == 0 ){
 				break;
 			}
 
 			console.log('----------------------');
+			console.log( '微信号', member.weixin_id, '群数量', roomid.length )
 
 			//文字
 			if (msg.msgType == 1) {
 
 				//延迟消息，不是最后一条消息时
+				//console.log( detail );
+				//console.log( '__LAZY__', lazy, detail.indexOf( self.conf.retard ) >= 0 );
 
-				//var lazy =  && i > 0 && msgs[i - 1].send != true;
-
-				if( detail.indexOf( self.retard ) > -1 && lazy ){
-					console.log('推迟消息', msg);
+				if( lazy && detail.indexOf( self.conf.retard ) >= 0 ){
 					stag.push( { type: msg.msgType, detail : detail, source : msg.msgSource } );
+					console.log('推迟消息', msg);
 					continue;
 				}
 
@@ -389,25 +387,27 @@ class Groups {
 					//解除延迟
 					lazy = false;
 
-					//console.log( 'body', body );
-
 					var data = JSON.parse( body );
 					
+					//转链成功，发送消息，否则跳过
 					if( data.status >= 0 ){
-						var body = data.result;
+
+						let pm = self.wx.NewSendMsg(member.weixin_id, roomid, data.result, msg.msgSource);
+
+						pm.then(ret => {
+							console.log('发群成功', ret.count);
+							console.log('----------------------');
+						}).catch(msg => {
+							console.log('NewSendMsg', msg);
+						});
+
 					}else{
-						console.log('转链错误', data.result);
-						return;
+
+						console.log('转链错误', data);
+
+						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, updated_time = ? WHERE member_id = ?', [ body, com.getTime(), member.member_id ] );
+
 					}
-
-					let pm = self.wx.NewSendMsg(member.weixin_id, roomid, body, msg.msgSource);
-
-					pm.then(ret => {
-						console.log('发群成功', ret.count);
-						console.log('----------------------');
-					}).catch(msg => {
-						console.log('NewSendMsg', msg);
-					});
 
 					//////////////
 
@@ -416,8 +416,8 @@ class Groups {
 						console.log('迟延消息', stag.length);
 	
 						//处理迟延消息
-						for( let x = 0; x < stag.length; x++ ){
-							var news = stag.pop();
+						while( stag.length > 0 ){
+							let news = stag.pop();
 							self.wx.NewSendMsg(member.weixin_id, roomid, news.detail, news.source, news.type);
 						}
 
@@ -425,14 +425,14 @@ class Groups {
 
 				}, ( data ) =>{
 
-					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );					
-						lazy = conv;
+					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );						
 
 					console.log( data.text );
 					console.log('是否转链', conv);
 
 					//是口令，需要转链
 					if( conv ){
+						lazy = true;
 						return { 'request' : true };
 					}else{
 						return { 'request' : false, 'respond' : JSON.stringify( { 'status' : 0, 'result' : data.text } ) };

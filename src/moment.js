@@ -19,7 +19,7 @@ class Moment {
 		this.conf = conf;
 		this.wx = new wx(conf.weixin);
 		this.redis = com.redis(conf.redis);
-		this.mysql = com.mysql(conf.mysql);
+		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 		this.stamp = 'mm_moment_id';
 		
 	}
