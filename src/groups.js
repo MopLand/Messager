@@ -8,7 +8,10 @@ const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const req = require('../lib/request');
 const act = require('../lib/activity');
+const Logger = require('../lib/logger');
 const Account = require('./account');
+const tag = com.fileName( __filename, false );
+const log = new Logger( tag );
 
 class Groups {
 
@@ -16,7 +19,6 @@ class Groups {
      * 构造函数
      */
 	constructor(conf) {
-
 		this.conf = conf;
 		this.wx = new wx(conf.weixin);
 		this.redis = com.redis(conf.redis);
@@ -39,6 +41,7 @@ class Groups {
 		//最近一次微信群消息ID
 		this.sider.get( this.stamp, ( err, ret ) => {
 			keybuf = ret || keybuf;
+			log.info( 'init', keybuf );
 		} );
 
 		//处理 Redis 消息
@@ -57,19 +60,20 @@ class Groups {
 
 			pm.then(ret => {
 
-				console.log( '------------------------' );
-
 				//获取最新消息
 				var msgs = self.filterMessage(ret.cmdList.list, { fromUserName: conf.follow.groups_id, content: conf.follow.groups + ':\n'  });
 				
-				console.log( '原始消息', ret.cmdList.count, '过滤消息', msgs.length );
+				log.info( '消息数量', ret.cmdList.count + ' / ' + msgs.length );
+				log.info( '监听对象', conf.follow.groups_id + ' / ' + conf.follow.groups );
 
-				console.log( '监听群组', conf.follow.groups_id, '消息作者', conf.follow.groups );
+				if( msgs.length ){
 
-				//console.log( '最新消息', msgs );
+					log.info( '最新消息', msgs );
+	
+					//获取到新消息
+					self.send(msgs);
 
-				//获取到新消息
-				msgs.length && self.send(msgs);
+				}
 				
 				//记录消息标记
 				keybuf = ret.keyBuf.buffer;
@@ -84,7 +88,7 @@ class Groups {
 
 				locked = false;
 
-				console.log( err );
+				log.info( err );
 
 				req.status(conf.report, 'MM_Groups', 500, err);
 
@@ -120,10 +124,10 @@ class Groups {
 		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 ORDER BY auto_id ASC', function (err, res) {
 
 			if( err ){
-				console.log( err );
+				log.error( err );
 				return;
 			}else{
-				console.log( '本次发群', '', res.length + ' 人' );
+				log.info( '本次发群', '', res.length + ' 人' );
 			}
 
 			for (let i = 0; i < res.length; i++) {
@@ -212,10 +216,10 @@ class Groups {
 		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` ORDER BY auto_id ASC', function (err, res) {
 
 			if( err ){
-				console.log( err );
+				log.error( err );
 				return;
 			}else{
-				console.log( '本次心跳', res.length + ' 人' );
+				log.info( '本次心跳', res.length + ' 人' );
 			}
 
 			for (let i = 0; i < res.length; i++) {
@@ -230,11 +234,11 @@ class Groups {
 					//更新群发设置
 					self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
 
-					console.log( '心跳成功', row.weixin_id, ret );
+					log.info( '心跳成功', row.weixin_id, ret );
 
 				}).catch( err => {
 
-					console.log( 'Heartbeat', err );
+					log.info( 'Heartbeat', err );
 
 					if( err.indexOf('退出微信登录') > -1 ){
 						klas.init( row.weixin_id );
@@ -264,7 +268,7 @@ class Groups {
 		//长时间没有读取消息
 		if( work && diff > 15 ){
 			this.sider.publish( this.channel, time );
-			console.log( '主动拉取', time );
+			log.info( '主动拉取', time );
 		}
 
 	}
@@ -331,10 +335,10 @@ class Groups {
 				group_id = chat_room.ToUserName.String;
 			}
 
-			//console.log(chat_room, group_id);
+			//log.info(chat_room, group_id);
 
 		}).catch(msg => {
-			console.log(msg);
+			log.error(msg);
 		});
 
 		return pm;
@@ -356,7 +360,6 @@ class Groups {
 
 			var msg = msgs[i];
 			var detail = msg.content.string;
-			var struct = detail.indexOf('<') == 0;
 
 			var groups = JSON.parse( member.groups_list );
 			var roomid = groups.map( ele => { return ele.userName } );
@@ -365,21 +368,21 @@ class Groups {
 				break;
 			}
 
-			console.log('----------------------');
-			console.log( '微信号', member.weixin_id, '群数量', roomid.length )
+			log.info( '当前微信', { '微信号' : member.weixin_id, '群数量' : roomid.length } );
+
+			//是否要推迟，针对 表情 或 分割线
+			if( lazy && ( msg.msgType == 47 || detail.indexOf( self.conf.retard ) >= 0 ) ){
+				stag.push( msg );
+				log.warn('推迟消息', msg);
+				continue;
+			}
 
 			//文字
 			if (msg.msgType == 1) {
 
 				//延迟消息，不是最后一条消息时
-				//console.log( detail );
-				//console.log( '__LAZY__', lazy, detail.indexOf( self.conf.retard ) >= 0 );
-
-				if( lazy && detail.indexOf( self.conf.retard ) >= 0 ){
-					stag.push( { type: msg.msgType, detail : detail, source : msg.msgSource } );
-					console.log('推迟消息', msg);
-					continue;
-				}
+				//log.info( detail );
+				//log.info( '__LAZY__', lazy, detail.indexOf( self.conf.retard ) >= 0 );
 
 				//转链
 				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : detail }, (code, body) => {
@@ -395,15 +398,14 @@ class Groups {
 						let pm = self.wx.NewSendMsg(member.weixin_id, roomid, data.result, msg.msgSource);
 
 						pm.then(ret => {
-							console.log('发群成功', ret.count);
-							console.log('----------------------');
+							log.info('发群成功', ret.count);
 						}).catch(msg => {
-							console.log('NewSendMsg', msg);
+							log.info('NewSendMsg', msg);
 						});
 
 					}else{
 
-						console.log('转链错误', data);
+						log.error('转链错误', data);
 
 						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, updated_time = ? WHERE member_id = ?', [ body, com.getTime(), member.member_id ] );
 
@@ -413,12 +415,11 @@ class Groups {
 
 					if( stag.length ){
 					
-						console.log('迟延消息', stag.length);
+						log.warn('迟延消息', stag.length);
 	
 						//处理迟延消息
 						while( stag.length > 0 ){
-							let news = stag.pop();
-							self.wx.NewSendMsg(member.weixin_id, roomid, news.detail, news.source, news.type);
+							self.sendMsg( stag.pop(), member.weixin_id, roomid );
 						}
 
 					}
@@ -427,8 +428,8 @@ class Groups {
 
 					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );						
 
-					console.log( data.text );
-					console.log('是否转链', conv);
+					log.info('原始文本', data.text );
+					log.debug('是否转链', conv);
 
 					//是口令，需要转链
 					if( conv ){
@@ -442,53 +443,81 @@ class Groups {
 
 			}
 
-			//图片
-			if (msg.msgType == 3 && struct) {
-
-				for( let i = 0; i < roomid.length; i++ ){
-					var fn = self.wx.UploadMsgImgXml(member.weixin_id, roomid[i], detail);
-				}
-
-				fn.then(ret => {
-					console.log('ret', ret);
-				}).catch(err => {
-					console.log('msg', err);
-				});
-
+			//其他消息
+			if ( msg.msgType != 1 ) {
+				this.sendMsg( msg, member.weixin_id, roomid );
 			}
 
-			//视频
-			if (msg.msgType == 43 && struct) {
+		}
 
-				for( let i = 0; i < roomid.length; i++ ){
-					var fn = self.wx.UploadVideoXml(member.weixin_id, roomid[i], detail);
-				}
+	}
 
-				fn.then(ret => {
-					console.log('ret', ret);
-				}).catch(err => {
-					console.log('msg', err);
-				});
+	/**
+	 * 转发群消息
+	 * @param object 单条消息
+	 * @param string 微信 ID
+	 * @param object 微信群
+	 */
+	sendMsg( msg, weixin_id, roomid ){
 
+		var self = this;
+		var detail = msg.content.string;
+		var struct = detail.indexOf('<') == 0;
+
+		if (msg.msgType == 1) {
+
+			let fn = self.wx.NewSendMsg(weixin_id, roomid, detail, msg.msgSource);
+
+			fn.then(ret => {
+				log.info('发群成功', ret.count);
+			}).catch(msg => {
+				log.info('发群失败', msg);
+			});
+
+		}
+
+		//图片
+		if (msg.msgType == 3 && struct) {
+
+			for( let i = 0; i < roomid.length; i++ ){
+				var fn = self.wx.UploadMsgImgXml(weixin_id, roomid[i], detail);
 			}
 
-			//表情
-			if (msg.msgType == 47 && struct) {
+			fn.then(ret => {
+				log.info('发图成功', ret);
+			}).catch(err => {
+				log.error('发图失败', err);
+			});
 
-				//var len = detail.match(/len="(.+?)"/)[1];
-				//var md5 = detail.match(/md5="(.+?)"/)[1];
+		}
 
-				for( let i = 0; i < roomid.length; i++ ){
-					var fn = self.wx.SendEmojiXml(member.weixin_id, roomid[i], detail);
-				}
+		//视频
+		if (msg.msgType == 43 && struct) {
 
-				fn.then(ret => {
-					console.log('ret', ret);
-				}).catch(err => {
-					console.log('msg', err);
-				});
-
+			for( let i = 0; i < roomid.length; i++ ){
+				var fn = self.wx.UploadVideoXml(weixin_id, roomid[i], detail);
 			}
+
+			fn.then(ret => {
+				log.info('视频成功', ret);
+			}).catch(err => {
+				log.error('视频失败', err);
+			});
+
+		}
+
+		//表情
+		if (msg.msgType == 47 && struct) {
+
+			for( let i = 0; i < roomid.length; i++ ){
+				var fn = self.wx.SendEmojiXml(weixin_id, roomid[i], detail);
+			}
+
+			fn.then(ret => {
+				log.info('表情成功', ret);
+			}).catch(err => {
+				log.error('表情失败', err);
+			});
 
 		}
 

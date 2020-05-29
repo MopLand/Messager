@@ -1,7 +1,10 @@
 'use strict'
 
 const wx = require('../lib/weixin');
-const cm = require('../lib/common');
+const Common = require('../lib/common');
+const Logger = require('../lib/logger');
+const tag = Common.fileName( __filename, false );
+const log = new Logger( tag );
 
 class Account {
 
@@ -32,19 +35,11 @@ class Account {
 		var pm = this.login( wxid, device );
 
 		pm.then( ret => {
-
 			uuid = ret.uuid;
-
-			console.log( 'UUID', ret.uuid );
-			console.log( '过期', ret.expiredTime );
-
-			console.log('等待完成扫码 或 登录');
-
+			log.info( '等待登录', ret );
 		}).catch( err => {
-			console.log('ACCOUNT_LOGIN', err);
+			log.error('登录出错', err);
 		});
-
-		console.log( '--------------------------' );
 		
 		////////////
 
@@ -55,41 +50,39 @@ class Account {
 
 				let pm = self.check( uuid );
 
-				console.log( '--------------------------' );
-
 				pm.then( ret =>{
 
-					//console.log( ret );
+					//log.info( ret );
 
 					//扫码成功
 					if (ret.notify.status == 2) {
 
 						clearInterval( clok );
 
-						console.log( ret.notify );
+						log.info( ret.notify );
 
 						////////
 
 						let pm = self.submit( ret.notify.userName );
 
 						pm.then(ret=>{
-							console.log( ret );
+							log.info( ret );
 						}).catch(err=>{
-							console.log( err );
+							log.error( err );
 						});
 						
 					}
 
 				}).catch(err => {
-					console.log(err);
+					log.info(err);
 				});
 
 			}
 
 			if( init >= 10 ){
 				clearInterval( clok );
-				cm.DelFile( self.code );
-				console.log('扫码登录超时，请重试');
+				Common.DelFile( self.code );
+				log.info('扫码登录超时，请重试');
 			}else{
 				init++;
 			}
@@ -108,14 +101,14 @@ class Account {
 		var self = this;
 		var pm = wxid ? this.wx.PushLoginUrl( wxid ) : this.wx.GetLoginQrCode( device );
 
-		console.log('登录方式', wxid, wxid ? 'Push' : 'Qrcode' );
+		log.info('登录方式', wxid, wxid ? 'Push' : 'Qrcode' );
 
 		pm.then(ret => {
 			if( !wxid && ret.qrcode ){
-				cm.SavePic(decodeURIComponent(ret.qrcode.buffer), self.code );
+				Common.SavePic(decodeURIComponent(ret.qrcode.buffer), self.code );
 			}
 		}).catch( msg => {
-			console.log( msg );
+			log.error( msg );
 		});
 
 		return pm;
@@ -132,9 +125,9 @@ class Account {
 
 		/*
 		pm.then(ret => {
-			console.log(ret);
+			log.info(ret);
 		}).catch(err => {
-			console.log(err);
+			log.info(err);
 		});
 		*/
 
@@ -143,14 +136,14 @@ class Account {
 		/*
 		fn.then(ret => {
 
-			console.log(ret);
+			log.info(ret);
 
 			if (ret.State <= 0) {
-				console.log('请完成扫码登录');
+				log.info('请完成扫码登录');
 			}
 
 		}).catch(msg => {
-			console.log(msg);
+			log.info(msg);
 		});
 		*/
 	}
@@ -166,11 +159,11 @@ class Account {
 
 		//删除二维码
 		pm.then( ret => {
-			//cm.DelFile( self.code );
+			//Common.DelFile( self.code );
 		}).catch( err => {
-			//console.log( err );
+			//log.info( err );
 		}).finally( () => {
-			cm.DelFile( self.code );
+			Common.DelFile( self.code );
 		} );
 
 		return pm;
@@ -192,9 +185,9 @@ class Account {
 		}
 
 		pm.then( ret => {			
-			console.log( ret );
+			log.info( ret );
 		}).catch( msg => {
-			console.log( msg );
+			log.info( msg );
 		});
 
 		return pm;
