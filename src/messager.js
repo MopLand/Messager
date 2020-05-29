@@ -89,7 +89,7 @@ class Messager {
 						copyed.set(msg.tag + '_status', JSON.stringify(status));
 
 						//一定机率上报日志
-						request.status(conf.report, 'Messager', status, msg, null, 0.01 );
+						request.status(conf.report, 'Messager', msg.msgid, status, null, 0.01 );
 					}
 
 				});
