@@ -57,9 +57,6 @@ if (func == 'account') {
 	let device = Common.getArgv('device');
 
 	let klas = new Account(conf, save);
-
-	if( !func ){
 		klas.init( weixin, device );
-	}
 
 }
