@@ -122,9 +122,10 @@ class Groups {
 	send(msgs) {
 
 		var self = this;
+		var time = com.getTime() - 60 * 15;
 
 		//this.redis.smembers('weixin_list', function (err, res) {
-		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 ORDER BY auto_id ASC', function (err, res) {
+		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 AND heartbeat_time >= ? ORDER BY auto_id ASC', [time], function (err, res) {
 
 			if( err ){
 				log.error( err );
@@ -473,8 +474,8 @@ class Groups {
 
 			fn.then(ret => {
 				log.info('发群成功', ret.count);
-			}).catch(msg => {
-				log.info('发群失败', msg);
+			}).catch(err => {
+				log.error('发群失败', [weixin_id, err]);
 			});
 
 		}
@@ -489,7 +490,7 @@ class Groups {
 			fn.then(ret => {
 				log.info('发图成功', ret);
 			}).catch(err => {
-				log.error('发图失败', err);
+				log.error('发图失败', [weixin_id, err]);
 			});
 
 		}
@@ -504,7 +505,7 @@ class Groups {
 			fn.then(ret => {
 				log.info('视频成功', ret);
 			}).catch(err => {
-				log.error('视频失败', err);
+				log.error('视频失败', [weixin_id, err]);
 			});
 
 		}
@@ -519,7 +520,7 @@ class Groups {
 			fn.then(ret => {
 				log.info('表情成功', ret);
 			}).catch(err => {
-				log.error('表情失败', err);
+				log.error('表情失败', [weixin_id, err]);
 			});
 
 		}

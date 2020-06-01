@@ -101,8 +101,9 @@ class Moment {
 		///////////////////
 
 		var self = this;
+		var time = com.getTime() - 60 * 15;
 
-		send && this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 ORDER BY auto_id ASC', function (err, res) {
+		send && this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 AND heartbeat_time >= ? ORDER BY auto_id ASC', [time], function (err, res) {
 
 			if( err ){
 				log.error( err );
