@@ -108,7 +108,7 @@ class Account {
 				Common.SavePic(decodeURIComponent(ret.qrcode.buffer), self.code );
 			}
 		}).catch( msg => {
-			log.error( msg );
+			log.error( '接口错误', msg );
 		});
 
 		return pm;
@@ -185,9 +185,9 @@ class Account {
 		}
 
 		pm.then( ret => {			
-			log.info( ret );
+			log.info( '接口返回', ret );
 		}).catch( msg => {
-			log.info( msg );
+			log.error( '接口错误', msg );
 		});
 
 		return pm;
