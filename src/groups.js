@@ -77,7 +77,10 @@ class Groups {
 				
 				//记录消息标记
 				keybuf = ret.keyBuf.buffer;
+
+				//临时存储一小时
 				self.sider.set( self.stamp, keybuf );
+				self.sider.expire( self.stamp, 3600 );
 
 				//解除读消息锁
 				locked = false;

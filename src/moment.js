@@ -62,7 +62,9 @@ class Moment {
 					log.info( '暂无发圈', post.id );
 				}
 
+				//临时存储一小时
 				self.redis.set( self.stamp, post.id );
+				self.redis.expire( self.stamp, 3600 );
 
 				req.status(conf.report, 'MM_Moment', maxid, ret.baseResponse);
 

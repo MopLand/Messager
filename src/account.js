@@ -170,11 +170,11 @@ class Account {
 	}
 
 	 /**
-     * 提交登录
+     * 联系人
      * @param string wxId 微信Id
      * @param string room 微信群Id
      */
-	groups( wxid, room ) {
+	contact( wxid, room ) {
 
 		var wxid = wxid || this.conf.wechat;
 
