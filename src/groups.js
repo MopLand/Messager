@@ -255,11 +255,11 @@ class Groups {
 					//更新群发设置
 					self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
 
-					log.info( '心跳成功', row.weixin_id, ret );
+					log.info( '心跳成功', [row.weixin_id, ret] );
 
 				}).catch( err => {
 
-					log.info( 'Heartbeat', err );
+					log.info( '心跳失败', [row.weixin_id, err] );
 
 					if( err.indexOf('退出微信登录') > -1 ){
 						klas.init( row.weixin_id );
