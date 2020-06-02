@@ -38,6 +38,19 @@ class Groups {
 
 		///////////////
 
+		//消息筛选条件
+		var where = {}
+
+		if( conf.follow.groups_id ){
+			where.fromUserName = conf.follow.groups_id;
+		}
+
+		if( conf.follow.groups ){
+			where.content = conf.follow.groups + ':\n';
+		}
+
+		///////////////
+
 		//最近一次微信群消息ID
 		this.sider.get( this.stamp, ( err, ret ) => {
 			keybuf = ret || keybuf;
@@ -60,8 +73,10 @@ class Groups {
 
 			pm.then(ret => {
 
+				log.info( '原始消息', ret.cmdList.list );
+
 				//获取最新消息
-				var msgs = self.filterMessage(ret.cmdList.list, { fromUserName: conf.follow.groups_id, content: conf.follow.groups + ':\n'  });
+				var msgs = self.filterMessage( ret.cmdList.list, where );
 				
 				log.info( '消息数量', ret.cmdList.count + ' / ' + msgs.length );
 				log.info( '监听对象', conf.follow.groups_id + ' / ' + conf.follow.groups );
@@ -124,6 +139,8 @@ class Groups {
 		var self = this;
 		var time = com.getTime() - 60 * 15;
 
+		log.info( '心跳范围', time );
+
 		//this.redis.smembers('weixin_list', function (err, res) {
 		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 AND heartbeat_time >= ? ORDER BY auto_id ASC', [time], function (err, res) {
 
@@ -131,7 +148,7 @@ class Groups {
 				log.error( err );
 				return;
 			}else{
-				log.info( '本次发群', '', res.length + ' 人' );
+				log.info( '本次发群', res.length + ' 人' );
 			}
 
 			for (let i = 0; i < res.length; i++) {
@@ -267,7 +284,8 @@ class Groups {
 		var time = com.getTime();
 
 		//上次消息过去了多少分钟
-		var diff = ( time - this.lastmsg ) / 60; 
+		var diff = ( time - this.lastmsg ) / 60;
+		log.info( '过去时间', diff + '分钟' );
 
 		//长时间没有读取消息
 		if( work && diff > 15 ){
@@ -449,7 +467,7 @@ class Groups {
 
 			//其他消息
 			if ( msg.msgType != 1 ) {
-				this.sendMsg( msg, member.weixin_id, roomid );
+				this.sendMsg( msg, member, roomid );
 			}
 
 		}
@@ -459,10 +477,10 @@ class Groups {
 	/**
 	 * 转发群消息
 	 * @param object 单条消息
-	 * @param string 微信 ID
+	 * @param object 用户数据
 	 * @param object 微信群
 	 */
-	sendMsg( msg, weixin_id, roomid ){
+	sendMsg( msg, member, roomid ){
 
 		var self = this;
 		var detail = msg.content.string;
@@ -470,12 +488,12 @@ class Groups {
 
 		if (msg.msgType == 1) {
 
-			let fn = self.wx.NewSendMsg(weixin_id, roomid, detail, msg.msgSource);
+			let fn = self.wx.NewSendMsg(member.weixin_id, roomid, detail, msg.msgSource);
 
 			fn.then(ret => {
 				log.info('发群成功', ret.count);
 			}).catch(err => {
-				log.error('发群失败', [weixin_id, err]);
+				log.error('发群失败', [member, err]);
 			});
 
 		}
@@ -484,13 +502,13 @@ class Groups {
 		if (msg.msgType == 3 && struct) {
 
 			for( let i = 0; i < roomid.length; i++ ){
-				var fn = self.wx.UploadMsgImgXml(weixin_id, roomid[i], detail);
+				var fn = self.wx.UploadMsgImgXml(member.weixin_id, roomid[i], detail);
 			}
 
 			fn.then(ret => {
 				log.info('发图成功', ret);
 			}).catch(err => {
-				log.error('发图失败', [weixin_id, err]);
+				log.error('发图失败', [member, err]);
 			});
 
 		}
@@ -499,28 +517,48 @@ class Groups {
 		if (msg.msgType == 43 && struct) {
 
 			for( let i = 0; i < roomid.length; i++ ){
-				var fn = self.wx.UploadVideoXml(weixin_id, roomid[i], detail);
+				var fn = self.wx.UploadVideoXml(member.weixin_id, roomid[i], detail);
 			}
 
 			fn.then(ret => {
 				log.info('视频成功', ret);
 			}).catch(err => {
-				log.error('视频失败', [weixin_id, err]);
+				log.error('视频失败', [member, err]);
 			});
 
 		}
+
 
 		//表情
 		if (msg.msgType == 47 && struct) {
 
 			for( let i = 0; i < roomid.length; i++ ){
-				var fn = self.wx.SendEmojiXml(weixin_id, roomid[i], detail);
+				var fn = self.wx.SendEmojiXml(member.weixin_id, roomid[i], detail);
 			}
 
 			fn.then(ret => {
 				log.info('表情成功', ret);
 			}).catch(err => {
-				log.error('表情失败', [weixin_id, err]);
+				log.error('表情失败', [member, err]);
+			});
+
+		}
+
+		//小程序
+		if (msg.msgType == 49 && struct) {
+
+			detail = detail.replace(/userid=(\d*)/g, 'userid=' + member.member_id);
+
+			log.info('替换UID', detail);
+
+			for( let i = 0; i < roomid.length; i++ ){
+				var fn = self.wx.SendAppMsgXml(member.weixin_id, roomid[i], detail);
+			}
+
+			fn.then(ret => {
+				log.info('小程序成功', ret);
+			}).catch(err => {
+				log.error('小程序失败', [member, err]);
 			});
 
 		}

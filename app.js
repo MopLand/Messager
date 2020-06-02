@@ -42,7 +42,7 @@ if (func == 'groups') {
 if (func == 'contact') {
 
 	let room = Common.getArgv('room');
-	let weixin = Common.getArgv('weixin');
+	let weixin = Common.getArgv('weixin', conf.wechat);
 
 	let klas = new Account(conf);
 		klas.contact( weixin, room );

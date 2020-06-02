@@ -59,11 +59,12 @@ var conf = {
 		//朋友圈：小助手
 		moment		: 'wxid_ig5bgx8ydlbp22',
 		
-		//微信群：糖糖
-		groups		: 'wxid_35ipm1ssbbbc22',
+		//微信群接收人：糖糖
+		//groups		: 'wxid_35ipm1ssbbbc22',
+		groups		: '',
 		
-		//微信群ID
-		groups_id	: '22997642011@chatroom',
+		//微信群ID：云发单测试群
+		groups_id	: '18935808677@chatroom',
 	}
 }
 

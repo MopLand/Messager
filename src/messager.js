@@ -84,7 +84,7 @@ class Messager {
 
 					if (!err) {
 
-						var status = { 'popid': msg.msgid, 'length': len, 'pushing_time': (new Date).getTime() / 1000 };
+						var status = { 'popid': msg.msgid, 'length': len, 'pushing_time': common.getTime() };
 
 						copyed.set(msg.tag + '_status', JSON.stringify(status));
 
