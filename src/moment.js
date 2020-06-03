@@ -58,6 +58,7 @@ class Moment {
 				if( post.id > maxid ){
 					self.send( post );
 					maxid = post.id;
+					log.info( '最新发圈', post );
 				}else{					
 					log.info( '暂无发圈', post.id );
 				}

@@ -234,7 +234,7 @@ class Groups {
 		var self = this;
 		var klas = new Account(this.conf);
 
-		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` ORDER BY auto_id ASC', function (err, res) {
+		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` ORDER BY auto_id ASC', function (err, res) {
 
 			if( err ){
 				log.error( err );
