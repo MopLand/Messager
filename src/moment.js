@@ -131,7 +131,7 @@ class Moment {
 	/**
 	 * 发送消息
 	 * @param string 微信ID
-	 * @param int 类型
+	 * @param integer 类型
 	 * @param string 内容
 	 */
 	sendMoment(wxid, type, content) {
@@ -151,9 +151,9 @@ class Moment {
 	/**
 	 * 获取最新发圈
 	 * @param string 微信ID
-	 * @param int 好友ID
-	 * @param int 上一次消息ID
-	 * @param int 来源ID
+	 * @param integer 好友ID
+	 * @param integer 上一次消息ID
+	 * @param integer 来源ID
 	 */
 	fetchMoment(wxid, toWxId, maxid = 0, source = 0) {
 		var pm = this.wx.SnsUserPage(wxid, toWxId, maxid, source);
