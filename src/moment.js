@@ -91,11 +91,20 @@ class Moment {
 		//需要忽略的发圈
 		if( post.commentUserListCount ){
 			for( let i = 0; i < post.commentUserList.length; i ++ ){
-				let comm = post.commentUserList[i].content.toLocaleUpperCase();
+
+				let text = post.commentUserList[i].content;
+				let comm = text.toLocaleUpperCase();
+
 				if( comm == this.conf.ignore ){
 					send = false;
 					log.info( '跳过发圈', comm );
 				}
+
+				if( comm == this.conf.origin ){
+					post.keep_raw = true;
+					log.info( '不要转链', comm );
+				}
+
 			}
 		}
 
@@ -229,6 +238,7 @@ class Moment {
 				}, ( data ) =>{
 
 					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );
+						conv = post.keep_raw ? false : conv;
 
 					log.debug('是否转链', conv, data.text );
 

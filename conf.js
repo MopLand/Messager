@@ -45,6 +45,9 @@ var conf = {
 	//忽略标识符
 	ignore: 'SKIP',
 
+	//原样标识符
+	origin: 'KEEP',
+
 	//迟延标识符
 	retard: '分割线',
 
