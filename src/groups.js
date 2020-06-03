@@ -233,8 +233,9 @@ class Groups {
 
 		var self = this;
 		var klas = new Account(this.conf);
+		var time = com.getTime() - 60 * 30;
 
-		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` ORDER BY auto_id ASC', function (err, res) {
+		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY auto_id ASC', [time], function (err, res) {
 
 			if( err ){
 				log.error( err );
