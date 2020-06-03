@@ -52,7 +52,7 @@ class Moment {
 
 			pm.then(ret => {
 
-				var post = ret.objectList[0];
+				let post = ret.objectList[0];
 
 				//转发朋友圈
 				if( post.id > maxid ){
@@ -114,13 +114,13 @@ class Moment {
 
 			for (let i = 0; i < res.length; i++) {
 
-				let row = res[i];
+				let member = res[i];
 
 				//转发朋友圈
-				self.forwardMoment(row.weixin_id, post, row);
+				self.forwardMoment(member, post);
 
 				//更新发圈时间
-				self.mysql.query('UPDATE `pre_member_weixin` SET moment_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
+				self.mysql.query('UPDATE `pre_member_weixin` SET moment_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member.member_id ] );
 
 			}
 
@@ -162,26 +162,18 @@ class Moment {
 
 	/**
 	 * 转发朋友圈
-	 * @param string 微信ID
+	 * @param object 用户数据
 	 * @param object 发圈数据
-	 * @param object 原始记录
 	 */
-	forwardMoment(wxid, post, row) {
+	forwardMoment(member, post) {
 
 		let buffer = post.objectDesc.string;
-
-		//let texts = /<contentDesc><\!\[CDATA\[(.+?)\]\]><\/contentDesc>/.exec(buffer)[1];
-
-		//let media = /<mediaList>(.+?)<\/mediaList>/.exec(buffer)[1];
-
-		let pm = this.wx.SnsPostXml(wxid, buffer);
+		let pm = this.wx.SnsPostXml(member.weixin_id, buffer);
 
 		pm.then(ret => {
 
-			//自己的发圈ID
-			post.id = ret.snsObject.id;
-
-			this.forwardComment(wxid, post, row);
+			//转发评论，使用自己的发圈ID
+			this.forwardComment(member, post, ret.snsObject.id);
 
 			log.info(ret);
 
@@ -195,11 +187,11 @@ class Moment {
 
 	/**
 	 * 转发发圈评论
-	 * @param string 微信ID
+	 * @param object 用户数据
 	 * @param object 发圈数据
-	 * @param object 原始记录
+	 * @param integer 发圈ID
 	 */
-	forwardComment(wxid, post, row) {
+	forwardComment(member, post, post_id) {
 
 		var self = this;
 
@@ -209,29 +201,29 @@ class Moment {
 
 				let comm = post.commentUserList[i];
 
-				//log.info(comm);
-
 				//转链
-				req.get(self.conf.convert, { 'member_id' : row.member_id, 'text' : comm.content }, (code, body) => {
+				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.content }, (code, body) => {
 
 					var data = JSON.parse( body );
 					
 					if( data.status >= 0 ){
-						var body = data.result;
+
+						//评论
+						let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, data.result);
+
+						pm.then(ret => {
+							log.info('评论成功', ret);
+						}).catch(err => {
+							log.error('评论失败', err);
+						});
+
 					}else{
+
 						log.error('转链错误', data);
-						return;
+
+						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, updated_time = ? WHERE member_id = ?', [ body, com.getTime(), member.member_id ] );
+
 					}
-
-					//评论
-					let pm = self.wx.SnsComment(wxid, post.id, comm.type, body);
-
-					pm.then(ret => {
-						//log.info('评论成功', ret.snsObject.objectDesc.commentUserList);
-						log.info('评论成功', ret);
-					}).catch(err => {
-						log.error('评论失败', err);
-					});
 
 				}, ( data ) =>{
 
