@@ -71,6 +71,8 @@ class Groups {
 
 			//let pm = this.wx.InitContact( conf.wechat );
 
+			log.info( '拉取方式', message );
+
 			pm.then(ret => {
 
 				log.info( '原始消息', ret.cmdList.list );
@@ -290,7 +292,7 @@ class Groups {
 
 		//长时间没有读取消息
 		if( work && diff > 15 ){
-			this.sider.publish( this.channel, time );
+			this.sider.publish( this.channel, 'timer' );
 			log.info( '主动拉取', time );
 		}
 
@@ -412,25 +414,29 @@ class Groups {
 
 					//解除延迟
 					lazy = false;
-
-					var data = JSON.parse( body );
+					
+					if( typeof body == 'string' ){
+						body = JSON.parse( body );
+					}
 					
 					//转链成功，发送消息，否则跳过
-					if( data.status >= 0 ){
+					if( body.status >= 0 ){
 
-						let pm = self.wx.NewSendMsg(member.weixin_id, roomid, data.result, msg.msgSource);
+						let pm = self.wx.NewSendMsg(member.weixin_id, roomid, body.result, msg.msgSource);
 
 						pm.then(ret => {
 							log.info('发群成功', ret.count);
 						}).catch(msg => {
-							log.info('NewSendMsg', msg);
+							log.error('发群失败', msg);
 						});
+
+						log.info('转链结果', body);
 
 					}else{
 
-						log.error('转链错误', data);
+						log.error('转链错误', body);
 
-						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, updated_time = ? WHERE member_id = ?', [ body, com.getTime(), member.member_id ] );
+						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, updated_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
 					}
 
@@ -451,15 +457,15 @@ class Groups {
 
 					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );						
 
-					log.info('原始文本', data.text );
-					log.debug('是否转链', conv);
+					//log.info('原始文本', data.text );
+					//log.debug('是否转链', conv);
 
 					//是口令，需要转链
 					if( conv ){
 						lazy = true;
 						return { 'request' : true };
 					}else{
-						return { 'request' : false, 'respond' : JSON.stringify( { 'status' : 0, 'result' : data.text } ) };
+						return { 'request' : false, 'respond' : { 'status' : 0, 'result' : data.text } };
 					}
 
 				} );

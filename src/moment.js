@@ -213,13 +213,15 @@ class Moment {
 
 				//转链
 				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.content }, (code, body) => {
-
-					var data = JSON.parse( body );
 					
-					if( data.status >= 0 ){
+					if( typeof body == 'string' ){
+						body = JSON.parse( body );
+					}
+					
+					if( body.status >= 0 ){
 
 						//评论
-						let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, data.result);
+						let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, body.result);
 
 						pm.then(ret => {
 							log.info('评论成功', ret);
@@ -227,11 +229,13 @@ class Moment {
 							log.error('评论失败', err);
 						});
 
+						log.info('转链结果', body);
+
 					}else{
 
-						log.error('转链错误', data);
+						log.error('转链错误', body);
 
-						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, updated_time = ? WHERE member_id = ?', [ body, com.getTime(), member.member_id ] );
+						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, updated_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
 					}
 
@@ -240,13 +244,13 @@ class Moment {
 					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );
 						conv = post.keep_raw ? false : conv;
 
-					log.debug('是否转链', conv, data.text );
+					//log.debug('是否转链', conv, data.text );
 
 					//是口令，需要转链
 					if( conv ){
 						return { 'request' : true };
 					}else{
-						return { 'request' : false, 'respond' : JSON.stringify( { 'status' : 0, 'result' : data.text } ) };
+						return { 'request' : false, 'respond' : { 'status' : 0, 'result' : data.text } };
 					}
 
 				} );
