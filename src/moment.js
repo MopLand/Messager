@@ -60,7 +60,7 @@ class Moment {
 					maxid = post.id;
 					log.info( '最新发圈', post );
 				}else{					
-					log.info( '暂无发圈', post.id );
+					log.info( '暂无发圈', { 'maxid' : maxid, 'post.id' : post.id, 'post.time' : post.createTime } );
 				}
 
 				//临时存储一小时

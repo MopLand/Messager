@@ -34,7 +34,7 @@ class Groups {
 		var self = this;
 		var conf = this.conf;
 		var keybuf = '';
-		var locked = false;
+		var locked = 0;
 
 		///////////////
 
@@ -62,9 +62,10 @@ class Groups {
 
 			//正在读取消息
 			if( locked ){
-				return;
+				//return;
+				log.info( '在读消息', locked );
 			}else{
-				locked = true;
+				locked = com.getTime();
 			}
 
 			let pm = self.wx.NewSync( conf.wechat, keybuf );
@@ -100,13 +101,13 @@ class Groups {
 				self.sider.expire( self.stamp, 3600 );
 
 				//解除读消息锁
-				locked = false;
+				locked = 0;
 
 				req.status(conf.report, 'MM_Groups', msgs.length, { '原始消息' : ret.cmdList.count } );
 
 			}).catch(err => {
 
-				locked = false;
+				locked = 0;
 
 				log.info( err );
 
