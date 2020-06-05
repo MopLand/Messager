@@ -46,7 +46,7 @@ class Groups {
 		}
 
 		if( conf.groups.talker ){
-			where.content = conf.groups.talker + ':\n';
+			where.speaker = conf.groups.talker + ':\n';
 		}
 
 		if( conf.groups.detect ){
@@ -318,19 +318,26 @@ class Groups {
 
 			var idx = 0;
 			var msg = AddMsgs[i].cmdBuf;
-
+			
 			for (let w in where) {
 
-				//谁说的活
-				if( w == 'content' && msg[w].string.indexOf( where[w] ) === 0 ){
-					idx++;
+				switch( w ){
 
-				//允许的文本
-				}else if( w == 'allowed' && where[w].test( msg['content'].string ) ){
-					idx++;
+					//谁说的活
+					case 'speaker':
+						idx += msg['content'].string.indexOf( where[w] ) === 0 ? 1 : 0;
+					break;
 
-				}else if ( msg[w].string == where[w] ) {
-					idx++;
+					//允许的文本
+					case 'allowed':
+						idx += where[w].test( msg['content'].string ) ? 1 : 0;
+					break;
+
+					//其他字段
+					default:
+						idx += msg[w].string == where[w] ? 1 : 0;
+					break;
+
 				}
 
 			};
