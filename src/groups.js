@@ -330,7 +330,7 @@ class Groups {
 
 					//允许的文本
 					case 'allowed':
-						idx += where[w].test( msg['content'].string ) ? 1 : 0;
+						idx += ( msg.msgType != 1 || where[w].test( msg['content'].string ) ) ? 1 : 0;
 					break;
 
 					//其他字段
@@ -341,6 +341,9 @@ class Groups {
 				}
 
 			};
+
+			//console.log( msg );
+			//console.log( idx );
 
 			//群消息，过滤 xxx:\n
 			if( /@chatroom$/.test( msg.fromUserName.string ) ){

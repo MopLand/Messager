@@ -67,7 +67,7 @@ var conf = {
 
 		//监听来源
 		//微信群ID：云发单测试群
-		follow: '18935808677@chatroom',
+		follow: '22997642011@chatroom',
 
 		//微信群接收人：糖糖
 		//talker : 'wxid_35ipm1ssbbbc22',
