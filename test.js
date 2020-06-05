@@ -1,14 +1,38 @@
 
 const Common = require('./lib/common');
+const Loader = require('./lib/loader');
 const Weixin = require('./lib/weixin');
+const Groups = require('./src/groups');
+const Moment = require('./src/moment');
+const Account = require('./src/account');
+const Messager = require('./src/messager');
 
 let conf = Common.getConf( __dirname );
-let step = Common.getArgv( 'step' );
+let func = Common.getFunc();
 
-//var wx = new Weixin( 'http://180.97.238.53:5432/api/' );
-var wx = new Weixin( 'http://localhost:62677/api/' );
+var wx = new Weixin( conf.weixin );
 
-if( step == 'login' ){
+if( func == 'send' ){
+
+	var groups = [{"userName":"18935808677@chatroom","nickName":"\u4e0d\u9519\u54df","memberCount":3},{"userName":"19072919829@chatroom","nickName":"\u4e0d\u9519\u54df","memberCount":3}];
+
+	var roomid = groups.map( ele => { return ele.userName } );
+
+	//console.log( roomid );
+
+	let wxid = Common.getArgv( 'wxid' );
+
+	var fn = wx.NewSendMsg( wxid, roomid, 'content', msgSource = '', type = 1);
+	
+	fn.then( ret => {
+		console.log( ret );
+	}).catch( msg => {
+		console.log( msg );
+	});
+
+}
+
+if( func == 'login' ){
 
 	var fn = wx.GetLoginQrCode();
 	
@@ -21,7 +45,7 @@ if( step == 'login' ){
 
 }
 
-if( step == 'check' ){
+if( func == 'check' ){
 
 	let id = Common.getArgv( 'uuid' );
 
@@ -41,7 +65,7 @@ if( step == 'check' ){
 
 }
 
-if( step == 'moment' ){
+if( func == 'moment' ){
 
 	let wxid = Common.getArgv( 'wxid' );
 	let type = Common.getArgv( 'type', 0 );
@@ -59,7 +83,7 @@ if( step == 'moment' ){
 
 }
 
-if( step == 'getpop' ){
+if( func == 'getpop' ){
 
 	let wxid = Common.getArgv( 'wxid' );
 	let toWxId = Common.getArgv( 'toWxId', 'wxid_ig5bgx8ydlbp22' );
@@ -206,7 +230,7 @@ var filter = function( AddMsgs, where = {}, size = -1 ){
 
 }
 
-if( step == 'group' ){
+if( func == 'group' ){
 
 	let wxid = Common.getArgv( 'wxid' );
 	let text = Common.getArgv( 'text', '好' );
@@ -232,7 +256,7 @@ if( step == 'group' ){
 
 }
 
-if( step == 'syncmsg' ){
+if( func == 'syncmsg' ){
 
 	let wxid = Common.getArgv( 'wxid' );
 	let gpid = Common.getArgv( 'gpid' );

@@ -161,13 +161,11 @@ class Groups {
 
 			for (let i = 0; i < res.length; i++) {
 
-				let row = res[i];
-
 				//转发群消息
-				self.forwardMessage(msgs, row);
+				self.forwardMessage(msgs, res[i]);
 
 				//更新发群时间
-				self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
+				self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ res[i].member_id ] );
 
 			}
 
@@ -404,17 +402,20 @@ class Groups {
 		var stag = [];
 		var lazy = false;
 
+		var groups = JSON.parse( member.groups_list );
+		var roomid = groups.map( ele => { return ele.userName } );
+
+		if( roomid.length == 0 ){
+			log.error('无微信群', roomid);
+			return;
+		}
+
+		///////////////
+
 		for (let i = 0; i < msgs.length; i++) {
 
 			var msg = msgs[i];
 			var detail = msg.content.string;
-
-			var groups = JSON.parse( member.groups_list );
-			var roomid = groups.map( ele => { return ele.userName } );
-
-			if( roomid.length == 0 ){
-				break;
-			}
 
 			log.info( '当前微信', { '微信号' : member.weixin_id, '群数量' : roomid.length } );
 
