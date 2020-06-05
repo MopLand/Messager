@@ -12,7 +12,7 @@ var conf = {
 	},
 
 	//小米推送
-	activity: 'com.guodongbaohe.app.activity.MipushTestActivity',
+	activity: 'com.example.app.activity.MipushTestActivity',
 
 	//别名标识
 	aliastag: '',
@@ -21,7 +21,7 @@ var conf = {
 	report: 'http://api.example.com/report',
 
 	//转链接口
-	convert: 'https://proxy.guodongbaohe.com/share/transtxt',
+	convert: 'http://api.example.com/transtxt',
 
 	//微信通信
 	weixin: 'http://127.0.0.1/',
@@ -42,33 +42,45 @@ var conf = {
 		database : 'project_jellybox'
 	},
 
-	//忽略标识符
-	ignore: 'SKIP',
-
-	//原样标识符
-	origin: 'KEEP',
-
-	//迟延标识符
-	retard: '分割线',
-
 	//工作时间段
 	worked: 8,
 
 	//当前微信号：清清
 	wechat: 'wxid_okvkiyguz1yh22',
 
-	//关注的微信号
-	follow: {
-		//朋友圈：小助手
-		moment		: 'wxid_ig5bgx8ydlbp22',
-		
-		//微信群接收人：糖糖
-		//groups		: 'wxid_35ipm1ssbbbc22',
-		groups		: '',
-		
+	//朋友圈
+	moment: {
+
+		//监听来源
+		follow: 'wxid_ig5bgx8ydlbp22',
+
+		//忽略标识符
+		ignore: 'SKIP',
+	
+		//原样标识符
+		origin: 'KEEP',
+
+	},
+
+	//微信群
+	groups: {
+
+		//监听来源
 		//微信群ID：云发单测试群
-		groups_id	: '18935808677@chatroom',
+		follow: '18935808677@chatroom',
+
+		//微信群接收人：糖糖
+		//talker : 'wxid_35ipm1ssbbbc22',
+		talker: '',
+
+		//迟延标识符
+		retard: '分割线',
+
+		//内容有效性
+		detect: /[\u4e00-\u9fa5]/,
+
 	}
+
 }
 
 module.exports = conf;

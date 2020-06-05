@@ -41,13 +41,19 @@ class Groups {
 		//消息筛选条件
 		var where = {}
 
-		if( conf.follow.groups_id ){
-			where.fromUserName = conf.follow.groups_id;
+		if( conf.groups.follow ){
+			where.fromUserName = conf.groups.follow;
 		}
 
-		if( conf.follow.groups ){
-			where.content = conf.follow.groups + ':\n';
+		if( conf.groups.talker ){
+			where.content = conf.groups.talker + ':\n';
 		}
+
+		if( conf.groups.detect ){
+			where.allowed = conf.groups.detect;
+		}
+		
+		log.info( '监听条件', where );
 
 		///////////////
 
@@ -82,7 +88,6 @@ class Groups {
 				var msgs = self.filterMessage( ret.cmdList.list, where );
 				
 				log.info( '消息数量', ret.cmdList.count + ' / ' + msgs.length );
-				log.info( '监听对象', conf.follow.groups_id + ' / ' + conf.follow.groups );
 
 				if( msgs.length ){
 
@@ -315,12 +320,19 @@ class Groups {
 			var msg = AddMsgs[i].cmdBuf;
 
 			for (let w in where) {
+
 				//谁说的活
-				if( w == 'content' && msg[w].string.indexOf( where[w] ) === 0 ){					
+				if( w == 'content' && msg[w].string.indexOf( where[w] ) === 0 ){
 					idx++;
+
+				//允许的文本
+				}else if( w == 'allowed' && where[w].test( msg['content'].string ) ){
+					idx++;
+
 				}else if ( msg[w].string == where[w] ) {
 					idx++;
 				}
+
 			};
 
 			//群消息，过滤 xxx:\n
@@ -397,7 +409,7 @@ class Groups {
 			log.info( '当前微信', { '微信号' : member.weixin_id, '群数量' : roomid.length } );
 
 			//是否要推迟，针对 表情 或 分割线
-			if( lazy && ( msg.msgType == 47 || detail.indexOf( self.conf.retard ) >= 0 ) ){
+			if( lazy && ( msg.msgType == 47 || detail.indexOf( self.conf.groups.retard ) >= 0 ) ){
 				stag.push( msg );
 				log.warn('推迟消息', msg);
 				continue;
@@ -408,7 +420,7 @@ class Groups {
 
 				//延迟消息，不是最后一条消息时
 				//log.info( detail );
-				//log.info( '__LAZY__', lazy, detail.indexOf( self.conf.retard ) >= 0 );
+				//log.info( '__LAZY__', lazy, detail.indexOf( self.conf.groups.retard ) >= 0 );
 
 				//转链
 				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : detail }, (code, body) => {
@@ -426,7 +438,7 @@ class Groups {
 						let pm = self.wx.NewSendMsg(member.weixin_id, roomid, body.result, msg.msgSource);
 
 						pm.then(ret => {
-							log.info('发群成功', ret.count);
+							log.info('发群成功', [member.weixin_id, ret.count]);
 						}).catch(msg => {
 							log.error('发群失败', msg);
 						});
@@ -499,9 +511,9 @@ class Groups {
 			let fn = self.wx.NewSendMsg(member.weixin_id, roomid, detail, msg.msgSource);
 
 			fn.then(ret => {
-				log.info('发群成功', ret.count);
+				log.info('发群成功', [member.member_id, ret.count]);
 			}).catch(err => {
-				log.error('发群失败', [member, err]);
+				log.error('发群失败', [member.member_id, err]);
 			});
 
 		}
@@ -514,9 +526,9 @@ class Groups {
 			}
 
 			fn.then(ret => {
-				log.info('发图成功', ret);
+				log.info('发图成功', [member.member_id, ret]);
 			}).catch(err => {
-				log.error('发图失败', [member, err]);
+				log.error('发图失败', [member.member_id, err]);
 			});
 
 		}
@@ -529,9 +541,9 @@ class Groups {
 			}
 
 			fn.then(ret => {
-				log.info('视频成功', ret);
+				log.info('视频成功', [member.member_id, ret]);
 			}).catch(err => {
-				log.error('视频失败', [member, err]);
+				log.error('视频失败', [member.member_id, err]);
 			});
 
 		}
@@ -545,9 +557,9 @@ class Groups {
 			}
 
 			fn.then(ret => {
-				log.info('表情成功', ret);
+				log.info('表情成功', [member.member_id, ret]);
 			}).catch(err => {
-				log.error('表情失败', [member, err]);
+				log.error('表情失败', [member.member_id, err]);
 			});
 
 		}
@@ -564,9 +576,9 @@ class Groups {
 			}
 
 			fn.then(ret => {
-				log.info('小程序成功', ret);
+				log.info('小程序成功', [member.member_id, ret]);
 			}).catch(err => {
-				log.error('小程序失败', [member, err]);
+				log.error('小程序失败', [member.member_id, err]);
 			});
 
 		}

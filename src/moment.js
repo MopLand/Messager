@@ -48,7 +48,7 @@ class Moment {
 
 			if( !work ) return;
 
-			let pm = self.fetchMoment( conf.wechat, conf.follow.moment );
+			let pm = self.fetchMoment( conf.wechat, conf.moment.follow );
 
 			pm.then(ret => {
 
@@ -87,6 +87,7 @@ class Moment {
 	send(post) {
 
 		var send = true;
+		var conf = this.conf.moment;
 
 		//需要忽略的发圈
 		if( post.commentUserListCount ){
@@ -95,12 +96,12 @@ class Moment {
 				let text = post.commentUserList[i].content;
 				let comm = text.toLocaleUpperCase();
 
-				if( comm == this.conf.ignore ){
+				if( comm == conf.ignore ){
 					send = false;
 					log.info( '跳过发圈', comm );
 				}
 
-				if( comm == this.conf.origin ){
+				if( comm == conf.origin ){
 					post.keep_raw = true;
 					log.info( '不要转链', comm );
 				}
@@ -224,12 +225,12 @@ class Moment {
 						let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, body.result);
 
 						pm.then(ret => {
-							log.info('评论成功', ret);
+							log.info('评论成功', [member.member_id, ret]);
 						}).catch(err => {
-							log.error('评论失败', err);
+							log.error('评论失败', [member.member_id, err]);
 						});
 
-						log.info('转链结果', body);
+						log.info('转链结果', [member.member_id, body]);
 
 					}else{
 
