@@ -220,7 +220,7 @@ class Groups {
 					//更新群发设置
 					self.mysql.query('UPDATE `pre_member_weixin` SET groups_list = ?, groups_num, updated_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ JSON.stringify( gps ), num, row.member_id ] );
 					
-					wx.SendTxtMessage(member.weixin_id, gid, gid + ' 设置成功');					
+					wx.SendTxtMessage(member.weixin_id, gid, gid + ' 设置成功');
 
 				}).catch( err => {
 
@@ -472,14 +472,14 @@ class Groups {
 	
 						//处理迟延消息
 						while( stag.length > 0 ){
-							self.sendMsg( stag.pop(), member.weixin_id, roomid );
+							self.sendMsg( stag.pop(), member, roomid );
 						}
 
 					}
 
 				}, ( data ) =>{
 
-					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );						
+					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );
 
 					//log.info('原始文本', data.text );
 					//log.debug('是否转链', conv);
