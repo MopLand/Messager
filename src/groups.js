@@ -103,7 +103,7 @@ class Groups {
 
 				//临时存储一小时
 				self.sider.set( self.stamp, keybuf );
-				self.sider.expire( self.stamp, 3600 );
+				self.sider.expire( self.stamp, 3600 * 2 );
 
 				//解除读消息锁
 				locked = 0;
