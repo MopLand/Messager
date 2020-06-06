@@ -65,7 +65,7 @@ class Moment {
 
 				//临时存储一小时
 				self.redis.set( self.stamp, post.id );
-				self.redis.expire( self.stamp, 3600 );
+				self.redis.expire( self.stamp, 3600 * 14 );
 
 				req.status(conf.report, 'MM_Moment', maxid, ret.baseResponse);
 
@@ -186,10 +186,10 @@ class Moment {
 			//转发评论，使用自己的发圈ID
 			this.forwardComment(member, post, ret.snsObject.id);
 
-			log.info(ret);
+			log.info( '发圈成功', ret );
 
-		}).catch(msg => {
-			log.error(err);
+		}).catch(err => {
+			log.error( '发圈出错', err );
 		});
 
 		return pm;
