@@ -450,15 +450,15 @@ class Groups {
 
 						pm.then(ret => {
 							log.info('发群成功', [member.weixin_id, ret.count]);
-						}).catch(msg => {
-							log.error('发群失败', msg);
+						}).catch(err => {
+							log.error('发群失败', [member.weixin_id, err]);
 						});
 
-						log.info('转链结果', body);
+						log.info('转链结果', [member.member_id, body]);
 
 					}else{
 
-						log.error('转链错误', body);
+						log.error('转链错误', [member.member_id, body]);
 
 						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, updated_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 

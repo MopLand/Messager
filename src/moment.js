@@ -189,7 +189,7 @@ class Moment {
 			log.info( '发圈成功', ret );
 
 		}).catch(err => {
-			log.error( '发圈出错', err );
+			log.error( '发圈出错', [member.member_id, err] );
 		});
 
 		return pm;
@@ -225,16 +225,16 @@ class Moment {
 						let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, body.result);
 
 						pm.then(ret => {
-							log.info('评论成功', [member.member_id, ret]);
+							log.info('评论成功', [member.weixin_id, ret]);
 						}).catch(err => {
-							log.error('评论失败', [member.member_id, err]);
+							log.error('评论失败', [member.weixin_id, err]);
 						});
 
 						log.info('转链结果', [member.member_id, body]);
 
 					}else{
 
-						log.error('转链错误', body);
+						log.error('转链错误', [member.member_id, body]);
 
 						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, updated_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
