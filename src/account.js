@@ -79,7 +79,7 @@ class Account {
 
 			}
 
-			if( init >= 20 ){
+			if( init >= 15 ){
 				clearInterval( clok );
 				Common.DelFile( self.code );
 				log.info('扫码登录超时，请重试');
