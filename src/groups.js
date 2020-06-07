@@ -68,8 +68,8 @@ class Groups {
 
 			//正在读取消息
 			if( locked ){
-				//return;
-				log.info( '在读消息', locked );
+				log.info( '读消息锁', locked );
+				return;
 			}else{
 				locked = com.getTime();
 			}
