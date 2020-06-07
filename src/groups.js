@@ -105,20 +105,20 @@ class Groups {
 				self.sider.set( self.stamp, keybuf );
 				self.sider.expire( self.stamp, 3600 * 2 );
 
-				//解除读消息锁
-				locked = 0;
-
 				req.status(conf.report, 'MM_Groups', msgs.length, { '原始消息' : ret.cmdList.count } );
 
 			}).catch(err => {
 
-				locked = 0;
-
-				log.info( err );
+				log.info( '读取错误', err );
 
 				req.status(conf.report, 'MM_Groups', 500, err);
 
-			});
+			}).finally( () => {
+
+				//解除读消息锁
+				locked = 0;
+
+			} );
 
 			//最后一次消息时间
 			self.lastmsg = com.getTime();
@@ -130,10 +130,10 @@ class Groups {
 
 		///////////////
 
-		//每3分钟心跳一次
-		setInterval( this.heartBeat.bind(this), 60 * 1000 * 3 );
+		//每分钟分批心跳
+		setInterval( this.heartBeat.bind(this), 60 * 1111 );
 
-		//每1分钟同步一次
+		//每分钟同步一次
 		setInterval( this.timedPull.bind(this), 60 * 1000 );
 
 	}
@@ -241,7 +241,7 @@ class Groups {
 		var klas = new Account(this.conf);
 		var time = com.getTime() - 60 * 30;
 
-		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY auto_id ASC', [time], function (err, res) {
+		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT 50', [time], function (err, res) {
 
 			if( err ){
 				log.error( err );
@@ -410,14 +410,14 @@ class Groups {
 			return;
 		}
 
+		log.info( '当前微信', { '微信号' : member.weixin_id, '群数量' : roomid.length } );
+
 		///////////////
 
 		for (let i = 0; i < msgs.length; i++) {
 
 			var msg = msgs[i];
 			var detail = msg.content.string;
-
-			log.info( '当前微信', { '微信号' : member.weixin_id, '群数量' : roomid.length } );
 
 			//是否要推迟，针对 表情 或 分割线
 			if( lazy && ( msg.msgType == 47 || detail.indexOf( self.conf.groups.retard ) >= 0 ) ){
