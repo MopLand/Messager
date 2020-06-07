@@ -131,10 +131,10 @@ class Groups {
 		///////////////
 
 		//每分钟分批心跳
-		setInterval( this.heartBeat.bind(this), 60 * 1111 );
+		setInterval( this.heartBeat.bind(this), 60 * 999 );
 
 		//每分钟同步一次
-		setInterval( this.timedPull.bind(this), 60 * 1000 );
+		setInterval( this.timedPull.bind(this), 60 * 1111 );
 
 	}
 
@@ -241,7 +241,7 @@ class Groups {
 		var klas = new Account(this.conf);
 		var time = com.getTime() - 60 * 30;
 
-		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT 25', [time], function (err, res) {
+		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT 60', [time], function (err, res) {
 
 			if( err ){
 				log.error( err );
