@@ -241,7 +241,7 @@ class Groups {
 		var klas = new Account(this.conf);
 		var time = com.getTime() - 60 * 30;
 
-		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT 50', [time], function (err, res) {
+		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT 25', [time], function (err, res) {
 
 			if( err ){
 				log.error( err );
