@@ -33,7 +33,7 @@ class Groups {
 
 		var self = this;
 		var conf = this.conf;
-		var wait = 60 * 2;
+		var wait = 60;
 		var keybuf = '';
 		var locked = 0;
 
@@ -150,27 +150,41 @@ class Groups {
 
 		log.info( '心跳范围', time );
 
-		//this.redis.smembers('weixin_list', function (err, res) {
-		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 AND heartbeat_time >= ? ORDER BY auto_id ASC', [time], function (err, res) {
+		var func = ( auto ) => {
 
-			if( err ){
-				log.error( err );
-				return;
-			}else{
-				log.info( '本次发群', res.length + ' 人' );
-			}
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [time, auto], function (err, res) {
 
-			for (let i = 0; i < res.length; i++) {
+				if( err ){
+					log.error( err );
+					return;
+				}
 
-				//转发群消息
-				self.forwardMessage(msgs, res[i]);
+				if( res.length == 0 ){
+					log.info( '处理完毕', time );
+					return;
+				}else{
+					log.info( '本次发群', res.length + ' 人' );
+				}
 
-				//更新发群时间
-				self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ res[i].member_id ] );
+				for (var i = 0; i < res.length; i++) {
 
-			}
+					//转发群消息
+					self.forwardMessage(msgs, res[i]);
 
-		});
+					//更新发群时间
+					self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ res[i].member_id ] );
+
+				}
+
+				//再次执行，传入最后ID
+				func( res[i].auto_id );
+
+			});
+
+		}
+
+		//开始执行
+		func( 0 );
 
 	}
 
