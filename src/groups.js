@@ -148,8 +148,6 @@ class Groups {
 		var self = this;
 		var time = com.getTime() - 60 * 15;
 
-		log.info( '心跳范围', time );
-
 		var func = ( auto ) => {
 
 			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [time, auto], function (err, res) {

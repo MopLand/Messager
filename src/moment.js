@@ -114,28 +114,41 @@ class Moment {
 		var self = this;
 		var time = com.getTime() - 60 * 15;
 
-		send && this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 AND heartbeat_time >= ? ORDER BY auto_id ASC', [time], function (err, res) {
+		var func = ( auto ) => {
 
-			if( err ){
-				log.error( err );
-				return;
-			}else{
-				log.info( '本次发圈', res.length + ' 人，评论' + post.commentUserListCount + ' 条' );
-			}
+			self.mysql.query('SELECT auto_id, member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [time, auto], function (err, res) {
 
-			for (let i = 0; i < res.length; i++) {
+				if( err ){
+					log.error( err );
+					return;
+				}
 
-				let member = res[i];
+				if( res.length == 0 ){
+					log.info( '处理完毕', time );
+					return;
+				}else{
+					log.info( '本次发圈', res.length + ' 人，评论' + post.commentUserListCount + ' 条' );
+				}
+	
+				for (var i = 0; i < res.length; i++) {
+	
+					//转发朋友圈
+					self.forwardMoment(res[i], post);
+	
+					//更新发圈时间
+					self.mysql.query('UPDATE `pre_member_weixin` SET moment_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ res[i].member_id ] );
+	
+				}
 
-				//转发朋友圈
-				self.forwardMoment(member, post);
+				//再次执行，传入最后ID
+				func( res[i - 1].auto_id );
+	
+			});
 
-				//更新发圈时间
-				self.mysql.query('UPDATE `pre_member_weixin` SET moment_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member.member_id ] );
+		};
 
-			}
-
-		});
+		//开始执行
+		send && func( 0 );
 
 	}
 
