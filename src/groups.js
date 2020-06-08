@@ -299,7 +299,7 @@ class Groups {
 				return;
 			}
 
-			span = parseInt( res[0].count / 60 );
+			span = parseInt( res[0].count / 15 );
 
 			log.info( '心跳计划', '总人数 ' + res[0].count + '，每次心跳 ' + span );
 			
