@@ -67,8 +67,8 @@ class Groups {
 		//处理 Redis 消息
 		this.redis.on('message', function (channel, message) {
 
-			//正在读取消息，最多锁 3 分钟
-			if( locked && locked < com.getTime() - wait ){
+			//正在读取消息，锁还未失效
+			if( locked && locked >= com.getTime() - wait ){
 				log.info( '读消息锁', locked );
 				return;
 			}else{
