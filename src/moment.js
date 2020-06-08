@@ -140,8 +140,8 @@ class Moment {
 	
 				}
 
-				//再次执行，传入最后ID
-				func( res[i - 1].auto_id );
+				//再次执行，传入最后ID				
+				setTimeout( () => { func( res[i - 1].auto_id ); }, 1000 );
 	
 			});
 

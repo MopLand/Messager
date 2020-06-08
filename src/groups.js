@@ -175,7 +175,7 @@ class Groups {
 				}
 
 				//再次执行，传入最后ID
-				func( res[i - 1].auto_id );
+				setTimeout( () => { func( res[i - 1].auto_id ); }, 1000 );
 
 			});
 
@@ -315,7 +315,7 @@ class Groups {
 
 			log.info( '心跳计划', '总人数 ' + res[0].count + '，每次心跳 ' + span );
 			
-			setInterval( func, 60 * 1100 );
+			setInterval( func, 60 * 999 );
 			
 		});
 
