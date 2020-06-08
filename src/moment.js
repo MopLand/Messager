@@ -236,7 +236,7 @@ class Moment {
 
 						log.error('转链错误', [member.member_id, body]);
 
-						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, updated_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
 					}
 
