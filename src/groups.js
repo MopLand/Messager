@@ -132,7 +132,7 @@ class Groups {
 		///////////////
 
 		//每分钟分批心跳
-		setInterval( this.heartBeat.bind(this), 60 * 999 );
+		this.heartBeat();
 
 		//每分钟同步一次
 		setInterval( this.timedPull.bind(this), 60 * 1111 );
@@ -240,43 +240,71 @@ class Groups {
 
 		var self = this;
 		var klas = new Account(this.conf);
-		var time = com.getTime() - 60 * 30;
+		var span = 60;
+		
+		//半小时以内有心跳
+		var time = () => {
+			return com.getTime() - 60 * 30;
+		};
 
-		this.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT 60', [time], function (err, res) {
+		var func = () => {
+
+			self.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
+
+				if( err ){
+					log.error( err );
+					return;
+				}else{
+					log.info( '本次心跳', res.length + ' 人' );
+				}
+	
+				for (let i = 0; i < res.length; i++) {
+	
+					let row = res[i];
+	
+					//获取群消息
+					let pm = self.wx.Heartbeat( row.weixin_id );
+	
+					pm.then(ret => {
+	
+						//更新群发设置
+						self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
+	
+						log.info( '心跳成功', [row.weixin_id, ret] );
+	
+					}).catch( err => {
+	
+						log.info( '心跳失败', [row.weixin_id, err] );
+	
+						if( err.indexOf('退出微信登录') > -1 ){
+							klas.init( row.weixin_id );
+						}
+	
+					} );
+	
+				}
+	
+			});
+
+		}
+
+		///////////////
+
+		log.info( '心跳范围', time() );
+
+		self.mysql.query('SELECT COUNT(*) AS count FROM `pre_member_weixin` WHERE heartbeat_time >= ?', [time()], function (err, res) {
 
 			if( err ){
-				log.error( err );
+				log.error( '心跳统计', err );
 				return;
-			}else{
-				log.info( '本次心跳', res.length + ' 人' );
 			}
 
-			for (let i = 0; i < res.length; i++) {
+			span = parseInt( res[0].count / 60 );
 
-				let row = res[i];
-
-				//获取群消息
-				let pm = self.wx.Heartbeat( row.weixin_id );
-
-				pm.then(ret => {
-
-					//更新群发设置
-					self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
-
-					log.info( '心跳成功', [row.weixin_id, ret] );
-
-				}).catch( err => {
-
-					log.info( '心跳失败', [row.weixin_id, err] );
-
-					if( err.indexOf('退出微信登录') > -1 ){
-						klas.init( row.weixin_id );
-					}
-
-				} );
-
-			}
-
+			log.info( '心跳计划', '总人数 ' + res[0].count + '，每次心跳 ' + span );
+			
+			setInterval( func, 60 * 1100 );
+			
 		});
 
 	}
