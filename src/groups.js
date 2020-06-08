@@ -177,7 +177,7 @@ class Groups {
 				}
 
 				//再次执行，传入最后ID
-				func( res[i].auto_id );
+				func( res[i - 1].auto_id );
 
 			});
 
