@@ -146,7 +146,7 @@ class Groups {
 	send(msgs) {
 
 		var self = this;
-		var time = com.getTime() - 60 * 15;
+		var time = com.getTime() - 60 * 20;
 
 		var func = ( auto ) => {
 
@@ -315,7 +315,7 @@ class Groups {
 
 			log.info( '心跳计划', '总人数 ' + res[0].count + '，每次心跳 ' + span );
 			
-			setInterval( func, 60 * 999 );
+			setInterval( func, 60 * 900 );
 			
 		});
 
@@ -336,7 +336,7 @@ class Groups {
 		log.info( '过去时间', diff + '分钟' );
 
 		//长时间没有读取消息
-		if( work && diff > 15 ){
+		if( work && diff > 10 ){
 			this.sider.publish( this.channel, 'timer' );
 			log.info( '主动拉取', time );
 		}
