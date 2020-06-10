@@ -253,7 +253,7 @@ class Moment {
 	 * @param integer 发圈ID
 	 * @param integer 延迟时间
 	 */
-	forwardComment(member, data, post_id, lazy_time) {
+	forwardComment(member, data, post_id, lazy_time = 0) {
 
 		var self = this;
 
@@ -263,7 +263,7 @@ class Moment {
 			let last = i == data.comment.length - 1;
 
 			//转链
-			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text }, (code, body) => {
+			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'lazy_time' : lazy_time }, (code, body) => {
 				
 				if( typeof body == 'string' ){
 					body = JSON.parse( body );
