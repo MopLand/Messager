@@ -35,7 +35,7 @@ class Moment {
 
 		//最近一次朋友圈消息ID
 		this.redis.get( this.stamp, ( err, ret ) => {
-			maxid = ret || maxid;
+			//maxid = ret || maxid;
 			log.info( 'init', maxid );
 		} );
 
@@ -57,8 +57,8 @@ class Moment {
 				//转发朋友圈
 				if( post.id > maxid ){
 					self.send( post );
-					maxid = post.id;
-					//log.info( '最新发圈', post );
+					//maxid = post.id;
+					log.info( '最新发圈', post );
 				}else{					
 					log.info( '暂无发圈', { 'maxid' : maxid, 'post.id' : post.id, 'post.time' : post.createTime } );
 				}
@@ -77,7 +77,7 @@ class Moment {
 
 			});
 
-		}, 60 * 1000 * 6 );
+		}, 60 * 1000 );
 
 	}
 
@@ -117,7 +117,7 @@ class Moment {
 				}
 
 				//再次执行，传入最后ID				
-				setTimeout( () => { func( res[i - 1].auto_id ); }, 1000 );
+				setTimeout( () => { func( res[i - 1].auto_id ); }, 1100 );
 	
 			});
 
@@ -129,23 +129,15 @@ class Moment {
 	}
 
 	/**
-	 * 发送消息
+	 * 获取最新发圈
 	 * @param string 微信ID
-	 * @param integer 类型
-	 * @param string 内容
+	 * @param integer 好友ID
+	 * @param integer 上一次消息ID
+	 * @param integer 来源ID
 	 */
-	sendMoment(wxid, type, content) {
-
-		var pm = this.wx.SendFriendCircle(wxid, type, content);
-
-		pm.then(ret => {
-			log.info(ret);
-		}).catch(err => {
-			log.error(err);
-		});
-
+	fetchMoment(wxid, toWxId, maxid = 0, source = 0) {
+		var pm = this.wx.SnsUserPage(wxid, toWxId, maxid, source);
 		return pm;
-
 	}
 
 	/**
@@ -207,55 +199,19 @@ class Moment {
 	}
 
 	/**
-	 * 获取最新发圈
-	 * @param string 微信ID
-	 * @param integer 好友ID
-	 * @param integer 上一次消息ID
-	 * @param integer 来源ID
-	 */
-	fetchMoment(wxid, toWxId, maxid = 0, source = 0) {
-		var pm = this.wx.SnsUserPage(wxid, toWxId, maxid, source);
-		return pm;
-	}
-
-	/**
-	 * 转发朋友圈
+	 * 预处理评论
 	 * @param object 用户数据
 	 * @param object 发圈数据
 	 */
-	forwardMoment(member, data) {
+	parseComment( member, data, func ){
 
-		let pm = this.wx.SnsPostXml(member.weixin_id, data.subject);
-
-		pm.then(ret => {
-
-			//转发评论，使用自己的发圈ID
-			this.forwardComment(member, data, ret.snsObject.id);
-
-			log.info( '发圈成功', ret );
-
-		}).catch(err => {
-			log.error( '发圈出错', [member.member_id, err] );
-		});
-
-		return pm;
-
-	}
-
-	/**
-	 * 转发评论
-	 * @param object 用户数据
-	 * @param object 发圈数据
-	 * @param integer 发圈ID
-	 */
-	forwardComment(member, data, post_id) {
-
+		var post = data;
 		var self = this;
 
-		for( let i = 0; i < data.comment.length; i ++ ){
+		for( let i = 0; i < post.comment.length; i ++ ){
 
-			let comm = data.comment[i];
-			let last = i == data.comment.length - 1;
+			let comm = post.comment[i];
+			let last = i == post.comment.length - 1;
 
 			//转链
 			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text }, (code, body) => {
@@ -267,13 +223,10 @@ class Moment {
 				if( body.status >= 0 ){
 
 					//评论
-					let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, body.result);
+					comm.text = body.result;
 
-					pm.then(ret => {
-						log.info('评论成功', [member.weixin_id, ret]);
-					}).catch(err => {
-						log.error('评论失败', [member.weixin_id, err]);
-					});
+					//最后一条评论
+					last && func( post );
 
 					log.info('转链结果', [member.member_id, body]);
 
@@ -297,6 +250,54 @@ class Moment {
 			} );
 
 		}
+
+		//没有评论，直接回调
+		if( post.comment.length == 0 ){
+			func( post );
+		}
+
+	}
+
+	/**
+	 * 转发朋友圈
+	 * @param object 用户数据
+	 * @param object 发圈数据
+	 */
+	forwardMoment(member, data) {
+
+		var self = this;
+
+		this.parseComment( member, data, ( post ) => {
+
+			log.info( '处理结果', post );
+
+			//处理发圈
+			let pm = self.wx.SnsPostXml(member.weixin_id, post.subject);
+
+				pm.then(ret => {
+
+					log.info( '发圈成功', ret );
+
+					for( let i = 0; i < post.comment.length; i ++ ){
+
+						let comm = post.comment[i];
+
+						//转发评论，使用自己的发圈ID
+						let pm = self.wx.SnsComment(member.weixin_id, ret.snsObject.id, comm.type, comm.text);
+		
+						pm.then(ret => {
+							log.info('评论成功', [member.weixin_id, ret]);
+						}).catch(err => {
+							log.error('评论失败', [member.weixin_id, err]);
+						});
+
+					}
+
+				}).catch(err => {
+					log.error( '发圈出错', [member.member_id, err] );
+				});
+
+		} );
 
 	}
 
