@@ -22,7 +22,8 @@ class Moment {
 		this.wx = new wx(conf.weixin);
 		this.redis = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
-		this.stamp = 'mm_moment_id';		
+		this.stamp = 'mm_moment_id';
+		this.delay = [];
 	}
 
 	init(){
@@ -78,6 +79,9 @@ class Moment {
 			});
 
 		}, 60 * 1000 * 6 );
+
+		//每分钟补发一次
+		setInterval( this.reissueComment.bind(this), 60 * 1100 );
 
 	}
 
@@ -247,8 +251,9 @@ class Moment {
 	 * @param object 用户数据
 	 * @param object 发圈数据
 	 * @param integer 发圈ID
+	 * @param integer 延迟时间
 	 */
-	forwardComment(member, data, post_id) {
+	forwardComment(member, data, post_id, lazy_time) {
 
 		var self = this;
 
@@ -283,6 +288,14 @@ class Moment {
 
 					self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
+					//是延迟补发的消息，删除这条朋友圈，否则写入延迟消息
+					if( lazy_time ){
+						//self.wx.SnsObjectOp( member.weixin_id, post_id, 1 );
+						self.wx.SnsComment(member.weixin_id, post_id, comm.type, 'DEL');
+					}else{
+						self.delay.push( { member, data, post_id, time : com.getTime() } );
+					}
+
 				}
 
 			}, ( data ) =>{
@@ -297,6 +310,36 @@ class Moment {
 			} );
 
 		}
+
+	}
+
+	/**
+	 * 补发评论
+	 */
+	reissueComment() {
+
+		var size = this.delay.length;
+
+		if( size == 0 ){
+			log.info('暂无延迟');
+			return;
+		}
+
+		var size = size > 20 ? 20 : size;
+		var time = com.getTime() - 60 * 3;
+
+		for( let i = 0; i < size; i++ ){
+
+			let msg = this.delay.shift();
+
+			//超过 5 分钟
+			if( msg.time <= time ){
+				this.forwardComment( msg.member, msg.data, msg.post_id, msg.time );
+			}else{
+				this.delay.unshift( msg );
+			}
+
+		}		
 
 	}
 
