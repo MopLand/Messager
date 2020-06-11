@@ -120,7 +120,7 @@ class Moment {
 	
 				}
 
-				//再次执行，传入最后ID				
+				//再次执行，传入最后ID
 				setTimeout( () => { func( res[i - 1].auto_id ); }, 1000 );
 	
 			});
@@ -284,6 +284,8 @@ class Moment {
 
 				}else{
 
+					body.source = 'moment';
+
 					log.error('转链错误', [member.member_id, body]);
 
 					self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
@@ -339,7 +341,7 @@ class Moment {
 				this.delay.unshift( msg );
 			}
 
-		}		
+		}
 
 	}
 

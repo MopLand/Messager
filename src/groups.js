@@ -332,8 +332,8 @@ class Groups {
 		var time = com.getTime();
 
 		//上次消息过去了多少分钟
-		var diff = ( time - this.lastmsg ) / 60;
-		log.info( '过去时间', diff + '分钟' );
+		var diff = ( ( time - this.lastmsg ) / 60 ).toFixed(2);
+		log.info( '过去时间', diff + ' 分钟' );
 
 		//长时间没有读取消息
 		if( work && diff > 10 ){
@@ -349,14 +349,28 @@ class Groups {
 	 * @param object 过滤条件
 	 * @param integer 返回数据，-1 全返回，1 仅返回单条
 	 */
-	filterMessage(AddMsgs, where = {}, size = -1) {
+	filterMessage(AddMsgs, where = {}, limit = -1) {
 
-		var msgs = [];
+		//构造数据包
+		var data = {
+
+			//消息数量
+			length: 0,
+
+			//是否转链
+			convert: 0,
+
+			//消息列表，{ exch, msgtype, content, source }
+			message: [],
+		};
 
 		for (let i = 0; i < AddMsgs.length; i++) {
 
-			var idx = 0;
-			var msg = AddMsgs[i].cmdBuf;
+			var size = 0;
+			var item = AddMsgs[i].cmdBuf;
+			let text = item.content.string;
+			let exch = item.msgType == 1 ? ( act.detectTbc( text ) || act.detectUrl( text ) ) : false;
+				exch && data.convert ++;
 			
 			for (let w in where) {
 
@@ -364,41 +378,39 @@ class Groups {
 
 					//谁说的活
 					case 'speaker':
-						idx += msg['content'].string.indexOf( where[w] ) === 0 ? 1 : 0;
+						size += text.indexOf( where[w] ) === 0 ? 1 : 0;
 					break;
 
 					//允许的文本
 					case 'allowed':
-						idx += ( msg.msgType != 1 || where[w].test( msg['content'].string ) ) ? 1 : 0;
+						size += ( item.msgType != 1 || where[w].test( text ) ) ? 1 : 0;
 					break;
 
 					//其他字段
 					default:
-						idx += msg[w].string == where[w] ? 1 : 0;
+						size += ( item[w].string == where[w] ) ? 1 : 0;
 					break;
 
 				}
 
 			};
 
-			//console.log( msg );
-			//console.log( idx );
-
 			//群消息，过滤 xxx:\n
-			if( /@chatroom$/.test( msg.fromUserName.string ) ){
-				msg.content.string = msg.content.string.replace(/^[0-9a-zA-Z_\-]{1,}:\n/,'');
+			if( /@chatroom$/.test( item.fromUserName.string ) ){
+				text = text.replace(/^[0-9a-zA-Z_\-]{1,}:\n/, '');
 			}
 
 			//满足所有条件
-			if (idx == Object.keys(where).length) {
-				msgs.push(msg);
+			if (size == Object.keys(where).length) {
+				data.length = data.message.push( { msgtype : item.msgType, content : text, source : item.msgSource, exch });
 			}
 		};
 
-		if (size == 1) {
-			return msgs.length ? msgs[0] : null;
+		//只取一条时，直接返回消息体
+		if (limit == 1) {
+			return data.length ? data.message[0] : null;
 		} else {
-			return msgs;
+			return data;
 		}
 
 	}
@@ -433,11 +445,73 @@ class Groups {
 	}
 
 	/**
+	 * 预处理消息
+	 * @param object 用户数据
+	 * @param object 发圈数据
+	 * @param function 回调方法
+	 */
+	parseMessage( member, data, func ){
+
+		var post = data;
+		var self = this;
+
+		//无需转链，直接回调
+		if( post.convert == 0 ){
+			func( post );
+		}
+
+		for (let i = 0; i < post.length; i++) {
+
+			let comm = post.message[i];
+			let last = i == post.length - 1;
+
+			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.content }, (code, body) => {
+				
+				if( typeof body == 'string' ){
+					body = JSON.parse( body );
+				}
+				
+				if( body.status >= 0 ){
+
+					//评论
+					comm.content = body.result;
+
+					//最后一条评论
+					last && func( post );
+
+					log.info('转链结果', [member.member_id, body]);
+
+				}else{
+
+					body.source = 'groups';
+
+					log.error('转链错误', [member.member_id, body]);
+
+					self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+
+				}
+
+			}, ( data ) =>{
+
+				//是口令，需要转链
+				if( comm.exch ){
+					return { 'request' : true };
+				}else{
+					return { 'request' : false, 'respond' : { 'status' : 0, 'result' : data.text } };
+				}
+
+			} );
+
+		}
+
+	}
+
+	/**
 	 * 转发群消息
 	 * @param object 消息数据
 	 * @param object 用户信息
 	 */
-	forwardMessage(msgs, member) {
+	forwardMessage(data, member) {
 
 		var self = this;
 		var stag = [];
@@ -455,27 +529,51 @@ class Groups {
 
 		///////////////
 
-		for (let i = 0; i < msgs.length; i++) {
+		/**
+		
+		//先转链再顺序发送
+		this.parseMessage( member, data, ( post ) => {
 
-			var msg = msgs[i];
-			var detail = msg.content.string;
+			var func = ( ) => {
+
+				let msg = post.message.shift();
+				let fn = self.sendMsg( msg, member, roomid );
+					post.length = post.message.length;
+
+				fn.then(ret => {
+					if( post.message.length ){
+						setTimeout( () => { func(); }, 2500 );
+					}
+				}).catch(err => {
+					//log.error('发群失败', [member.member_id, err]);
+				});
+
+			};
+
+		});
+
+		*/
+
+		///////////////
+
+		//按顺序直接发送
+		for (let i = 0; i < data.length; i++) {
+
+			let comm = data.message[i];
+			let text = comm.content;
 
 			//是否要推迟，针对 表情 或 分割线
-			if( lazy && ( msg.msgType == 47 || detail.indexOf( self.conf.groups.retard ) >= 0 ) ){
-				stag.push( msg );
-				log.warn('推迟消息', msg);
+			if( lazy && ( comm.msgtype == 47 || text.indexOf( self.conf.groups.retard ) >= 0 ) ){
+				stag.push( comm );
+				log.warn('推迟消息', comm);
 				continue;
 			}
 
-			//文字
-			if (msg.msgType == 1) {
-
-				//延迟消息，不是最后一条消息时
-				//log.info( detail );
-				//log.info( '__LAZY__', lazy, detail.indexOf( self.conf.groups.retard ) >= 0 );
+			//文字消息
+			if (comm.msgtype == 1) {
 
 				//转链
-				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : detail }, (code, body) => {
+				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : text }, (code, body) => {
 
 					//解除延迟
 					lazy = false;
@@ -487,7 +585,7 @@ class Groups {
 					//转链成功，发送消息，否则跳过
 					if( body.status >= 0 ){
 
-						let pm = self.wx.NewSendMsg(member.weixin_id, roomid, body.result, msg.msgSource);
+						let pm = self.wx.NewSendMsg(member.weixin_id, roomid, body.result, comm.source);
 
 						pm.then(ret => {
 							log.info('发群成功', [member.weixin_id, ret.count]);
@@ -498,6 +596,8 @@ class Groups {
 						log.info('转链结果', [member.member_id, body]);
 
 					}else{
+
+						body.source = 'groups';
 
 						log.error('转链错误', [member.member_id, body]);
 
@@ -520,13 +620,8 @@ class Groups {
 
 				}, ( data ) =>{
 
-					var conv = act.detectTbc( data.text ) || act.detectUrl( data.text );
-
-					//log.info('原始文本', data.text );
-					//log.debug('是否转链', conv);
-
 					//是口令，需要转链
-					if( conv ){
+					if( comm.exch ){
 						lazy = true;
 						return { 'request' : true };
 					}else{
@@ -538,8 +633,8 @@ class Groups {
 			}
 
 			//其他消息
-			if ( msg.msgType != 1 ) {
-				this.sendMsg( msg, member, roomid );
+			if ( comm.msgtype != 1 ) {
+				this.sendMsg( comm, member, roomid );
 			}
 
 		}
@@ -555,12 +650,13 @@ class Groups {
 	sendMsg( msg, member, roomid ){
 
 		var self = this;
-		var detail = msg.content.string;
+		var detail = msg.content;
 		var struct = detail.indexOf('<') == 0;
 
-		if (msg.msgType == 1) {
+		//文本
+		if (msg.msgtype == 1) {
 
-			let fn = self.wx.NewSendMsg(member.weixin_id, roomid, detail, msg.msgSource);
+			let fn = self.wx.NewSendMsg(member.weixin_id, roomid, detail, msg.source);
 
 			fn.then(ret => {
 				log.info('发群成功', [member.member_id, ret.count]);
@@ -568,10 +664,12 @@ class Groups {
 				log.error('发群失败', [member.member_id, err]);
 			});
 
+			return fn;
+
 		}
 
 		//图片
-		if (msg.msgType == 3 && struct) {
+		if (msg.msgtype == 3 && struct) {
 
 			for( let i = 0; i < roomid.length; i++ ){
 				var fn = self.wx.UploadMsgImgXml(member.weixin_id, roomid[i], detail);
@@ -583,10 +681,12 @@ class Groups {
 				log.error('发图失败', [member.member_id, err]);
 			});
 
+			return fn;
+
 		}
 
 		//视频
-		if (msg.msgType == 43 && struct) {
+		if (msg.msgtype == 43 && struct) {
 
 			for( let i = 0; i < roomid.length; i++ ){
 				var fn = self.wx.UploadVideoXml(member.weixin_id, roomid[i], detail);
@@ -598,11 +698,13 @@ class Groups {
 				log.error('视频失败', [member.member_id, err]);
 			});
 
+			return fn;
+
 		}
 
 
 		//表情
-		if (msg.msgType == 47 && struct) {
+		if (msg.msgtype == 47 && struct) {
 
 			for( let i = 0; i < roomid.length; i++ ){
 				var fn = self.wx.SendEmojiXml(member.weixin_id, roomid[i], detail);
@@ -614,10 +716,12 @@ class Groups {
 				log.error('表情失败', [member.member_id, err]);
 			});
 
+			return fn;
+
 		}
 
 		//小程序
-		if (msg.msgType == 49 && struct) {
+		if (msg.msgtype == 49 && struct) {
 
 			detail = detail.replace(/userid=(\d*)/g, 'userid=' + member.member_id);
 
@@ -632,6 +736,8 @@ class Groups {
 			}).catch(err => {
 				log.error('小程序失败', [member.member_id, err]);
 			});
+
+			return fn;
 
 		}
 

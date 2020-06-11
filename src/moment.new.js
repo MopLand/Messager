@@ -22,7 +22,7 @@ class Moment {
 		this.wx = new wx(conf.weixin);
 		this.redis = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
-		this.stamp = 'mm_moment_id';		
+		this.stamp = 'mm_moment_id';
 	}
 
 	init(){
@@ -35,7 +35,7 @@ class Moment {
 
 		//最近一次朋友圈消息ID
 		this.redis.get( this.stamp, ( err, ret ) => {
-			//maxid = ret || maxid;
+			maxid = ret || maxid;
 			log.info( 'init', maxid );
 		} );
 
@@ -57,7 +57,7 @@ class Moment {
 				//转发朋友圈
 				if( post.id > maxid ){
 					self.send( post );
-					//maxid = post.id;
+					maxid = post.id;
 					log.info( '最新发圈', post );
 				}else{					
 					log.info( '暂无发圈', { 'maxid' : maxid, 'post.id' : post.id, 'post.time' : post.createTime } );
@@ -116,7 +116,7 @@ class Moment {
 	
 				}
 
-				//再次执行，传入最后ID				
+				//再次执行，传入最后ID
 				setTimeout( () => { func( res[i - 1].auto_id ); }, 1100 );
 	
 			});
@@ -202,6 +202,7 @@ class Moment {
 	 * 预处理评论
 	 * @param object 用户数据
 	 * @param object 发圈数据
+	 * @param function 回调方法
 	 */
 	parseComment( member, data, func ){
 
