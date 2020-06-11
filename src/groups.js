@@ -73,13 +73,10 @@ class Groups {
 				return;
 			}else{
 				locked = com.getTime();
+				log.info( '拉取方式', message );
 			}
 
 			let pm = self.wx.NewSync( conf.wechat, keybuf );
-
-			//let pm = this.wx.InitContact( conf.wechat );
-
-			log.info( '拉取方式', message );
 
 			pm.then(ret => {
 
@@ -90,7 +87,7 @@ class Groups {
 				
 				log.info( '消息数量', ret.cmdList.count + ' / ' + msgs.length );
 
-				if( msgs.length ){
+				if( msgs.length > 0 ){
 
 					log.info( '最新消息', msgs );
 	
@@ -349,7 +346,7 @@ class Groups {
 	 * @param object 过滤条件
 	 * @param integer 返回数据，-1 全返回，1 仅返回单条
 	 */
-	filterMessage(AddMsgs, where = {}, limit = -1) {
+	filterMessage( msgs, where = {}, limit = -1 ) {
 
 		//构造数据包
 		var data = {
@@ -360,14 +357,14 @@ class Groups {
 			//是否转链
 			convert: 0,
 
-			//消息列表，{ exch, msgtype, content, source }
+			//消息列表，{ exch, msgid, msgtype, content, source }
 			message: [],
 		};
 
-		for (let i = 0; i < AddMsgs.length; i++) {
+		for (let i = 0; i < msgs.length; i++) {
 
 			var size = 0;
-			var item = AddMsgs[i].cmdBuf;
+			var item = msgs[i].cmdBuf;
 			let text = item.content.string;
 			let exch = item.msgType == 1 ? ( act.detectTbc( text ) || act.detectUrl( text ) ) : false;
 				exch && data.convert ++;
@@ -402,7 +399,7 @@ class Groups {
 
 			//满足所有条件
 			if (size == Object.keys(where).length) {
-				data.length = data.message.push( { msgtype : item.msgType, content : text, source : item.msgSource, exch });
+				data.length = data.message.push( { msgid : item.msgId, msgtype : item.msgType, content : text, source : item.msgSource, exch });
 			}
 		};
 
@@ -537,20 +534,29 @@ class Groups {
 			var func = ( ) => {
 
 				let msg = post.message.shift();
-				let fn = self.sendMsg( msg, member, roomid );
+				let res = self.sendMsg( msg, member, roomid );
 					post.length = post.message.length;
 
-				fn.then(ret => {
-					if( post.message.length ){
-						setTimeout( () => { func(); }, 2500 );
+				console.log( 'post', post );
+				console.log( 'post.message.shift', msg );
+				console.log( 'post.message.length', post.length );
+
+				res.then(ret => {
+					if( post.length ){
+						setTimeout( () => { func(); }, 3000 );
+					}else{
+						log.info('群发完毕', member.weixin_id);
 					}
 				}).catch(err => {
 					//log.error('发群失败', [member.member_id, err]);
 				});
-
 			};
 
+			func();
+
 		});
+
+		return;
 
 		*/
 
