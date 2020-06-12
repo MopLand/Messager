@@ -81,7 +81,7 @@ class Moment {
 		}, 60 * 1000 * 6 );
 
 		//每分钟补发一次
-		setInterval( this.reissueComment.bind(this), 60 * 1100 );
+		setInterval( this.reissueComment.bind(this), 60 * 990 );
 
 	}
 
@@ -264,10 +264,18 @@ class Moment {
 
 			//转链
 			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'lazy_time' : lazy_time }, (code, body) => {
-				
-				if( typeof body == 'string' ){
-					body = JSON.parse( body );
+
+				try {
+					if( typeof body == 'string' ){
+						body = JSON.parse( body );
+					}
+				} catch( e ){
+					body = { 'status' : -code, 'body' : body, 'error' : e.toString() };
 				}
+
+				log.info('转链错误', [member.member_id, body, lazy_time]);
+
+				///////////////
 				
 				if( body.status >= 0 ){
 
@@ -280,20 +288,17 @@ class Moment {
 						log.error('评论失败', [member.weixin_id, err]);
 					});
 
-					log.info('转链结果', [member.member_id, body]);
-
 				}else{
 
 					body.source = 'moment';
-
-					log.error('转链错误', [member.member_id, body]);
+					body.lazy_time = lazy_time;
 
 					self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
 					//是延迟补发的消息，删除这条朋友圈，否则写入延迟消息
 					if( lazy_time ){
-						//self.wx.SnsObjectOp( member.weixin_id, post_id, 1 );
-						self.wx.SnsComment(member.weixin_id, post_id, comm.type, 'DEL');
+						self.wx.SnsObjectOp( member.weixin_id, post_id, 1 );
+						//self.wx.SnsComment(member.weixin_id, post_id, comm.type, 'DEL');
 					}else{
 						self.delay.push( { member, data, post_id, time : com.getTime() } );
 					}
@@ -323,22 +328,23 @@ class Moment {
 		var size = this.delay.length;
 
 		if( size == 0 ){
-			log.info('暂无延迟');
+			log.info('暂无延迟', { 'delay': size });
 			return;
 		}
 
 		var size = size > 20 ? 20 : size;
-		var time = com.getTime() - 60 * 3;
+		var time = com.getTime() - 59 * 5;
 
 		for( let i = 0; i < size; i++ ){
 
-			let msg = this.delay.shift();
+			let item = this.delay.shift();
 
-			//超过 5 分钟
-			if( msg.time <= time ){
-				this.forwardComment( msg.member, msg.data, msg.post_id, msg.time );
+			//超过 5 分钟，执行补发，否则还回去
+			if( item.time <= time ){
+				this.forwardComment( item.member, item.data, item.post_id, item.time );
+				log.info('补发消息', item );
 			}else{
-				this.delay.unshift( msg );
+				this.delay.unshift( item );
 			}
 
 		}
