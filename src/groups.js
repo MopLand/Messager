@@ -165,14 +165,9 @@ class Groups {
 					log.info( '本次发群', res.length + ' 人' );
 				}
 
-				for (var i = 0; i < res.length; i++) {
-
-					//转发群消息
+				//转发群消息
+				for (let i = 0; i < res.length; i++) {
 					self.forwardMessage(msgs, res[i]);
-
-					//更新发群时间
-					self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ res[i].member_id ] );
-
 				}
 
 				//再次执行，传入最后ID
@@ -312,7 +307,8 @@ class Groups {
 				return;
 			}
 
-			span = parseInt( res[0].count / 15 );
+			//以十分钟一轮，每次心跳数量
+			span = parseInt( res[0].count / 10 );
 
 			log.info( '心跳计划', '总人数 ' + res[0].count + '，每次心跳 ' + span );
 			
@@ -506,7 +502,7 @@ class Groups {
 
 					//写入延迟消息
 					if( lazy_time == 0 ){
-						self.delay.push( { member, data, time : com.getTime() } );
+						self.delay.push( { member, data : post, time : com.getTime() } );
 					}
 
 				}
@@ -570,11 +566,19 @@ class Groups {
 				console.log( 'post.message.length', post.length );
 
 				res.then(ret => {
+
 					if( post.length > 0 ){
+
 						setTimeout( () => { func(); }, 3000 );
+
 					}else{
+
 						log.info('群发完毕', member.weixin_id);
+						
+						//更新发群时间
+						self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member.member_id ] );
 					}
+
 				}).catch(err => {
 					//log.error('发群失败', [member.member_id, err]);
 				});
