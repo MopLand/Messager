@@ -456,7 +456,7 @@ class Groups {
 	 */
 	parseMessage( member, data, lazy_time = 0, func ){
 
-		var post = data;
+		var post = com.clone( data );
 		var self = this;
 
 		//无需转链，直接回调
@@ -688,7 +688,6 @@ class Groups {
 
 		var self = this;
 		var detail = msg.content;
-		var struct = detail.indexOf('<') == 0;
 
 		//文本
 		if ( msg.msgtype == 1 ) {
