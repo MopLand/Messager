@@ -166,7 +166,7 @@ class Groups {
 				}
 
 				//转发群消息
-				for (let i = 0; i < res.length; i++) {
+				for (var i = 0; i < res.length; i++) {
 					self.forwardMessage(msgs, res[i]);
 				}
 
