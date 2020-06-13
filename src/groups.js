@@ -472,7 +472,8 @@ class Groups {
 
 			let comm = post.message[i];
 			let last = i == post.length - 1;
-			let test = lazy_time ? true : com.weight( 0.3 );
+			//let test = lazy_time ? true : com.weight( 0.3 );
+			let test = true;
 
 			req.get(self.conf.convert, { 'member_id' : test ? member.member_id : 0, 'text' : comm.content, 'lazy_time' : lazy_time }, (code, body) => {
 				
