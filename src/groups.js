@@ -162,7 +162,7 @@ class Groups {
 					log.info( '处理完毕', time );
 					return;
 				}else{
-					log.info( '本次发群', res.length + ' 人' );
+					log.info( '本次发群', res.length + ' 人，auto_id >' + auto );
 				}
 
 				//转发群消息
@@ -171,7 +171,7 @@ class Groups {
 				}
 
 				//再次执行，传入最后ID
-				setTimeout( () => { func( res[i - 1].auto_id ); }, 1000 );
+				setTimeout( () => { func( res[i - 1].auto_id ); }, 1100 );
 
 			});
 
@@ -278,7 +278,7 @@ class Groups {
 						//更新群发设置
 						self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
 	
-						log.info( '心跳成功', [row.weixin_id, ret] );
+						log.info( '心跳成功', [row.weixin_id, row.member_id] );
 	
 					}).catch( err => {
 	
@@ -461,13 +461,14 @@ class Groups {
 
 		//无需转链，直接回调
 		if( post.convert == 0 ){
-			func( post );
+			return func( post );
 		}
 
 		for (let i = 0; i < post.length; i++) {
 
 			let comm = post.message[i];
-			let last = i == post.length - 1;
+			let exch = comm.msgtype == 1 && comm.exch;
+			//let last = i == post.length - 1;
 			//let test = lazy_time ? true : com.weight( 0.3 );
 			let test = true;
 
@@ -481,7 +482,9 @@ class Groups {
 					body = { 'status' : -code, 'body' : body, 'error' : e.toString() };
 				}
 
-				log.info('转链结果', [member.member_id, body, lazy_time]);
+				if( exch ){
+					log.info('转链结果', [member.member_id, body, lazy_time]);
+				}
 
 				///////////////
 				
@@ -490,8 +493,8 @@ class Groups {
 					//评论
 					comm.content = body.result;
 
-					//最后一条评论
-					last && func( post );
+					//转链成功，执行回调
+					comm.exch && func( post );
 
 				}else{
 
@@ -510,7 +513,7 @@ class Groups {
 			}, ( data ) =>{
 
 				//是口令，需要转链
-				if( comm.exch ){
+				if( exch ){
 					return { 'request' : true };
 				}else{
 					return { 'request' : false, 'respond' : { 'status' : 0, 'result' : data.text } };
@@ -542,28 +545,22 @@ class Groups {
 			return;
 		}
 
-		log.info( '当前微信', { '微信号' : member.weixin_id, '群数量' : roomid.length } );
+		log.info( '当前微信', { '用户ID' : member.member_id, '微信号' : member.weixin_id, '群数量' : roomid.length } );
 
 		///////////////
 		
 		//先转链再顺序发送
 		this.parseMessage( member, data, lazy_time, ( post ) => {
 
+			log.info('转链成功', { '用户ID' : member.member_id, '消息量' : post.length } );
+
 			var func = ( ) => {
 
 				let msg = post.message.shift();
-
-				if( !msg ){
-					log.info('提取错误', post);
-					return;
-				}
-
 				let res = self.sendMsg( msg, member, roomid );
 					post.length = post.message.length;
 
-				console.log( 'post', post );
-				console.log( 'post.message.shift', msg );
-				console.log( 'post.message.length', post.length );
+				log.info('消息拆包', { '用户ID' : member.member_id, '待发送' : post.length } );
 
 				res.then(ret => {
 
@@ -573,7 +570,7 @@ class Groups {
 
 					}else{
 
-						log.info('群发完毕', member.weixin_id);
+						log.info('群发完毕', member.member_id);
 						
 						//更新发群时间
 						self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member.member_id ] );
