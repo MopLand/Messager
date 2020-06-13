@@ -273,7 +273,7 @@ class Moment {
 					body = { 'status' : -code, 'body' : body, 'error' : e.toString() };
 				}
 
-				log.info('转链错误', [member.member_id, body, lazy_time]);
+				log.info('转链结果', [member.member_id, body, lazy_time]);
 
 				///////////////
 				

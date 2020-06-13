@@ -9,7 +9,7 @@ const Messager = require('./src/messager');
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
 
-console.log( '--------------------------' );
+console.log( '-------------' + Common.getTime() +'-------------' );
 
 //消息推送，默认方法
 if (!func || func == 'messager') {

@@ -27,6 +27,8 @@ class Groups {
 		this.stamp = 'mm_groups_id';
 		this.channel = 'mm_groups';
 		this.lastmsg = com.getTime();
+		this.locked = 0;
+		this.delay = [];
 	}
 
 	init(){
@@ -35,7 +37,6 @@ class Groups {
 		var conf = this.conf;
 		var wait = 60;
 		var keybuf = '';
-		var locked = 0;
 
 		///////////////
 
@@ -68,11 +69,11 @@ class Groups {
 		this.redis.on('message', function (channel, message) {
 
 			//正在读取消息，锁还未失效
-			if( locked && locked >= com.getTime() - wait ){
+			if( self.locked && self.locked >= com.getTime() - wait ){
 				log.info( '读消息锁', locked );
 				return;
 			}else{
-				locked = com.getTime();
+				self.locked = com.getTime();
 				log.info( '拉取方式', message );
 			}
 
@@ -114,7 +115,7 @@ class Groups {
 			}).finally( () => {
 
 				//解除读消息锁
-				locked = 0;
+				self.locked = 0;
 
 			} );
 
@@ -132,7 +133,10 @@ class Groups {
 		this.heartBeat();
 
 		//每分钟同步一次
-		setInterval( this.timedPull.bind(this), 60 * 1111 );
+		//setInterval( this.timedPull.bind(this), 60 * 1111 );
+
+		//每分钟补发一次
+		setInterval( this.reissueMessage.bind(this), 60 * 980 );
 
 	}
 
@@ -333,7 +337,7 @@ class Groups {
 		log.info( '过去时间', diff + ' 分钟' );
 
 		//长时间没有读取消息
-		if( work && diff > 10 ){
+		if( work && diff > 20 ){
 			this.sider.publish( this.channel, 'timer' );
 			log.info( '主动拉取', time );
 		}
@@ -366,6 +370,12 @@ class Groups {
 			var size = 0;
 			var item = msgs[i].cmdBuf;
 			let text = item.content.string;
+
+			//支持的消息类型：1 文字、3 图片、43 视频、47 表情、49 小程序
+			if( [1, 3, 43, 47, 49].indexOf( item.msgType ) == -1 ){
+				continue;
+			}
+
 			let exch = item.msgType == 1 ? ( act.detectTbc( text ) || act.detectUrl( text ) ) : false;
 				exch && data.convert ++;
 			
@@ -445,9 +455,10 @@ class Groups {
 	 * 预处理消息
 	 * @param object 用户数据
 	 * @param object 发圈数据
+	 * @param integer 延迟时间
 	 * @param function 回调方法
 	 */
-	parseMessage( member, data, func ){
+	parseMessage( member, data, lazy_time = 0, func ){
 
 		var post = data;
 		var self = this;
@@ -461,12 +472,21 @@ class Groups {
 
 			let comm = post.message[i];
 			let last = i == post.length - 1;
+			let test = lazy_time ? true : com.weight( 0.3 );
 
-			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.content }, (code, body) => {
+			req.get(self.conf.convert, { 'member_id' : test ? member.member_id : 0, 'text' : comm.content, 'lazy_time' : lazy_time }, (code, body) => {
 				
-				if( typeof body == 'string' ){
-					body = JSON.parse( body );
+				try {
+					if( typeof body == 'string' ){
+						body = JSON.parse( body );
+					}
+				} catch( e ){
+					body = { 'status' : -code, 'body' : body, 'error' : e.toString() };
 				}
+
+				log.info('转链结果', [member.member_id, body, lazy_time]);
+
+				///////////////
 				
 				if( body.status >= 0 ){
 
@@ -476,15 +496,17 @@ class Groups {
 					//最后一条评论
 					last && func( post );
 
-					log.info('转链结果', [member.member_id, body]);
-
 				}else{
 
 					body.source = 'groups';
-
-					log.error('转链错误', [member.member_id, body]);
+					body.lazy_time = lazy_time;
 
 					self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+
+					//写入延迟消息
+					if( lazy_time == 0 ){
+						self.delay.push( { member, data, time : com.getTime() } );
+					}
 
 				}
 
@@ -507,8 +529,9 @@ class Groups {
 	 * 转发群消息
 	 * @param object 消息数据
 	 * @param object 用户信息
+	 * @param integer 延迟时间
 	 */
-	forwardMessage(data, member) {
+	forwardMessage(data, member, lazy_time = 0) {
 
 		var self = this;
 		var stag = [];
@@ -525,11 +548,9 @@ class Groups {
 		log.info( '当前微信', { '微信号' : member.weixin_id, '群数量' : roomid.length } );
 
 		///////////////
-
-		/**
 		
 		//先转链再顺序发送
-		this.parseMessage( member, data, ( post ) => {
+		this.parseMessage( member, data, lazy_time, ( post ) => {
 
 			var func = ( ) => {
 
@@ -542,7 +563,7 @@ class Groups {
 				console.log( 'post.message.length', post.length );
 
 				res.then(ret => {
-					if( post.length ){
+					if( post.length > 0 ){
 						setTimeout( () => { func(); }, 3000 );
 					}else{
 						log.info('群发完毕', member.weixin_id);
@@ -557,6 +578,8 @@ class Groups {
 		});
 
 		return;
+
+		/**
 
 		*/
 
@@ -660,7 +683,7 @@ class Groups {
 		var struct = detail.indexOf('<') == 0;
 
 		//文本
-		if (msg.msgtype == 1) {
+		if ( msg.msgtype == 1 ) {
 
 			let fn = self.wx.NewSendMsg(member.weixin_id, roomid, detail, msg.source);
 
@@ -675,7 +698,7 @@ class Groups {
 		}
 
 		//图片
-		if (msg.msgtype == 3 && struct) {
+		if ( msg.msgtype == 3 ) {
 
 			for( let i = 0; i < roomid.length; i++ ){
 				var fn = self.wx.UploadMsgImgXml(member.weixin_id, roomid[i], detail);
@@ -692,7 +715,7 @@ class Groups {
 		}
 
 		//视频
-		if (msg.msgtype == 43 && struct) {
+		if ( msg.msgtype == 43 ) {
 
 			for( let i = 0; i < roomid.length; i++ ){
 				var fn = self.wx.UploadVideoXml(member.weixin_id, roomid[i], detail);
@@ -710,7 +733,7 @@ class Groups {
 
 
 		//表情
-		if (msg.msgtype == 47 && struct) {
+		if ( msg.msgtype == 47 ) {
 
 			for( let i = 0; i < roomid.length; i++ ){
 				var fn = self.wx.SendEmojiXml(member.weixin_id, roomid[i], detail);
@@ -727,7 +750,7 @@ class Groups {
 		}
 
 		//小程序
-		if (msg.msgtype == 49 && struct) {
+		if ( msg.msgtype == 49 ) {
 
 			detail = detail.replace(/userid=(\d*)/g, 'userid=' + member.member_id);
 
@@ -744,6 +767,38 @@ class Groups {
 			});
 
 			return fn;
+
+		}
+
+	}
+
+	/**
+	 * 补发消息
+	 */
+	reissueMessage( ) {
+
+		var size = this.delay.length;
+
+		//没有延迟消息 或 正在发送（暂停）
+		if( size == 0 || this.locked ){
+			log.info('暂无延迟', { 'delay': size, 'locked': this.locked });
+			return;
+		}
+
+		var size = size > 20 ? 20 : size;
+		var time = com.getTime() - 59 * 5;
+
+		for( let i = 0; i < size; i++ ){
+
+			let item = this.delay.shift();
+
+			//超过 5 分钟，执行补发，否则还回去
+			if( item.time <= time ){
+				this.forwardMessage( item.data, item.member, item.time );
+				log.info('补发消息', item );
+			}else{
+				this.delay.unshift( item );
+			}
 
 		}
 
