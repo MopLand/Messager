@@ -133,7 +133,7 @@ class Groups {
 		this.heartBeat();
 
 		//每分钟同步一次
-		//setInterval( this.timedPull.bind(this), 60 * 1111 );
+		setInterval( this.timedPull.bind(this), 60 * 1111 );
 
 		//每分钟补发一次
 		setInterval( this.reissueMessage.bind(this), 60 * 980 );
@@ -554,6 +554,10 @@ class Groups {
 		this.parseMessage( member, data, lazy_time, ( post ) => {
 
 			var func = ( ) => {
+
+				if( post.message.length == 0 ){
+					return;
+				}
 
 				let msg = post.message.shift();
 				let res = self.sendMsg( msg, member, roomid );
