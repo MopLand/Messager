@@ -555,11 +555,13 @@ class Groups {
 
 			var func = ( ) => {
 
-				if( post.message.length == 0 ){
+				let msg = post.message.shift();
+
+				if( !msg ){
+					log.info('提取错误', post);
 					return;
 				}
 
-				let msg = post.message.shift();
 				let res = self.sendMsg( msg, member, roomid );
 					post.length = post.message.length;
 
