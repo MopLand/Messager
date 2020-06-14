@@ -556,11 +556,11 @@ class Groups {
 
 			var func = ( ) => {
 
+				log.info('消息拆包', { '用户ID' : member.member_id, '待发送' : post.length } );
+
 				let msg = post.message.shift();
 				let res = self.sendMsg( msg, member, roomid );
 					post.length = post.message.length;
-
-				log.info('消息拆包', { '用户ID' : member.member_id, '待发送' : post.length } );
 
 				res.then(ret => {
 
@@ -695,9 +695,9 @@ class Groups {
 			let fn = self.wx.NewSendMsg(member.weixin_id, roomid, detail, msg.source);
 
 			fn.then(ret => {
-				log.info('发群成功', [member.member_id, ret.count]);
+				log.info('文本成功', [member.member_id, ret.msgId]);
 			}).catch(err => {
-				log.error('发群失败', [member.member_id, err]);
+				log.error('文本失败', [member.member_id, err]);
 			});
 
 			return fn;
@@ -712,7 +712,7 @@ class Groups {
 			}
 
 			fn.then(ret => {
-				log.info('发图成功', [member.member_id, ret]);
+				log.info('发图成功', [member.member_id, ret.msgId]);
 			}).catch(err => {
 				log.error('发图失败', [member.member_id, err]);
 			});
@@ -729,7 +729,7 @@ class Groups {
 			}
 
 			fn.then(ret => {
-				log.info('视频成功', [member.member_id, ret]);
+				log.info('视频成功', [member.member_id, ret.msgId]);
 			}).catch(err => {
 				log.error('视频失败', [member.member_id, err]);
 			});
@@ -747,7 +747,7 @@ class Groups {
 			}
 
 			fn.then(ret => {
-				log.info('表情成功', [member.member_id, ret]);
+				log.info('表情成功', [member.member_id, ret.msgId]);
 			}).catch(err => {
 				log.error('表情失败', [member.member_id, err]);
 			});
@@ -768,7 +768,7 @@ class Groups {
 			}
 
 			fn.then(ret => {
-				log.info('小程序成功', [member.member_id, ret]);
+				log.info('小程序成功', [member.member_id, ret.msgId]);
 			}).catch(err => {
 				log.error('小程序失败', [member.member_id, err]);
 			});
