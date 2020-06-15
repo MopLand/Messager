@@ -236,7 +236,7 @@ class Moment {
 			//转发评论，使用自己的发圈ID
 			this.forwardComment(member, data, ret.snsObject.id);
 
-			log.info( '发圈成功', ret );
+			log.info( '发圈成功', ret.snsObject.id );
 
 		}).catch(err => {
 			log.error( '发圈出错', [member.member_id, err] );
@@ -283,7 +283,7 @@ class Moment {
 					let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, body.result);
 
 					pm.then(ret => {
-						log.info('评论成功', [member.weixin_id, ret]);
+						log.info('评论成功', [member.weixin_id, post_id, ret.snsObject.id]);
 					}).catch(err => {
 						log.error('评论失败', [member.weixin_id, err]);
 					});
@@ -298,6 +298,7 @@ class Moment {
 					//是延迟补发的消息，删除这条朋友圈，否则写入延迟消息
 					if( lazy_time ){
 						self.wx.SnsObjectOp( member.weixin_id, post_id, 1 );
+						log.error('删除发圈', [member.weixin_id, post_id, lazy_time]);
 						//self.wx.SnsComment(member.weixin_id, post_id, comm.type, 'DEL');
 					}else{
 						self.delay.push( { member, data, post_id, time : com.getTime() } );
