@@ -26,9 +26,9 @@ class Groups {
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 		this.stamp = 'mm_groups_id';
 		this.channel = 'mm_groups';
-		this.lastmsg = com.getTime();
+		this.members = [];
+		this.queues = [];
 		this.locked = 0;
-		this.delay = [];
 	}
 
 	init(){
@@ -84,18 +84,15 @@ class Groups {
 				log.info( '原始消息', ret.cmdList.list );
 
 				//获取最新消息
-				var msgs = self.filterMessage( ret.cmdList.list, where );
-				
-				log.info( '消息数量', ret.cmdList.count + ' / ' + msgs.length );
+				var data = self.filterMessage( ret.cmdList.list, where );
 
-				if( msgs.length > 0 ){
-
-					log.info( '最新消息', msgs );
-	
-					//获取到新消息
-					self.send(msgs);
-
+				//发送最新消息
+				if( data.message.length ){
+					self.send( data );
 				}
+				
+				log.info( '消息数量', { '原消息' : ret.cmdList.count, '筛选后' : data.message.length } );
+				log.info( '有效消息', data );
 				
 				//记录消息标记
 				keybuf = ret.keyBuf.buffer;
@@ -104,7 +101,7 @@ class Groups {
 				self.sider.set( self.stamp, keybuf );
 				self.sider.expire( self.stamp, 3600 * 2 );
 
-				req.status(conf.report, 'MM_Groups', msgs.length, { '原始消息' : ret.cmdList.count } );
+				req.status(conf.report, 'MM_Groups', data.message.length, { '原始消息' : ret.cmdList.count } );
 
 			}).catch(err => {
 
@@ -119,9 +116,6 @@ class Groups {
 
 			} );
 
-			//最后一次消息时间
-			self.lastmsg = com.getTime();
-
 		});
 
 		//订阅 Redis 频道消息
@@ -132,11 +126,8 @@ class Groups {
 		//每分钟分批心跳
 		this.heartBeat();
 
-		//每分钟同步一次
-		setInterval( this.timedPull.bind(this), 60 * 1111 );
-
-		//每分钟补发一次
-		setInterval( this.reissueMessage.bind(this), 60 * 980 );
+		//每分钟分批心跳
+		this.getMember();
 
 	}
 
@@ -147,97 +138,28 @@ class Groups {
 	send(msgs) {
 
 		var self = this;
-		var time = com.getTime() - 60 * 20;
+		var size = self.members.length;
+		var func = ( i ) => {
 
-		var func = ( auto ) => {
+			self.parseMessage( self.members[i], msgs );
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [time, auto], function (err, res) {
+			if( i < size - 1 ){
+				setTimeout( () => { func( i + 1 ); }, 50 );
+			}
 
-				if( err ){
-					log.error( err );
-					return;
-				}
+			if( i > 0 ){
+				self.forwardMessage();
+			}
 
-				if( res.length == 0 ){
-					log.info( '处理完毕', time );
-					return;
-				}else{
-					log.info( '本次发群', res.length + ' 人，auto_id >' + auto );
-				}
-
-				//转发群消息
-				for (var i = 0; i < res.length; i++) {
-					self.forwardMessage(msgs, res[i]);
-				}
-
-				//再次执行，传入最后ID
-				setTimeout( () => { func( res[i - 1].auto_id ); }, 1100 );
-
-			});
+			//本地测试，单用户
+			if( size == 1 ){
+				setTimeout( self.forwardMessage.bind( self ), 15 * 1000 );
+			}
 
 		}
 
 		//开始执行
 		func( 0 );
-
-	}
-
-	/**
-	 * 监听群命令
-	 */
-	findCommand() {
-
-		var self = this;
-
-		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` ORDER BY auto_id ASC', function (err, res) {
-
-			for (let i = 0; i < res.length; i++) {
-
-				let row = res[i];
-
-				//获取群消息
-				let pm = this.wx.SyncMessage( row.weixin_id );
-
-				pm.then(ret => {
-
-					//获取最新命令
-					var msg = self.filterMessage(ret.AddMsgs, { MsgType: 1, FromUserName: row.weixin_id }, 1 );
-					var cmd = msg.Content.String;
-					var gid = msg.ToUserName;
-					var gps = row.groups_list ? JSON.parse( row.groups_list ) : {};
-					var num = Object.keys( gps ).length;
-
-					//限制群数量
-					if( !gps[gid] && num >= 5 ){
-						wx.SendTxtMessage(member.weixin_id, gid, '最多群发不超过 5 个群');
-						return;
-					}
-
-					//新增本群
-					if( !gps[gid] ){
-						num ++;
-					}
-
-					if( cmd == '开启群发' ){
-						gps[gid] = 'ON';
-					}
-
-					if( cmd == '关闭群发' ){
-						gps[gid] = 'OFF';
-					}
-
-					//更新群发设置
-					self.mysql.query('UPDATE `pre_member_weixin` SET groups_list = ?, groups_num, updated_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ JSON.stringify( gps ), num, row.member_id ] );
-					
-					wx.SendTxtMessage(member.weixin_id, gid, gid + ' 设置成功');
-
-				}).catch( err => {
-
-				} );
-
-			}
-
-		});
 
 	}
 
@@ -303,8 +225,7 @@ class Groups {
 		self.mysql.query('SELECT COUNT(*) AS count FROM `pre_member_weixin` WHERE heartbeat_time >= ?', [time()], function (err, res) {
 
 			if( err ){
-				log.error( '心跳统计', err );
-				return;
+				return log.error( '心跳统计', err );
 			}
 
 			//以十分钟一轮，每次心跳数量
@@ -319,24 +240,46 @@ class Groups {
 	}
 
 	/**
-	 * 主动同步
+	 * 拉取有效用户
 	 */
-	timedPull() {
+	getMember() {
 
-		//工作时段
-		var date = new Date();
-		var work = date.format('h') >= this.conf.worked;
-		var time = com.getTime();
+		var self = this;
 
-		//上次消息过去了多少分钟
-		var diff = ( ( time - this.lastmsg ) / 60 ).toFixed(2);
-		log.info( '过去时间', diff + ' 分钟' );
+		var func = () => {
+			
+			var time = com.getTime() - 60 * 20;
 
-		//长时间没有读取消息
-		if( work && diff > 20 ){
-			this.sider.publish( this.channel, 'timer' );
-			log.info( '主动拉取', time );
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 AND heartbeat_time >= ? ORDER BY auto_id ASC', [time], function (err, res) {
+
+				if( err ){
+					log.error( err );
+					return;
+				}else{
+					log.info( '有效用户', res.length + ' 人' );
+				}
+
+				for (let i = 0; i < res.length; i++) {
+
+					var groups = JSON.parse( res[i].groups_list );
+					var roomid = groups.map( ele => { return ele.userName } );
+
+						res[i].roomid = roomid;
+
+					delete res[i].groups_list;
+
+				}
+
+				self.members = res;
+
+			});
+
 		}
+
+		func();
+
+		//每十分钟同步一次
+		setInterval( func, 60 * 1000 * 10 );
 
 	}
 
@@ -351,10 +294,7 @@ class Groups {
 		//构造数据包
 		var data = {
 
-			//消息数量
-			length: 0,
-
-			//是否转链
+			//需要转链
 			convert: 0,
 
 			//消息列表，{ exch, msgid, msgtype, content, source }
@@ -371,9 +311,6 @@ class Groups {
 			if( [1, 3, 43, 47, 49].indexOf( item.msgType ) == -1 ){
 				continue;
 			}
-
-			let exch = item.msgType == 1 ? ( act.detectTbc( text ) || act.detectUrl( text ) ) : false;
-				exch && data.convert ++;
 			
 			for (let w in where) {
 
@@ -405,45 +342,23 @@ class Groups {
 
 			//满足所有条件
 			if (size == Object.keys(where).length) {
-				data.length = data.message.push( { msgid : item.msgId, msgtype : item.msgType, content : text, source : item.msgSource, exch });
+
+				let exch = item.msgType == 1 ? ( act.detectTbc( text ) || act.detectUrl( text ) ) : false;
+
+				if( exch ){ data.convert ++; }
+
+				data.message.push( { msgid : item.msgId, msgtype : item.msgType, content : text, source : item.msgSource, exch });
+
 			}
+
 		};
 
 		//只取一条时，直接返回消息体
 		if (limit == 1) {
-			return data.length ? data.message[0] : null;
+			return data.message.length ? data.message[0] : null;
 		} else {
 			return data;
 		}
-
-	}
-
-	/**
-	 * 获取微信群
-	 * @param string 微信ID
-	 * @param string 内容
-	 */
-	findMessage(wxid, text) {
-
-		var pm = wx.SyncMessage(wxid);
-
-		pm.then(ret => {
-
-			var group_id = '';
-
-			var chat_room = this.filter(ret.AddMsgs, { Content: text, FromUserName: wxid }, 1);
-
-			if (chat_room) {
-				group_id = chat_room.ToUserName.String;
-			}
-
-			//log.info(chat_room, group_id);
-
-		}).catch(msg => {
-			log.error(msg);
-		});
-
-		return pm;
 
 	}
 
@@ -452,27 +367,23 @@ class Groups {
 	 * @param object 用户数据
 	 * @param object 发圈数据
 	 * @param integer 延迟时间
-	 * @param function 回调方法
 	 */
-	parseMessage( member, data, lazy_time = 0, func ){
+	parseMessage( member, data, lazy_time = 0 ){
 
-		var post = com.clone( data );
+		var data = com.clone( data );
 		var self = this;
 
 		//无需转链，直接回调
-		if( post.convert == 0 ){
-			return func( post );
+		if( data.convert == 0 ){
+			return self.queues.push( { member, data } );
 		}
 
-		for (let i = 0; i < post.length; i++) {
+		for (let i = 0; i < data.message.length; i++) {
 
-			let comm = post.message[i];
+			let comm = data.message[i];
 			let exch = comm.msgtype == 1 && comm.exch;
-			//let last = i == post.length - 1;
-			//let test = lazy_time ? true : com.weight( 0.3 );
-			let test = true;
 
-			req.get(self.conf.convert, { 'member_id' : test ? member.member_id : 0, 'text' : comm.content, 'lazy_time' : lazy_time }, (code, body) => {
+			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.content, 'lazy_time' : lazy_time }, (code, body) => {
 				
 				try {
 					if( typeof body == 'string' ){
@@ -483,7 +394,7 @@ class Groups {
 				}
 
 				if( exch ){
-					log.info('转链结果', [member.member_id, body, lazy_time]);
+					log.info('转链结果', { 'member_id' : member.member_id, body, lazy_time, 'convert' : data.convert });
 				}
 
 				///////////////
@@ -494,7 +405,11 @@ class Groups {
 					comm.content = body.result;
 
 					//转链成功，执行回调
-					comm.exch && func( post );
+					comm.exch && data.convert --;
+
+					if( data.convert == 0 ){
+						self.queues.push( { member, data } );
+					}
 
 				}else{
 
@@ -505,7 +420,7 @@ class Groups {
 
 					//写入延迟消息
 					if( lazy_time == 0 ){
-						self.delay.push( { member, data : post, time : com.getTime() } );
+						setTimeout( () => { self.parseMessage( member, data, com.getTime() ); }, 60 * 1000 * 5 );
 					}
 
 				}
@@ -531,171 +446,71 @@ class Groups {
 	 * @param object 用户信息
 	 * @param integer 延迟时间
 	 */
-	forwardMessage(data, member, lazy_time = 0) {
+	forwardMessage() {
+
+		if( this.queues.length == 0 ){
+			return log.info('暂无消息');
+		}
 
 		var self = this;
-		var stag = [];
-		var lazy = false;
+		let item = this.queues.shift();
+		let user = item.member;
+		let data = item.data;
 
-		var groups = JSON.parse( member.groups_list );
-		var roomid = groups.map( ele => { return ele.userName } );
+		log.info( '当前微信', { '用户ID' : user.member_id, '微信号' : user.weixin_id, '群数量' : user.roomid.length, '消息量' : data.message.length } );
 
-		if( roomid.length == 0 ){
-			log.error('无微信群', roomid);
-			return;
-		}
+		var func = ( ) => {
 
-		log.info( '当前微信', { '用户ID' : member.member_id, '微信号' : member.weixin_id, '群数量' : roomid.length } );
+			log.info('消息拆包', { '用户ID' : user.member_id, '待发送' : data.message.length } );
 
-		///////////////
-		
-		//先转链再顺序发送
-		this.parseMessage( member, data, lazy_time, ( post ) => {
+			let msg = data.message.shift();
+			let res = self.sendMsg( user, msg );
 
-			log.info('转链成功', { '用户ID' : member.member_id, '消息量' : post.length } );
+			res.then(ret => {
 
-			var func = ( ) => {
+				//消息包未完成
+				if( data.message.length > 0 ){
 
-				log.info('消息拆包', { '用户ID' : member.member_id, '待发送' : post.length } );
+					setTimeout( () => { func(); }, 3000 );
 
-				let msg = post.message.shift();
-				let res = self.sendMsg( msg, member, roomid );
-					post.length = post.message.length;
+				}else{
 
-				res.then(ret => {
-
-					if( post.length > 0 ){
-
-						setTimeout( () => { func(); }, 3000 );
-
-					}else{
-
-						log.info('群发完毕', member.member_id);
-						
-						//更新发群时间
-						self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member.member_id ] );
-					}
-
-				}).catch(err => {
-					//log.error('发群失败', [member.member_id, err]);
-				});
-			};
-
-			func();
-
-		});
-
-		return;
-
-		/**
-
-		*/
-
-		///////////////
-
-		//按顺序直接发送
-		for (let i = 0; i < data.length; i++) {
-
-			let comm = data.message[i];
-			let text = comm.content;
-
-			//是否要推迟，针对 表情 或 分割线
-			if( lazy && ( comm.msgtype == 47 || text.indexOf( self.conf.groups.retard ) >= 0 ) ){
-				stag.push( comm );
-				log.warn('推迟消息', comm);
-				continue;
-			}
-
-			//文字消息
-			if (comm.msgtype == 1) {
-
-				//转链
-				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : text }, (code, body) => {
-
-					//解除延迟
-					lazy = false;
+					log.info('群发完毕', user.member_id);
 					
-					if( typeof body == 'string' ){
-						body = JSON.parse( body );
-					}
-					
-					//转链成功，发送消息，否则跳过
-					if( body.status >= 0 ){
+					//更新发群时间
+					self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ user.member_id ] );
 
-						let pm = self.wx.NewSendMsg(member.weixin_id, roomid, body.result, comm.source);
+					//消息队列未完成
+					self.forwardMessage();
 
-						pm.then(ret => {
-							log.info('发群成功', [member.weixin_id, ret.count]);
-						}).catch(err => {
-							log.error('发群失败', [member.weixin_id, err]);
-						});
+				}
 
-						log.info('转链结果', [member.member_id, body]);
+			}).catch(err => {
+				//log.error('发群失败', [member.member_id, err]);
+			});
 
-					}else{
+		};
 
-						body.source = 'groups';
-
-						log.error('转链错误', [member.member_id, body]);
-
-						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
-
-					}
-
-					//////////////
-
-					if( stag.length ){
-					
-						log.warn('迟延消息', stag.length);
-	
-						//处理迟延消息
-						while( stag.length > 0 ){
-							self.sendMsg( stag.pop(), member, roomid );
-						}
-
-					}
-
-				}, ( data ) =>{
-
-					//是口令，需要转链
-					if( comm.exch ){
-						lazy = true;
-						return { 'request' : true };
-					}else{
-						return { 'request' : false, 'respond' : { 'status' : 0, 'result' : data.text } };
-					}
-
-				} );
-
-			}
-
-			//其他消息
-			if ( comm.msgtype != 1 ) {
-				this.sendMsg( comm, member, roomid );
-			}
-
-		}
+		func();
 
 	}
 
 	/**
 	 * 转发群消息
-	 * @param object 单条消息
 	 * @param object 用户数据
-	 * @param object 微信群
+	 * @param object 单条消息
 	 */
-	sendMsg( msg, member, roomid ){
+	sendMsg( member, msg ){
 
-		var self = this;
 		var detail = msg.content;
 
 		//文本
 		if ( msg.msgtype == 1 ) {
 
-			let fn = self.wx.NewSendMsg(member.weixin_id, roomid, detail, msg.source);
+			let fn = this.wx.NewSendMsg(member.weixin_id, member.roomid, detail, msg.source);
 
 			fn.then(ret => {
-				log.info('文本成功', [member.member_id, ret.msgId]);
+				log.info('文本成功', [member.member_id, ret.count]);
 			}).catch(err => {
 				log.error('文本失败', [member.member_id, err]);
 			});
@@ -707,8 +522,8 @@ class Groups {
 		//图片
 		if ( msg.msgtype == 3 ) {
 
-			for( let i = 0; i < roomid.length; i++ ){
-				var fn = self.wx.UploadMsgImgXml(member.weixin_id, roomid[i], detail);
+			for( let i = 0; i < member.roomid.length; i++ ){
+				var fn = this.wx.UploadMsgImgXml(member.weixin_id, member.roomid[i], detail);
 			}
 
 			fn.then(ret => {
@@ -724,8 +539,8 @@ class Groups {
 		//视频
 		if ( msg.msgtype == 43 ) {
 
-			for( let i = 0; i < roomid.length; i++ ){
-				var fn = self.wx.UploadVideoXml(member.weixin_id, roomid[i], detail);
+			for( let i = 0; i < member.roomid.length; i++ ){
+				var fn = this.wx.UploadVideoXml(member.weixin_id, member.roomid[i], detail);
 			}
 
 			fn.then(ret => {
@@ -742,12 +557,12 @@ class Groups {
 		//表情
 		if ( msg.msgtype == 47 ) {
 
-			for( let i = 0; i < roomid.length; i++ ){
-				var fn = self.wx.SendEmojiXml(member.weixin_id, roomid[i], detail);
+			for( let i = 0; i < member.roomid.length; i++ ){
+				var fn = this.wx.SendEmojiXml(member.weixin_id, member.roomid[i], detail);
 			}
 
 			fn.then(ret => {
-				log.info('表情成功', [member.member_id, ret.msgId]);
+				log.info('表情成功', [member.member_id, ret]);
 			}).catch(err => {
 				log.error('表情失败', [member.member_id, err]);
 			});
@@ -763,8 +578,8 @@ class Groups {
 
 			log.info('替换UID', detail);
 
-			for( let i = 0; i < roomid.length; i++ ){
-				var fn = self.wx.SendAppMsgXml(member.weixin_id, roomid[i], detail);
+			for( let i = 0; i < member.roomid.length; i++ ){
+				var fn = this.wx.SendAppMsgXml(member.weixin_id, member.roomid[i], detail);
 			}
 
 			fn.then(ret => {
@@ -774,38 +589,6 @@ class Groups {
 			});
 
 			return fn;
-
-		}
-
-	}
-
-	/**
-	 * 补发消息
-	 */
-	reissueMessage( ) {
-
-		var size = this.delay.length;
-
-		//没有延迟消息 或 正在发送（暂停）
-		if( size == 0 || this.locked ){
-			log.info('暂无延迟', { 'delay': size, 'locked': this.locked });
-			return;
-		}
-
-		var size = size > 20 ? 20 : size;
-		var time = com.getTime() - 59 * 5;
-
-		for( let i = 0; i < size; i++ ){
-
-			let item = this.delay.shift();
-
-			//超过 5 分钟，执行补发，否则还回去
-			if( item.time <= time ){
-				this.forwardMessage( item.data, item.member, item.time );
-				log.info('补发消息', item );
-			}else{
-				this.delay.unshift( item );
-			}
 
 		}
 
