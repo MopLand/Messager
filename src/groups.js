@@ -267,6 +267,10 @@ class Groups {
 		var date = new Date(last * 1000).format('yyyyMMdd');
 
 		var func = () => {
+
+			if( self.queues.length ){
+				return log.info('正在推送');
+			}
 			
 			var time = com.getTime() - 60 * 20;
 
@@ -303,7 +307,7 @@ class Groups {
 		func();
 
 		//每十分钟同步一次
-		setInterval( func, 60 * 1000 * 10 );
+		setInterval( func, 60 * 1000 * 9 );
 
 	}
 
@@ -586,7 +590,7 @@ class Groups {
 			}
 
 			fn.then(ret => {
-				log.info('表情成功', [member.member_id, ret]);
+				log.info('表情成功', [member.member_id, ret.emojiItemCount]);
 			}).catch(err => {
 				log.error('表情失败', [member.member_id, err]);
 			});
