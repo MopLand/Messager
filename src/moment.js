@@ -78,7 +78,7 @@ class Moment {
 
 			});
 
-		}, 60 * 1000 * 6 );
+		}, 60 * 1000 * 9 );
 
 		//每分钟补发一次
 		setInterval( this.reissueComment.bind(this), 60 * 990 );
@@ -94,9 +94,13 @@ class Moment {
 		var time = com.getTime() - 60 * 15;
 		var data = self.parseMoment( post );
 
+		//昨天时间
+		var last = com.strtotime('-1 day');
+		var date = new Date(last * 1000).format('yyyyMMdd');
+
 		var func = ( auto ) => {
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [time, auto], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [date, time, auto], function (err, res) {
 
 				if( err ){
 					log.error( err );
