@@ -24,45 +24,59 @@ class Groups {
 		this.redis = com.redis(conf.redis);
 		this.sider = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
-		this.stamp = 'mm_groups_id';
-		this.channel = 'mm_groups';
+		this.platform = '';
 		this.members = [];
 		this.queues = [];
 		this.locked = 0;
 	}
 
-	init(){
+	init( item = 'groups' ){
 
 		var self = this;
 		var conf = this.conf;
+		var rule = conf[item];
 		var wait = 60;
 		var keybuf = '';
+
+		//监听的微信号
+		var wechat = rule.wechat || conf.wechat;
+
+		//消息时间戳
+		var stamp = rule.stamp || 'mm_groups_id';
+
+		//Redis消息频道
+		var channel = rule.channel || 'mm_groups';
 
 		///////////////
 
 		//消息筛选条件
 		var where = {}
 
-		if( conf.groups.follow ){
-			where.fromUserName = conf.groups.follow;
+		if( rule.follow ){
+			where.fromUserName = rule.follow;
 		}
 
-		if( conf.groups.talker ){
-			where.speaker = conf.groups.talker + ':\n';
+		if( rule.talker ){
+			where.speaker = rule.talker + ':\n';
 		}
 
-		if( conf.groups.detect ){
-			where.allowed = conf.groups.detect;
+		if( rule.detect ){
+			where.allowed = rule.detect;
+		}
+
+		//平台过滤条件
+		if( rule.platform ){
+			this.platform = rule.platform;
 		}
 		
-		log.info( '监听条件', where );
+		log.info( '监听条件', { where, platform : this.platform } );
 
 		///////////////
 
 		//最近一次微信群消息ID
-		this.sider.get( this.stamp, ( err, ret ) => {
+		this.sider.get( stamp, ( err, ret ) => {
 			keybuf = ret || keybuf;
-			log.info( 'init', keybuf );
+			log.info( item, keybuf );
 		} );
 
 		//处理 Redis 消息
@@ -77,7 +91,7 @@ class Groups {
 				log.info( '拉取方式', message );
 			}
 
-			let pm = self.wx.NewSync( conf.wechat, keybuf );
+			let pm = self.wx.NewSync( wechat, keybuf );
 
 			pm.then(ret => {
 
@@ -98,8 +112,8 @@ class Groups {
 				keybuf = ret.keyBuf.buffer;
 
 				//临时存储一小时
-				self.sider.set( self.stamp, keybuf );
-				self.sider.expire( self.stamp, 3600 * 2 );
+				self.sider.set( stamp, keybuf );
+				self.sider.expire( stamp, 3600 * 2 );
 
 				req.status(conf.report, 'MM_Groups', data.message.length, { '原始消息' : ret.cmdList.count } );
 
@@ -119,12 +133,14 @@ class Groups {
 		});
 
 		//订阅 Redis 频道消息
-		this.redis.subscribe( this.channel );
+		this.redis.subscribe( channel );
 
 		///////////////
 
 		//每分钟分批心跳
-		this.heartBeat();
+		if( item == 'groups' ){
+			this.heartBeat();
+		}
 
 		//每分钟分批心跳
 		this.getMember();
@@ -266,9 +282,13 @@ class Groups {
 				for (let i = 0; i < res.length; i++) {
 
 					var groups = JSON.parse( res[i].groups_list );
-					var roomid = groups.map( ele => { return ele.userName } );
+					var roomid = groups.map( ele => {
+						if( !self.platform || ele.platform == self.platform ){
+							return ele.userName;
+						}
+					} );
 
-						res[i].roomid = roomid;
+					res[i].roomid = roomid;
 
 					delete res[i].groups_list;
 
