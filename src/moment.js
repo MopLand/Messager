@@ -137,26 +137,6 @@ class Moment {
 	}
 
 	/**
-	 * 发送消息
-	 * @param string 微信ID
-	 * @param integer 类型
-	 * @param string 内容
-	 */
-	sendMoment(wxid, type, content) {
-
-		var pm = this.wx.SendFriendCircle(wxid, type, content);
-
-		pm.then(ret => {
-			log.info(ret);
-		}).catch(err => {
-			log.error(err);
-		});
-
-		return pm;
-
-	}
-
-	/**
 	 * 预处理朋友圈
 	 * @param object 发圈数据
 	 */
@@ -277,7 +257,7 @@ class Moment {
 					body = { 'status' : -code, 'body' : body, 'error' : e.toString() };
 				}
 
-				log.info('转链结果', [member.member_id, body, lazy_time]);
+				log.info( '转链结果', [member.member_id, body, lazy_time] );
 
 				///////////////
 				
@@ -287,9 +267,9 @@ class Moment {
 					let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, body.result);
 
 					pm.then(ret => {
-						log.info('评论成功', [member.weixin_id, post_id, ret.snsObject.id]);
+						log.info( '评论成功', [member.weixin_id, post_id, ret.snsObject.id] );
 					}).catch(err => {
-						log.error('评论失败', [member.weixin_id, err]);
+						log.error( '评论失败', [member.weixin_id, err] );
 					});
 
 				}else{
@@ -333,7 +313,7 @@ class Moment {
 		var size = this.delay.length;
 
 		if( size == 0 ){
-			log.info('暂无延迟', { 'delay': size });
+			log.info( '暂无延迟', { 'delay': size } );
 			return;
 		}
 
@@ -347,7 +327,7 @@ class Moment {
 			//超过 5 分钟，执行补发，否则还回去
 			if( item.time <= time ){
 				this.forwardComment( item.member, item.data, item.post_id, item.time );
-				log.info('补发消息', item );
+				log.info( '补发消息', item );
 			}else{
 				this.delay.unshift( item );
 			}

@@ -71,7 +71,7 @@ class Moment {
 
 			}).catch(err => {
 
-				log.info( err );
+				log.info( '读圈错误', err );
 
 				req.status(conf.report, 'MM_Moment', maxid, err);
 
@@ -229,11 +229,11 @@ class Moment {
 					//最后一条评论
 					last && func( post );
 
-					log.info('转链结果', [member.member_id, body]);
+					log.info( '转链结果', [member.member_id, body] );
 
 				}else{
 
-					log.error('转链错误', [member.member_id, body]);
+					log.error( '转链错误', [member.member_id, body] );
 
 					self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
@@ -287,9 +287,9 @@ class Moment {
 						let pm = self.wx.SnsComment(member.weixin_id, ret.snsObject.id, comm.type, comm.text);
 		
 						pm.then(ret => {
-							log.info('评论成功', [member.weixin_id, ret]);
+							log.info( '评论成功', [member.weixin_id, ret] );
 						}).catch(err => {
-							log.error('评论失败', [member.weixin_id, err]);
+							log.error( '评论失败', [member.weixin_id, err] );
 						});
 
 					}
