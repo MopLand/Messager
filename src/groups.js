@@ -160,7 +160,7 @@ class Groups {
 			self.parseMessage( self.members[i], msgs );
 
 			if( i < size - 1 ){
-				setTimeout( () => { func( i + 1 ); }, 50 );
+				setTimeout( () => { func( i + 1 ); }, 100 );
 			}
 
 			if( i > 0 ){
@@ -203,10 +203,16 @@ class Groups {
 				}else{
 					log.info( '本次心跳', res.length + ' 人' );
 				}
-	
-				for (let i = 0; i < res.length; i++) {
-	
-					let row = res[i];
+
+				var clok = setInterval(() => {
+
+					if( res.length == 0 ){
+						clearInterval( clok );
+						return log.info( '心跳完成' );
+					}
+
+					//弹出一个人
+					let row = res.shift();
 	
 					//获取群消息
 					let pm = self.wx.Heartbeat( row.weixin_id );
@@ -227,8 +233,8 @@ class Groups {
 						}
 	
 					} );
-	
-				}
+
+				 }, 100);
 	
 			});
 
@@ -499,7 +505,7 @@ class Groups {
 				//消息包未完成
 				if( data.message.length > 0 ){
 
-					setTimeout( () => { func(); }, 3000 );
+					setTimeout( () => { func(); }, 3500 );
 
 				}else{
 
