@@ -98,7 +98,7 @@ class Groups {
 				log.info( '原始消息', ret.cmdList.list );
 
 				//获取最新消息
-				var data = self.filterMessage( ret.cmdList.list, where );
+				var data = self.filterMessage( message, ret.cmdList.list, where );
 				var size = data.message.length;
 				var last = null;
 
@@ -332,17 +332,21 @@ class Groups {
 
 	/**
 	 * 消息过滤器
+	 * @param string 消息包ID
 	 * @param object 消息数据
 	 * @param object 过滤条件
 	 * @param integer 返回数据，-1 全返回，1 仅返回单条
 	 */
-	filterMessage( msgs, where = {}, limit = -1 ) {
+	filterMessage( pakId, msgs, where = {}, limit = -1 ) {
 
 		//构造数据包
 		var data = {
 
 			//需要转链
 			convert: 0,
+
+			//消息包ID
+			package: pakId,
 
 			//消息列表，{ exch, msgid, msgtype, content, source }
 			message: [],
@@ -510,7 +514,7 @@ class Groups {
 
 		var func = ( ) => {
 
-			log.info('消息拆包', { '用户ID' : user.member_id, '待发送' : data.message.length } );
+			log.info('消息拆包', { '用户ID' : user.member_id, '消息包' : data.package, '待发送' : data.message.length } );
 
 			let msg = data.message.shift();
 			let res = self.sendMsg( user, msg );
@@ -524,7 +528,7 @@ class Groups {
 
 				}else{
 
-					log.info('群发完毕', user.member_id);
+					log.info('群发完毕', [user.member_id, data.package]);
 					
 					//更新发群时间
 					self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ user.member_id ] );
