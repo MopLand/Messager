@@ -99,13 +99,16 @@ class Groups {
 
 				//获取最新消息
 				var data = self.filterMessage( ret.cmdList.list, where );
+				var size = data.message.length;
+				var last = null;
 
 				//发送最新消息
-				if( data.message.length ){
+				if( size ){
 					self.send( data );
+					last = data.message[ size - 1 ].rowid;
 				}
 				
-				log.info( '消息数量', { '原消息' : ret.cmdList.count, '筛选后' : data.message.length } );
+				log.info( '消息数量', { '原消息' : ret.cmdList.count, '筛选后' : size } );
 				log.info( '有效消息', data );
 				
 				//记录消息标记
@@ -115,7 +118,13 @@ class Groups {
 				self.sider.set( stamp, keybuf );
 				self.sider.expire( stamp, 3600 * 2 );
 
-				req.status(conf.report, 'MM_Groups', data.message.length, { '原始消息' : ret.cmdList.count } );
+				//消息不完整
+				if( message != 'timer' && message != last ){
+					log.info( '消息验证', { '通知ID' : message, '拉取ID' : last } );			
+					setTimeout( () => { self.sider.publish( channel, 'timer' ); }, 1000 * 30 );
+				}
+
+				req.status(conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : message, '拉取ID' : last } );
 
 			}).catch(err => {
 
@@ -385,7 +394,7 @@ class Groups {
 
 				if( exch ){ data.convert ++; }
 
-				data.message.push( { msgid : item.msgId, msgtype : item.msgType, content : text, source : item.msgSource, exch });
+				data.message.push( { msgid : item.msgId, rowid : item.newMsgId, msgtype : item.msgType, content : text, source : item.msgSource, exch });
 
 			}
 
