@@ -186,14 +186,37 @@ class Groups {
 
 		var self = this;
 		var klas = new Account(this.conf);
-		var span = 60;
+		var span = 200;
 		
 		//半小时以内有心跳
 		var time = () => {
 			return com.getTime() - 60 * 30;
 		};
 
-		var func = () => {
+		///////////////
+
+		//每半小时，计算一次心跳量
+		setInterval( () => {
+
+			self.mysql.query('SELECT COUNT(*) AS count FROM `pre_member_weixin` WHERE heartbeat_time >= ?', [time()], function (err, res) {
+
+				if( err ){
+					return log.error( '心跳统计', err );
+				}
+	
+				//以十分钟一轮，每次心跳数量
+				span = parseInt( res[0].count / 10 );
+	
+				log.info( '心跳计划', '总人数 ' + res[0].count + '，每次心跳 ' + span );
+				
+			});
+
+		}, 60 * 1000 * 30 );
+
+		///////////////
+		
+		//每分钟，分批次发送心跳
+		setInterval( () => {
 
 			self.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
 
@@ -238,26 +261,7 @@ class Groups {
 	
 			});
 
-		}
-
-		///////////////
-
-		log.info( '心跳范围', time() );
-
-		self.mysql.query('SELECT COUNT(*) AS count FROM `pre_member_weixin` WHERE heartbeat_time >= ?', [time()], function (err, res) {
-
-			if( err ){
-				return log.error( '心跳统计', err );
-			}
-
-			//以十分钟一轮，每次心跳数量
-			span = parseInt( res[0].count / 10 );
-
-			log.info( '心跳计划', '总人数 ' + res[0].count + '，每次心跳 ' + span );
-			
-			setInterval( func, 60 * 900 );
-			
-		});
+		}, 60 * 1000 );
 
 	}
 
@@ -454,7 +458,9 @@ class Groups {
 
 					//写入延迟消息
 					if( lazy_time == 0 ){
-						setTimeout( () => { self.parseMessage( member, data, com.getTime() ); }, 60 * 1000 * 5 );
+						var user = com.clone( member );
+						var time = com.getTime();
+						setTimeout( () => { self.parseMessage( user, data, time ); }, 60 * 1000 * 5 );
 					}
 
 				}
