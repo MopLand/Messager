@@ -169,17 +169,19 @@ class Moment {
 				let type = post.commentUserList[i].type;
 				let text = post.commentUserList[i].content;
 				let comm = text.toLocaleUpperCase();
-				let exch = act.detectTbc( text ) || act.detectUrl( text );
-					exch && data.convert ++;
+				let exch = false;
 
 				if( comm == conf.ignore ){
 					data.sending = false;
 					log.info( '跳过发圈', comm );
 				}
 
-				if( comm == conf.origin ){
+				if( conf.origin && conf.origin.test( comm ) ){
 					data.convert = 0;
 					log.info( '不要转链', comm );
+				}else{
+					exch = act.detectTbc( text ) || act.detectUrl( text );
+					exch && data.convert ++;
 				}
 
 				data.comment.push( { exch, type, text } );

@@ -64,6 +64,11 @@ class Groups {
 			where.allowed = rule.detect;
 		}
 
+		//原样标识符
+		if( rule.origin ){
+			this.origin = rule.origin;
+		}
+
 		//平台过滤条件
 		if( rule.platform ){
 			this.platform = rule.platform;
@@ -395,9 +400,13 @@ class Groups {
 			//满足所有条件
 			if (size == Object.keys(where).length) {
 
-				let exch = item.msgType == 1 ? ( act.detectTbc( text ) || act.detectUrl( text ) ) : false;
+				let exch = false;
 
-				if( exch ){ data.convert ++; }
+				//配置部分文本不转链
+				if( item.msgType == 1 && this.origin && !this.origin.test( text ) ){
+					exch = ( act.detectTbc( text ) || act.detectUrl( text ) );
+					exch && data.convert ++;
+				}
 
 				data.message.push( { msgid : item.msgId, rowid : item.newMsgId, msgtype : item.msgType, content : text, source : item.msgSource, exch });
 
