@@ -64,7 +64,7 @@ class Moment {
 					log.info( '暂无发圈', { 'maxid' : maxid, 'post.id' : post.id, 'post.time' : post.createTime } );
 				}
 
-				//临时存储一小时
+				//临时存储一天
 				self.redis.set( self.stamp, post.id );
 				self.redis.expire( self.stamp, 3600 * 14 );
 

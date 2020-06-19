@@ -84,7 +84,7 @@ class Groups {
 
 			//正在读取消息，锁还未失效
 			if( self.locked && self.locked >= com.getTime() - wait ){
-				log.info( '读消息锁', locked );
+				log.info( '读消息锁', self.locked );
 				return;
 			}else{
 				self.locked = com.getTime();
@@ -100,31 +100,32 @@ class Groups {
 				//获取最新消息
 				var data = self.filterMessage( message, ret.cmdList.list, where );
 				var size = data.message.length;
-				var last = null;
+				var find = false;
 
 				//发送最新消息
 				if( size ){
 					self.send( data );
-					last = data.message[ size - 1 ].rowid;
+					find = data.message.find( ele => {
+						return ele.rowid == message;
+					} );
 				}
 				
-				log.info( '消息数量', { '原消息' : ret.cmdList.count, '筛选后' : size } );
+				log.info( '消息数量', { '通知ID' : message, '原消息' : ret.cmdList.count, '筛选后' : size } );
 				log.info( '有效消息', data );
 				
 				//记录消息标记
 				keybuf = ret.keyBuf.buffer;
 
-				//临时存储一小时
+				//临时存储一天
 				self.sider.set( stamp, keybuf );
-				self.sider.expire( stamp, 3600 * 2 );
+				self.sider.expire( stamp, 3600 * 14 );
 
 				//消息不完整
-				if( message != 'timer' && message != last ){
-					log.info( '消息验证', { '通知ID' : message, '拉取ID' : last } );			
+				if( !find && message != 'timer' ){
 					setTimeout( () => { self.sider.publish( channel, 'timer' ); }, 1000 * 30 );
 				}
 
-				req.status(conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : message, '拉取ID' : last } );
+				req.status(conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : message, '拉取ID' : find } );
 
 			}).catch(err => {
 
