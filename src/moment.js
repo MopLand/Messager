@@ -142,7 +142,14 @@ class Moment {
      * @param object 状态信息
      */
 	status( member_id, body ) {
-		return this.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member_id ] );
+
+		var pushed = null;
+
+		if( body.err && body.err.indexOf('退出微信') > -1 ){
+			pushed = '请检查微信是否在登录状态?';
+		}
+
+		return this.mysql.query('UPDATE `pre_member_weixin` SET pushed = ?, status = ?, status_time = ? WHERE member_id = ?', [ pushed, JSON.stringify( body ), com.getTime(), member_id ] );
 	}
 
 	/**
