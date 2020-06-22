@@ -195,6 +195,15 @@ class Groups {
 	}
 
 	/**
+     * 更新状态
+     * @param integer 用户Id
+     * @param object 状态信息
+     */
+	status( member_id, body ) {
+		return this.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member_id ] );
+	}
+
+	/**
 	 * 同步心跳
 	 */
 	heartBeat() {
@@ -477,7 +486,9 @@ class Groups {
 					body.source = 'groups';
 					body.lazy_time = lazy_time;
 
-					self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+					
+					self.status( member.member_id, body );
 
 					//写入延迟消息
 					if( lazy_time == 0 ){
@@ -565,6 +576,7 @@ class Groups {
 	 */
 	sendMsg( member, msg ){
 
+		var self = this;
 		var detail = msg.content;
 
 		//文本
@@ -576,6 +588,7 @@ class Groups {
 				log.info('文本成功', [member.member_id, ret.count]);
 			}).catch(err => {
 				log.error('文本失败', [member.member_id, err]);
+				self.status( member.member_id, { api:'NewSendMsg', err } );
 			});
 
 			return fn;
@@ -593,6 +606,7 @@ class Groups {
 				log.info('发图成功', [member.member_id, ret.msgId]);
 			}).catch(err => {
 				log.error('发图失败', [member.member_id, err]);
+				self.status( member.member_id, { api:'UploadMsgImgXml', err } );
 			});
 
 			return fn;
@@ -610,6 +624,7 @@ class Groups {
 				log.info('视频成功', [member.member_id, ret.msgId]);
 			}).catch(err => {
 				log.error('视频失败', [member.member_id, err]);
+				self.status( member.member_id, { api:'UploadVideoXml', err } );
 			});
 
 			return fn;
@@ -628,6 +643,7 @@ class Groups {
 				log.info('表情成功', [member.member_id, ret.emojiItemCount]);
 			}).catch(err => {
 				log.error('表情失败', [member.member_id, err]);
+				self.status( member.member_id, { api:'SendEmojiXml', err } );
 			});
 
 			return fn;
@@ -649,6 +665,7 @@ class Groups {
 				log.info('小程序成功', [member.member_id, ret.msgId]);
 			}).catch(err => {
 				log.error('小程序失败', [member.member_id, err]);
+				self.status( member.member_id, { api:'SendAppMsgXml', err } );
 			});
 
 			return fn;

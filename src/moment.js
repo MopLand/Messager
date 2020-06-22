@@ -137,6 +137,15 @@ class Moment {
 	}
 
 	/**
+     * 更新状态
+     * @param integer 用户Id
+     * @param object 状态信息
+     */
+	status( member_id, body ) {
+		return this.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member_id ] );
+	}
+
+	/**
 	 * 预处理朋友圈
 	 * @param object 发圈数据
 	 */
@@ -215,6 +224,7 @@ class Moment {
 	 */
 	forwardMoment(member, data) {
 
+		let self = this;
 		let pm = this.wx.SnsPostXml(member.weixin_id, data.subject);
 
 		pm.then(ret => {
@@ -226,6 +236,7 @@ class Moment {
 
 		}).catch(err => {
 			log.error( '发圈出错', [member.member_id, err] );
+			self.status( member.member_id, { api:'SnsPostXml', err } );
 		});
 
 		return pm;
@@ -272,6 +283,7 @@ class Moment {
 						log.info( '评论成功', [member.weixin_id, post_id, ret.snsObject.id] );
 					}).catch(err => {
 						log.error( '评论失败', [member.weixin_id, err] );
+						self.status( member.member_id, { api:'SnsComment', err } );
 					});
 
 				}else{
@@ -279,7 +291,9 @@ class Moment {
 					body.source = 'moment';
 					body.lazy_time = lazy_time;
 
-					self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+
+					self.status( member.member_id, body );
 
 					//是延迟补发的消息，删除这条朋友圈，否则写入延迟消息
 					if( lazy_time ){

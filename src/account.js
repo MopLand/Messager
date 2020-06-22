@@ -119,7 +119,7 @@ class Account {
      * 检查登录状态
      * @param string wxId 微信Id
      */
-	check ( uuid ) {
+	check( uuid ) {
 
 		var pm = this.wx.CheckLogin(uuid);
 
