@@ -127,7 +127,7 @@ class Groups {
 
 				//消息不完整
 				if( !find && message != 'timer' ){
-					setTimeout( () => { self.sider.publish( channel, 'timer' ); }, 1000 * 30 );
+					setTimeout( () => { self.sider.publish( channel, 'timer' ); }, 1000 * 45 );
 				}
 
 				req.status(conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : message, '拉取ID' : find } );
