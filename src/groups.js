@@ -619,59 +619,63 @@ class Groups {
 		//媒体
 		for( var i = 0; i < member.roomid.length; i++ ){
 
+			let chat = member.roomid[i];
+
 			//图片
 			if( msg.msgtype == 3 ){
 
-				let fn = this.wx.UploadMsgImgXml(member.weixin_id, member.roomid[i], detail);
+				var fn = this.wx.UploadMsgImgXml(member.weixin_id, chat, detail);
 
 				fn.then(ret => {
 					log.info('发图成功', [member.member_id, ret.msgId]);
 				}).catch(err => {
-					log.error('发图失败', [member.member_id, err]);
-					self.status( member.member_id, { api:'UploadMsgImgXml', err } );
+					log.error('发图失败', [member.member_id, chat, err]);
+					self.status( member.member_id, { api:'UploadMsgImgXml', chat, err } );
 				});
 			}
 
 			//视频
 			if( msg.msgtype == 43 ){
 
-				let fn = this.wx.UploadVideoXml(member.weixin_id, member.roomid[i], detail);
+				var fn = this.wx.UploadVideoXml(member.weixin_id, chat, detail);
 
 				fn.then(ret => {
 					log.info('视频成功', [member.member_id, ret.msgId]);
 				}).catch(err => {
-					log.error('视频失败', [member.member_id, err]);
-					self.status( member.member_id, { api:'UploadVideoXml', err } );
+					log.error('视频失败', [member.member_id, chat, err]);
+					self.status( member.member_id, { api:'UploadVideoXml', chat, err } );
 				});
 			}
 
 			//表情
 			if( msg.msgtype == 47 ){
 
-				let fn = this.wx.SendEmojiXml(member.weixin_id, member.roomid[i], detail);
+				var fn = this.wx.SendEmojiXml(member.weixin_id, chat, detail);
 
 				fn.then(ret => {
 					log.info('表情成功', [member.member_id, ret.emojiItemCount]);
 				}).catch(err => {
-					log.error('表情失败', [member.member_id, err]);
-					self.status( member.member_id, { api:'SendEmojiXml', err } );
+					log.error('表情失败', [member.member_id, chat, err]);
+					self.status( member.member_id, { api:'SendEmojiXml', chat, err } );
 				});
 			}
 
 			//小程序
 			if( msg.msgtype == 49 ){
 
-				let fn = this.wx.SendAppMsgXml(member.weixin_id, member.roomid[i], detail);
+				var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, detail);
 
 				fn.then(ret => {
 					log.info('小程序成功', [member.member_id, ret.msgId]);
 				}).catch(err => {
-					log.error('小程序失败', [member.member_id, err]);
-					self.status( member.member_id, { api:'SendAppMsgXml', err } );
+					log.error('小程序失败', [member.member_id, chat, err]);
+					self.status( member.member_id, { api:'SendAppMsgXml', chat, err } );
 				});
 			}
 
 		}
+
+		return fn;
 
 		/*
 		//图片
