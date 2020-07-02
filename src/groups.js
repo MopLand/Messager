@@ -534,13 +534,17 @@ class Groups {
 	forwardMessage() {
 
 		if( this.queues.length == 0 ){
-			return log.info('暂无消息');
+			return log.info('暂无队列');
 		}
 
 		var self = this;
 		let item = this.queues.shift();
 		let user = item.member;
 		let data = item.data;
+
+		if( !user.member_id ){
+			return log.info('异常队列', user);
+		}
 
 		log.info( '当前微信', { '用户ID' : user.member_id, '微信号' : user.weixin_id, '群数量' : user.roomid.length, '消息量' : data.message.length } );
 
@@ -606,11 +610,75 @@ class Groups {
 
 		}
 
+		//小程序
+		if( msg.msgtype == 49 ){		
+			detail = detail.replace(/userid=(\d*)/g, 'userid=' + member.member_id);
+			log.info('替换UID', detail);
+		}
+
+		//媒体
+		for( var i = 0; i < member.roomid.length; i++ ){
+
+			//图片
+			if( msg.msgtype == 3 ){
+
+				let fn = this.wx.UploadMsgImgXml(member.weixin_id, member.roomid[i], detail);
+
+				fn.then(ret => {
+					log.info('发图成功', [member.member_id, ret.msgId]);
+				}).catch(err => {
+					log.error('发图失败', [member.member_id, err]);
+					self.status( member.member_id, { api:'UploadMsgImgXml', err } );
+				});
+			}
+
+			//视频
+			if( msg.msgtype == 43 ){
+
+				let fn = this.wx.UploadVideoXml(member.weixin_id, member.roomid[i], detail);
+
+				fn.then(ret => {
+					log.info('视频成功', [member.member_id, ret.msgId]);
+				}).catch(err => {
+					log.error('视频失败', [member.member_id, err]);
+					self.status( member.member_id, { api:'UploadVideoXml', err } );
+				});
+			}
+
+			//表情
+			if( msg.msgtype == 47 ){
+
+				let fn = this.wx.SendEmojiXml(member.weixin_id, member.roomid[i], detail);
+
+				fn.then(ret => {
+					log.info('表情成功', [member.member_id, ret.emojiItemCount]);
+				}).catch(err => {
+					log.error('表情失败', [member.member_id, err]);
+					self.status( member.member_id, { api:'SendEmojiXml', err } );
+				});
+			}
+
+			//小程序
+			if( msg.msgtype == 49 ){
+
+				let fn = this.wx.SendAppMsgXml(member.weixin_id, member.roomid[i], detail);
+
+				fn.then(ret => {
+					log.info('小程序成功', [member.member_id, ret.msgId]);
+				}).catch(err => {
+					log.error('小程序失败', [member.member_id, err]);
+					self.status( member.member_id, { api:'SendAppMsgXml', err } );
+				});
+			}
+
+		}
+
+		/*
 		//图片
 		if ( msg.msgtype == 3 ) {
 
 			for( let i = 0; i < member.roomid.length; i++ ){
-				var fn = this.wx.UploadMsgImgXml(member.weixin_id, member.roomid[i], detail);
+				var fn = this.wx.UploadMsgImgXml(member.weixin_id, member.roomid[i], detail);				
 			}
 
 			fn.then(ret => {
@@ -682,6 +750,7 @@ class Groups {
 			return fn;
 
 		}
+		*/
 
 	}
 
