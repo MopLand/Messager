@@ -2,6 +2,7 @@
 const Common = require('./lib/common');
 const Loader = require('./lib/loader');
 const Weixin = require('./lib/weixin');
+const Activity = require('./lib/activity');
 const Groups = require('./src/groups');
 const Moment = require('./src/moment');
 const Account = require('./src/account');
@@ -11,6 +12,12 @@ let conf = Common.getConf( __dirname );
 let func = Common.getFunc();
 
 var wx = new Weixin( conf.weixin );
+
+if( func == 'code' ){
+	let text = Common.getArgv( 'text' );
+	let test = Activity.detectTbc( text );
+	console.log( test );
+}
 
 if( func == 'send' ){
 
