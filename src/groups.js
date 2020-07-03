@@ -127,7 +127,7 @@ class Groups {
 
 				//消息不完整
 				if( !find && message != 'timer' ){
-					setTimeout( () => { self.sider.publish( channel, 'timer' ); }, 1000 * 45 );
+					setTimeout( () => { self.sider.publish( channel, 'timer' ); }, 1000 * 50 );
 				}
 
 				req.status(conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : message, '拉取ID' : find } );
@@ -627,10 +627,10 @@ class Groups {
 				var fn = this.wx.UploadMsgImgXml(member.weixin_id, chat, detail);
 
 				fn.then(ret => {
-					log.info('发图成功', [member.member_id, ret.msgId]);
+					log.info('发图成功', [member.member_id, chat, ret.msgId]);
 				}).catch(err => {
-					log.error('发图失败', [member.member_id, chat, err]);
-					self.status( member.member_id, { api:'UploadMsgImgXml', chat, err } );
+					log.error('发图失败', [member.member_id, err, chat]);
+					self.status( member.member_id, { api:'UploadMsgImgXml', err, chat } );
 				});
 			}
 
@@ -640,10 +640,10 @@ class Groups {
 				var fn = this.wx.UploadVideoXml(member.weixin_id, chat, detail);
 
 				fn.then(ret => {
-					log.info('视频成功', [member.member_id, ret.msgId]);
+					log.info('视频成功', [member.member_id, chat, ret.msgId]);
 				}).catch(err => {
-					log.error('视频失败', [member.member_id, chat, err]);
-					self.status( member.member_id, { api:'UploadVideoXml', chat, err } );
+					log.error('视频失败', [member.member_id, err, chat]);
+					self.status( member.member_id, { api:'UploadVideoXml', err, chat } );
 				});
 			}
 
@@ -653,10 +653,10 @@ class Groups {
 				var fn = this.wx.SendEmojiXml(member.weixin_id, chat, detail);
 
 				fn.then(ret => {
-					log.info('表情成功', [member.member_id, ret.emojiItemCount]);
+					log.info('表情成功', [member.member_id, chat, ret]);
 				}).catch(err => {
-					log.error('表情失败', [member.member_id, chat, err]);
-					self.status( member.member_id, { api:'SendEmojiXml', chat, err } );
+					log.error('表情失败', [member.member_id, err, chat]);
+					self.status( member.member_id, { api:'SendEmojiXml', err, chat } );
 				});
 			}
 
@@ -666,10 +666,10 @@ class Groups {
 				var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, detail);
 
 				fn.then(ret => {
-					log.info('小程序成功', [member.member_id, ret.msgId]);
+					log.info('小程序成功', [member.member_id, chat, ret.msgId]);
 				}).catch(err => {
-					log.error('小程序失败', [member.member_id, chat, err]);
-					self.status( member.member_id, { api:'SendAppMsgXml', chat, err } );
+					log.error('小程序失败', [member.member_id, err, chat]);
+					self.status( member.member_id, { api:'SendAppMsgXml', err, chat } );
 				});
 			}
 
