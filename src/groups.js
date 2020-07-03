@@ -678,7 +678,7 @@ class Groups {
 				});
 			}
 
-			await sleep(500);
+			await sleep(1000);
 
 		}
 
