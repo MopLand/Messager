@@ -616,6 +616,11 @@ class Groups {
 			log.info('替换UID', detail);
 		}
 
+		//表情, TEMP
+		function sleep(ms) {
+			return new Promise(resolve => setTimeout(resolve, ms));
+		}
+
 		//媒体
 		for( var i = 0; i < member.roomid.length; i++ ){
 
@@ -672,6 +677,8 @@ class Groups {
 					self.status( member.member_id, { api:'SendAppMsgXml', err, chat } );
 				});
 			}
+
+			await sleep(500);
 
 		}
 
