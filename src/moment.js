@@ -55,12 +55,18 @@ class Moment {
 
 				let post = ret.objectList[0];
 
+				//必需有评论
+				if( post.commentUserListCount == 0 ){
+					log.info( '暂无评论', { 'post.data' : post, 'post.time' : post.createTime } );
+					return;
+				}
+
 				//转发朋友圈
 				if( post.id > maxid ){
 					self.send( post );
 					maxid = post.id;
 					//log.info( '最新发圈', post );
-				}else{					
+				}else{
 					log.info( '暂无发圈', { 'maxid' : maxid, 'post.id' : post.id, 'post.time' : post.createTime } );
 				}
 
@@ -78,7 +84,7 @@ class Moment {
 
 			});
 
-		}, 60 * 1000 * 9 );
+		}, 60 * 1000 * 5 );
 
 		//每分钟补发一次
 		setInterval( this.reissueComment.bind(this), 60 * 990 );
