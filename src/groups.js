@@ -451,12 +451,13 @@ class Groups {
 	 */
 	parseMessage( member, data, lazy_time = 0 ){
 
+		var user = com.clone( member );
 		var data = com.clone( data );
 		var self = this;
 
 		//无需转链，直接回调
 		if( data.convert == 0 ){
-			return self.queues.push( { member, data } );
+			return self.queues.push( { 'member' : user, data } );
 		}
 
 		for (let i = 0; i < data.message.length; i++) {
@@ -464,7 +465,7 @@ class Groups {
 			let comm = data.message[i];
 			let exch = comm.msgtype == 1 && comm.exch;
 
-			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.content, 'lazy_time' : lazy_time }, (code, body) => {
+			req.get(self.conf.convert, { 'member_id' : user.member_id, 'text' : comm.content, 'lazy_time' : lazy_time }, (code, body) => {
 				
 				try {
 					if( typeof body == 'string' ){
@@ -475,7 +476,7 @@ class Groups {
 				}
 
 				if( exch ){
-					log.info('转链结果', { 'member_id' : member.member_id, body, lazy_time, 'convert' : data.convert });
+					log.info('转链结果', { 'member_id' : user.member_id, body, lazy_time, 'convert' : data.convert });
 				}
 
 				///////////////
@@ -489,7 +490,7 @@ class Groups {
 					comm.exch && data.convert --;
 
 					if( data.convert == 0 ){
-						self.queues.push( { member, data } );
+						self.queues.push( { 'member' : user, data } );
 					}
 
 				}else{
@@ -497,13 +498,12 @@ class Groups {
 					body.source = 'groups';
 					body.lazy_time = lazy_time;
 
-					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
 					
-					self.status( member.member_id, body );
+					self.status( user.member_id, body );
 
 					//写入延迟消息
 					if( lazy_time == 0 ){
-						var user = com.clone( member );
 						var time = com.getTime();
 						setTimeout( () => { self.parseMessage( user, data, time ); }, 60 * 1000 * 5 );
 					}
@@ -542,7 +542,7 @@ class Groups {
 		let user = item.member;
 		let data = item.data;
 
-		if( !user.member_id ){
+		if( typeof user.member_id == 'undefined' ){
 			return log.info('异常队列', user);
 		}
 
