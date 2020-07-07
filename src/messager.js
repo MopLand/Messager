@@ -149,6 +149,7 @@ class Messager {
 			'after_open': msg.after_open,
 		});
 
+		this.ios.setCustomizedField('msgid', msg.msgid);
 		this.ios.setCustomizedField('target', msg.after_open);
 		this.ios.setCustomizedField('content', msg.content);
 		this.ios.setCustomizedField('category', msg.category);
