@@ -113,6 +113,7 @@ class Messager {
 		this.and.setTitle(msg.ticker);
 		this.and.setText(msg.text);
 
+		this.and.setExtraField('msgid', msg.msgid);
 		this.and.setExtraField('target', msg.after_open);
 		this.and.setExtraField('content', msg.content);
 		this.and.setExtraField('category', msg.category);
