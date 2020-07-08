@@ -58,7 +58,7 @@ var conf = {
 		ignore: 'SKIP',
 	
 		//原样标识符
-		origin: 'KEEP',
+		origin: /KEEP|猫超券/,
 
 	},
 
@@ -78,6 +78,9 @@ var conf = {
 
 		//内容有效性
 		detect: /[\u4e00-\u9fa5]/,
+	
+		//原样标识符
+		origin: /猫超券/,
 
 	}
 

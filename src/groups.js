@@ -357,6 +357,44 @@ class Groups {
 	}
 
 	/**
+	 * 删除无效群
+	 * @param integer 用户ID
+	 * @param string 群ID
+	 */
+	delGroup( member_id, group_id ){
+
+		var self = this;
+
+		self.mysql.query('SELECT * FROM `pre_member_weixin` WHERE member_id = ? LIMIT 1', [member_id], function (err, res) {
+
+			if( err ){
+				log.error( err );
+				return;
+			}
+
+			if( res.length == 0 ){
+				log.info( '无效用户', res.length + ' 人' );
+			}
+
+			//当前用户
+			let member = res.shift();
+
+			//清除此群
+			var groups = JSON.parse( member.groups_list );
+			var newgrp = groups.filter( ele => {
+				return ele.userName != group_id;
+			} );
+					
+			//更新微信群
+			self.mysql.query('UPDATE `pre_member_weixin` SET groups_num = ?, groups_list = ?, updated_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ newgrp.length, JSON.stringify( newgrp ), member_id ] );
+			
+			log.info( '删除群组', { member_id, group_id, groups, newgrp } );
+
+		});
+
+	}
+
+	/**
 	 * 消息过滤器
 	 * @param string 消息包ID
 	 * @param object 消息数据
@@ -632,10 +670,19 @@ class Groups {
 				var fn = this.wx.UploadMsgImgXml(member.weixin_id, chat, detail);
 
 				fn.then(ret => {
+
 					log.info('发图成功', [member.member_id, chat, ret.msgId]);
+
 				}).catch(err => {
+
 					log.error('发图失败', [member.member_id, err, chat]);
 					self.status( member.member_id, { api:'UploadMsgImgXml', err, chat } );
+
+					//群已经失效
+					if( err == 'MM_ERR_NOTCHATROOMCONTACT' ){
+						self.delGroup( member.member_id, chat );
+					}
+
 				});
 			}
 
