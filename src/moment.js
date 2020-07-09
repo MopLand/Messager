@@ -24,6 +24,7 @@ class Moment {
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 		this.stamp = 'mm_moment_id';
 		this.delay = [];
+		this.abort = false;
 	}
 
 	init(){
@@ -103,19 +104,24 @@ class Moment {
 		//昨天时间
 		var last = com.strtotime('-1 day');
 		var date = new Date(last * 1000).format('yyyyMMdd');
+		
+		//取消中断
+		self.abort = false;
 
 		var func = ( auto ) => {
+
+			if( self.abort ){
+				return log.error( '中断发送', 'MMSNS_RET_SPAM' );
+			}
 
 			self.mysql.query('SELECT auto_id, member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [date, time, auto], function (err, res) {
 
 				if( err ){
-					log.error( err );
-					return;
+					return log.error( '读取错误', err );
 				}
 
 				if( res.length == 0 ){
-					log.info( '处理完毕', time );
-					return;
+					return log.info( '处理完毕', time );
 				}else{
 					log.info( '本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条' );
 				}
@@ -248,8 +254,15 @@ class Moment {
 			log.info( '发圈成功', ret.snsObject.id );
 
 		}).catch(err => {
+
 			log.error( '发圈出错', [member.member_id, err] );
 			self.status( member.member_id, { api:'SnsPostXml', err } );
+
+			//判定为垃圾消息
+			if( err == 'MMSNS_RET_SPAM' ){
+				self.abort = true;
+			}
+
 		});
 
 		return pm;
