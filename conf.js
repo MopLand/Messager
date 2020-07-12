@@ -60,6 +60,9 @@ var conf = {
 		//原样标识符
 		origin: /KEEP|猫超券/,
 
+		//遇错误中断发送
+		cancel: /MMSNS_RET_SPAM/,
+
 	},
 
 	//微信群

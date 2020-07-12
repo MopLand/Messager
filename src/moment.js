@@ -111,7 +111,7 @@ class Moment {
 		var func = ( auto ) => {
 
 			if( self.abort ){
-				return log.error( '中断发送', 'MMSNS_RET_SPAM' );
+				return log.error( '中断发送', self.abort );
 			}
 
 			self.mysql.query('SELECT auto_id, member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [date, time, auto], function (err, res) {
@@ -157,7 +157,7 @@ class Moment {
 
 		var pushed = null;
 
-		if( body.err && body.err.indexOf('退出微信') > -1 ){
+		if( typeof body.err == 'string' && body.err.indexOf('退出微信') > -1 ){
 			pushed = '请检查微信是否在登录状态?';
 		}
 
@@ -259,8 +259,10 @@ class Moment {
 			self.status( member.member_id, { api:'SnsPostXml', err } );
 
 			//判定为垃圾消息
-			if( err == 'MMSNS_RET_SPAM' ){
-				self.abort = true;
+			if( typeof err == 'string' && self.conf.moment.cancel ){
+				if( ret = self.conf.moment.cancel.match( err ) ){
+					self.abort = ret[0];
+				}
 			}
 
 		});
