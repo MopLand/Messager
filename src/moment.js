@@ -260,7 +260,7 @@ class Moment {
 
 			//判定为垃圾消息
 			if( typeof err == 'string' && self.conf.moment.cancel ){
-				if( ret = self.conf.moment.cancel.match( err ) ){
+				if( ret = err.match( self.conf.moment.cancel ) ){
 					self.abort = ret[0];
 				}
 			}
