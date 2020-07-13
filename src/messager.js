@@ -1,6 +1,7 @@
 'use strict'
 
 const common = require('../lib/common');
+const logger = require('../lib/logger');
 const request = require('../lib/request');
 const umsdk = require('umeng-push-server-sdk');
 const umeng = new umsdk.client();
@@ -13,6 +14,8 @@ class Messager {
      * @param boolean test 是否测试
      */
 	constructor(conf, test) {
+
+		new logger().clean();
 
 		this.conf = conf;
 
