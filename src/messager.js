@@ -77,10 +77,21 @@ class Messager {
 			}
 
 			!test && msgs.forEach(msg => {
-
-				self.sendAndroid(msg);
-
-				self.sendIPhone(msg);
+			
+				//初始化别名
+				let alias = [ msg.alias ];
+				
+				//加抄送消息
+				if( msg.carbon ){
+					alias = alias.concat( msg.carbon.split(/[, ]+/) );
+				}
+				
+				//循环发消息
+				alias.forEach( uid => {
+					msg.alias = uid;
+					self.sendAndroid( msg );
+					self.sendIPhone( msg );
+				} );
 
 				//消息数自减，同时更新消息状态
 				var ret = copyed.decrby(msg.tag, 1, function (err, len) {
