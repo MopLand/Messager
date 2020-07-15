@@ -76,7 +76,7 @@ class Messager {
 				console.log(msgs);
 			}
 
-			!test && msgs.forEach(msg => {
+			!test && msgs.forEach( msg => {
 			
 				//初始化别名
 				let alias = [ msg.alias ];
@@ -86,9 +86,10 @@ class Messager {
 					alias = alias.concat( msg.carbon.split(/[, ]+/) );
 				}
 				
-				//循环发消息
-				alias.forEach( uid => {
+				//循环发消息，抄送标题增加 CC
+				alias.forEach( ( uid, idx ) => {
 					msg.alias = uid;
+					msg.ticker = idx == 1 ? 'CC: ' + msg.ticker : msg.ticker;
 					self.sendAndroid( msg );
 					self.sendIPhone( msg );
 				} );
