@@ -284,10 +284,20 @@ class Groups {
 	
 					}).catch( err => {
 	
-						log.info( '心跳失败', [row.weixin_id, err] );
+						log.debug( '心跳失败', [row.weixin_id, err] );
 	
+						//autoauth -> pushlogin -> qrcodelogin
 						if( err.indexOf('退出微信登录') > -1 ){
-							klas.init( row.weixin_id );
+							
+							let pa = self.wx.AutoAuth( row.weixin_id );
+	
+							pa.then( ret => {
+								log.info( '登录成功', [row.weixin_id, ret] );
+							}).catch( err => {
+								log.debug( '登录失败', [row.weixin_id, err] );
+								klas.init( row.weixin_id );
+							});
+							
 						}
 	
 					} );

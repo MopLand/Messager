@@ -103,7 +103,7 @@ class Account {
 
 		log.info('登录方式', wxid, wxid ? 'Push' : 'Qrcode' );
 
-		pm.then(ret => {
+		pm.then( ret => {
 			if( !wxid && ret.qrcode ){
 				Common.SavePic(decodeURIComponent(ret.qrcode.buffer), self.code );
 			}

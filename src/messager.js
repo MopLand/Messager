@@ -141,10 +141,10 @@ class Messager {
 
 		var ret = umeng.send(this.and);
 
-		ret.then(function (result) {
-			console.log('Android', '#' + msg.msgid, 'Alias ' + msg.alias, result ? '成功' : '失败', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
-		}).catch(function (reason) {
-			console.log('Android', '#' + msg.msgid, reason);
+		ret.then( ret => {
+			console.log('Android', '#' + msg.msgid, 'Alias ' + msg.alias, ret ? '成功' : '失败', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
+		}).catch( err => {
+			console.log('Android', '#' + msg.msgid, err);
 		});
 
 	}
@@ -174,10 +174,10 @@ class Messager {
 
 		var ret = umeng.send(this.ios);
 
-		ret.then(function (result) {
-			console.log('iPhone', '#' + msg.msgid, 'Alias ' + msg.alias, result ? '成功' : '失败', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
-		}).catch(function (reason) {
-			console.log('iPhone', '#' + msg.msgid, reason);
+		ret.then( ret => {
+			console.log('iPhone', '#' + msg.msgid, 'Alias ' + msg.alias, ret ? '成功' : '失败', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
+		}).catch( err => {
+			console.log('iPhone', '#' + msg.msgid, err);
 		});
 
 	}
