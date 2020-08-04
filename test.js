@@ -15,7 +15,7 @@ var wx = new Weixin( conf.weixin );
 
 if( func == 'code' ){
 	let text = Common.getArgv( 'text' );
-	let test = Activity.detectTbc( text );
+	let test = Activity.extractTbc( text );
 	console.log( test );
 }
 

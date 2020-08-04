@@ -318,14 +318,20 @@ class Moment {
 					//////////////
 
 					//链接
-					let lm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, '下单链接 http://wx.bhurl.net/wx.php?code=' + act.extractTbc( body.result ) );
+					let kl = act.extractTbc( body.result );
 
-					lm.then(ret => {
-						log.info( '链接成功', [member.weixin_id, post_id, ret.snsObject.id] );
-					}).catch(err => {
-						log.error( '链接失败', [member.weixin_id, err] );
-						self.status( member.member_id, { api:'SnsComment', act:'link', err } );
-					});
+					if( kl ){
+						
+						let lm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, '下单链接 http://wx.bhurl.net/wx.php?code=' + kl );
+
+						lm.then(ret => {
+							log.info( '链接成功', [member.weixin_id, post_id, ret.snsObject.id] );
+						}).catch(err => {
+							log.error( '链接失败', [member.weixin_id, err] );
+							self.status( member.member_id, { api:'SnsComment', act:'link', err } );
+						});
+
+					}
 
 				}else{
 
