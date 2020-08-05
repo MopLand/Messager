@@ -19,12 +19,12 @@ class Groups {
      * 构造函数
      */
 	constructor(conf) {
+		this.inst = {};
 		this.conf = conf;
 		this.wx = new wx( conf.weixin, conf.reserve, conf.special );
 		this.redis = com.redis(conf.redis);
 		this.sider = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
-		this.platform = '';
 		this.members = [];
 		this.queues = [];
 		this.locked = 0;
@@ -34,52 +34,44 @@ class Groups {
 
 		var self = this;
 		var conf = this.conf;
-		var rule = conf[item];
+		var inst = this.conf[item];
 		var wait = 60;
 		var keybuf = '';
 
 		//监听的微信号
-		var wechat = rule.wechat || conf.wechat;
+		var wechat = inst.wechat || conf.wechat;
 
 		//消息时间戳
-		var stamp = rule.stamp || 'mm_groups_id';
+		var marker = inst.marker || 'mm_groups_id';
 
 		//Redis消息频道
-		var channel = rule.channel || 'mm_groups';
+		var channel = inst.channel || 'mm_groups';
 
 		///////////////
 
 		//消息筛选条件
 		var where = {}
 
-		if( rule.follow ){
-			where.fromUserName = rule.follow;
+		this.inst = inst;
+
+		if( inst.follow ){
+			where.fromUserName = inst.follow;
 		}
 
-		if( rule.talker ){
-			where.speaker = rule.talker + ':\n';
+		if( inst.talker ){
+			where.speaker = inst.talker + ':\n';
 		}
 
-		if( rule.detect ){
-			where.allowed = rule.detect;
-		}
-
-		//原样标识符
-		if( rule.origin ){
-			this.origin = rule.origin;
-		}
-
-		//平台过滤条件
-		if( rule.platform ){
-			this.platform = rule.platform;
+		if( inst.detect ){
+			where.allowed = inst.detect;
 		}
 		
-		log.info( '监听条件', { where, platform : this.platform } );
+		log.info( '监听条件', { where, instance : inst } );
 
 		///////////////
 
 		//最近一次微信群消息ID
-		this.sider.get( stamp, ( err, ret ) => {
+		this.sider.get( marker, ( err, ret ) => {
 			keybuf = ret || keybuf;
 			log.info( item, keybuf );
 		} );
@@ -122,8 +114,8 @@ class Groups {
 				keybuf = ret.keyBuf.buffer;
 
 				//临时存储一天
-				self.sider.set( stamp, keybuf );
-				self.sider.expire( stamp, 3600 * 14 );
+				self.sider.set( marker, keybuf );
+				self.sider.expire( marker, 3600 * 14 );
 
 				//消息不完整
 				if( !find && message != 'timer' ){
@@ -153,7 +145,7 @@ class Groups {
 		///////////////
 
 		//每分钟分批心跳
-		if( item == 'groups' ){
+		if( inst.heartbeat ){
 			this.heartBeat();
 		}
 
@@ -329,7 +321,7 @@ class Groups {
 			
 			var time = com.getTime() - 60 * 20;
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups != \'0\' AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups = ? AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [self.inst.source, date, time], function (err, res) {
 
 				if( err ){
 					log.error( err );
@@ -342,9 +334,9 @@ class Groups {
 
 					var groups = JSON.parse( res[i].groups_list );
 					var roomid = groups.map( ele => {
-						if( !self.platform || ele.platform == self.platform ){
+						//if( !self.inst.source || ele.platform == self.inst.source ){
 							return ele.userName;
-						}
+						//}
 					} );
 
 					res[i].roomid = roomid;
@@ -471,7 +463,7 @@ class Groups {
 				let exch = false;
 
 				//配置部分文本不转链
-				if( item.msgType == 1 && this.origin && !this.origin.test( text ) ){
+				if( item.msgType == 1 && this.inst.origin && !this.inst.origin.test( text ) ){
 					exch = ( act.detectTbc( text ) || act.detectUrl( text ) );
 					exch && data.convert ++;
 				}

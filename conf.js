@@ -63,6 +63,12 @@ var conf = {
 		//遇错误中断发送
 		cancel: /MMSNS_RET_SPAM/,
 
+		//消息子分类
+		source: 'taobao',
+
+		//消息时间戳
+		marker: 'mm_moment_id',
+
 	},
 
 	//微信群
@@ -84,6 +90,18 @@ var conf = {
 	
 		//原样标识符
 		origin: /猫超券/,
+
+		//消息子分类
+		source: 'taobao',
+
+		//消息时间戳
+		marker: 'mm_groups_id',
+
+		//Redis消息频道
+		channel: 'mm_groups',
+
+		//处理心跳
+		heartbeat: true,
 
 	}
 

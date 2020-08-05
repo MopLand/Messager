@@ -18,25 +18,31 @@ class Moment {
      * 构造函数
      */
 	constructor(conf) {
+		this.inst = {};
 		this.conf = conf;
 		this.wx = new wx( conf.weixin, conf.reserve, conf.special );
 		this.redis = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
-		this.stamp = 'mm_moment_id';
 		this.delay = [];
 		this.abort = false;
 	}
 
-	init(){
+	init( item = 'moment' ){
 
 		var self = this;
 		var conf = this.conf;
+		var inst = this.conf[item];
 		var maxid = 0;
+
+		//消息时间戳
+		var stamp = inst.marker || 'mm_moment_id';
 
 		///////////////
 
+		this.inst = inst;
+
 		//最近一次朋友圈消息ID
-		this.redis.get( this.stamp, ( err, ret ) => {
+		this.redis.get( stamp, ( err, ret ) => {
 			maxid = ret || maxid;
 			log.info( 'init', maxid );
 		} );
@@ -50,7 +56,7 @@ class Moment {
 
 			if( !work ) return;
 
-			let pm = self.fetchMoment( conf.wechat, conf.moment.follow );
+			let pm = self.fetchMoment( conf.wechat, inst.follow );
 
 			pm.then(ret => {
 
@@ -72,8 +78,8 @@ class Moment {
 				}
 
 				//临时存储一天
-				self.redis.set( self.stamp, post.id );
-				self.redis.expire( self.stamp, 3600 * 14 );
+				self.redis.set( stamp, post.id );
+				self.redis.expire( stamp, 3600 * 14 );
 
 				req.status(conf.report, 'MM_Moment', maxid, ret.baseResponse);
 
@@ -114,7 +120,7 @@ class Moment {
 				return log.error( '中断发送', self.abort );
 			}
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id FROM `pre_member_weixin` WHERE moment != \'0\' AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [date, time, auto], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id FROM `pre_member_weixin` WHERE moment = ? AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [self.inst.source, date, time, auto], function (err, res) {
 
 				if( err ){
 					return log.error( '读取错误', err );
@@ -170,7 +176,7 @@ class Moment {
 	 */
 	parseMoment( post ){
 
-		var conf = this.conf.moment;
+		var conf = this.inst;
 		
 		//构造数据包
 		var data = {
@@ -259,8 +265,8 @@ class Moment {
 			self.status( member.member_id, { api:'SnsPostXml', err } );
 
 			//判定为垃圾消息
-			if( typeof err == 'string' && self.conf.moment.cancel ){
-				var ret = err.match( self.conf.moment.cancel );
+			if( typeof err == 'string' && self.inst.cancel ){
+				var ret = err.match( self.inst.cancel );
 				if( ret ){
 					self.abort = ret[0];
 				}
