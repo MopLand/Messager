@@ -69,6 +69,9 @@ var conf = {
 		//消息时间戳
 		marker: 'mm_moment_id',
 
+		//遇错误中断发送
+		//cancel: /MMSNS_RET_SPAM/,
+
 	},
 
 	//微信群

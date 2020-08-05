@@ -108,7 +108,7 @@ class Moment {
 		var data = self.parseMoment( post );
 
 		//昨天时间
-		var last = com.strtotime('-3 day');
+		var last = com.strtotime('-1 day');
 		var date = new Date(last * 1000).format('yyyyMMdd');
 		
 		//取消中断
