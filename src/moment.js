@@ -328,7 +328,7 @@ class Moment {
 
 					if( kl ){
 						
-						let lm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, '下单链接 http://wx.bhurl.net/wx.php?code=' + kl );
+						let lm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, '下单链接 http://wx.bhurl.net/wx?c=' + kl );
 
 						lm.then(ret => {
 							log.info( '链接成功', [member.weixin_id, post_id, ret.snsObject.id] );
