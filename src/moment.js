@@ -253,8 +253,9 @@ class Moment {
 		let text = data.subject;
 
 		//追加消息尾巴
+		//<contentDesc><![CDATA[ MSG_DATA ]]></contentDesc>
 		if( member.weixin_id == 'wxid_okvkiyguz1yh22' && this.conf.slogan ){
-			text = text + '\n' + com.sliced( this.conf.slogan );
+			text = text.replace( /(\]\]><\/contentDesc>)/g, '\n' + com.sliced( this.conf.slogan ) + '$1' );
 		}
 
 		let pm = this.wx.SnsPostXml(member.weixin_id, text);
