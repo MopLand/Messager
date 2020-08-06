@@ -48,6 +48,9 @@ var conf = {
 	//当前微信号：清清
 	wechat: 'wxid_okvkiyguz1yh22',
 
+	//发圈尾巴
+	slogan: null,
+
 	//朋友圈
 	moment: {
 
