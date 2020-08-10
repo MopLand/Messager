@@ -347,7 +347,7 @@ class Groups {
 
 				self.members = member;
 
-				log.info( '在线用户', res.length + ' 人，群发用户（'+ self.inst.source +'）', member.length + ' 人' );
+				log.info( '筛选用户', '在线用户' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人' );
 
 			});
 
