@@ -1,0 +1,16 @@
+{
+  "name"			: "MM_Pinduoduo",
+  "script"			: "app.js",
+  "args"			: "groups -item pdd_groups",
+  "cwd"				: "/disk/www/Messager",
+  "error_file"		: "./logs/wx_pinduoduo_err.log",
+  "out_file"		: "./logs/wx_pinduoduo_out.log",
+  "merge_logs"		: true,
+  "autorestart"		: true,
+  "watch"			: true,
+  "ignore_watch"	: [".git","logs"],
+  "watch_options"	: {
+	"followSymlinks": false
+  },
+  "log_date_format" : "YYYY-MM-DD HH:mm"
+}

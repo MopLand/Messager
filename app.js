@@ -34,7 +34,7 @@ if (func == 'moment') {
 
 //微信群
 if (func == 'groups') {
-	let item = Common.getArgv('item', 'groups');	
+	let item = Common.getArgv('item', 'groups');
 	let klas = new Groups(conf);
 		klas.init( item );
 }
