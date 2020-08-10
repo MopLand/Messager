@@ -333,7 +333,7 @@ class Groups {
 				for (let i = 0; i < res.length; i++) {
 
 					var groups = JSON.parse( res[i].groups_list );
-					var roomid = groups.map( ele => {
+					var roomid = groups.filter( ele => {
 						if( !self.inst.source || ele.status == self.inst.source ){
 							return ele.userName;
 						}
