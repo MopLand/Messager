@@ -321,7 +321,7 @@ class Groups {
 			
 			var time = com.getTime() - 60 * 20;
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups = ? AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [self.inst.source, date, time], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
 
 				if( err ){
 					log.error( err );
@@ -334,9 +334,9 @@ class Groups {
 
 					var groups = JSON.parse( res[i].groups_list );
 					var roomid = groups.map( ele => {
-						//if( !self.inst.source || ele.platform == self.inst.source ){
+						if( !self.inst.source || ele.status == self.inst.source ){
 							return ele.userName;
-						//}
+						}
 					} );
 
 					res[i].roomid = roomid;

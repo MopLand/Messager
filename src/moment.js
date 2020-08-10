@@ -120,7 +120,7 @@ class Moment {
 				return log.error( '中断发送', self.abort );
 			}
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, tag FROM `pre_member_weixin` WHERE moment = ? AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [self.inst.source, date, time, auto], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, tag FROM `pre_member_weixin` WHERE moment = 1 AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [date, time, auto], function (err, res) {
 
 				if( err ){
 					return log.error( '读取错误', err );
