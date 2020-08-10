@@ -321,7 +321,7 @@ class Groups {
 			
 			var time = com.getTime() - 60 * 20;
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, 0], function (err, res) {
 
 				if( err ){
 					log.error( err );
@@ -333,10 +333,17 @@ class Groups {
 				for (let i = 0; i < res.length; i++) {
 
 					var groups = JSON.parse( res[i].groups_list );
-					var roomid = groups.filter( ele => {
+
+					//过滤有效群
+					groups = groups.filter( ele => {
 						if( !self.inst.source || ele.status == self.inst.source ){
 							return ele.userName;
 						}
+					} );
+
+					//提取群ID
+					var roomid = groups.map( ele => {
+						return ele.userName;
 					} );
 
 					if( roomid.length > 0 ){
