@@ -326,9 +326,9 @@ class Groups {
 				if( err ){
 					log.error( err );
 					return;
-				}else{
-					log.info( '有效用户', res.length + ' 人' );
 				}
+
+				var member = [];
 
 				for (let i = 0; i < res.length; i++) {
 
@@ -339,13 +339,15 @@ class Groups {
 						}
 					} );
 
-					res[i].roomid = roomid;
-
-					delete res[i].groups_list;
+					if( roomid.length > 0 ){
+						member.push( { member_id, weixin_id, roomid } );
+					}
 
 				}
 
-				self.members = res;
+				self.members = member;
+
+				log.info( '在线用户', res.length + ' 人，群发用户（'+ self.inst.source +'）', member.length + ' 人' );
 
 			});
 
