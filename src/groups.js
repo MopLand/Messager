@@ -466,6 +466,11 @@ class Groups {
 				text = text.replace(/^[0-9a-zA-Z_\-]{1,}:\n/, '');
 			}
 
+			//小程序，过滤 mmlive
+			if( /<mmlive>/.test( text ) ){
+				text = text.replace(/<mmlive>(.+?)<\/mmlive>/g, '');
+			}
+
 			//满足所有条件
 			if (size == Object.keys(where).length) {
 
