@@ -334,7 +334,7 @@ class Moment {
 					//链接
 					let kl = act.extractTbc( body.result );
 
-					if( kl ){
+					if( kl && member.tag > 0 ){
 						
 						let lm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, '下单链接 http://wx.bhurl.net/wx?c=' + kl );
 
