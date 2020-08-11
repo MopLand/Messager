@@ -245,7 +245,7 @@ class Groups {
 		//每分钟，分批次发送心跳
 		setInterval( () => {
 
-			self.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
+			self.mysql.query('SELECT member_id, weixin_id, device_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
 
 				if( err ){
 					log.error( err );
@@ -287,7 +287,7 @@ class Groups {
 								log.info( '登录成功', [row.weixin_id, ret] );
 							}).catch( err => {
 								log.debug( '登录失败', [row.weixin_id, err] );
-								klas.init( row.weixin_id );
+								klas.init( row.weixin_id, row.device_id );
 							});
 							
 						}
@@ -321,7 +321,7 @@ class Groups {
 			
 			var time = com.getTime() - 60 * 20;
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, 0], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
 
 				if( err ){
 					log.error( err );
@@ -657,7 +657,7 @@ class Groups {
 				log.info('文本成功', [member.member_id, ret.count]);
 			}).catch(err => {
 				log.error('文本失败', [member.member_id, err]);
-				self.status( member.member_id, { api:'NewSendMsg', err } );
+				self.status( member.member_id, { api:'NewSendMsg', err, inst : self.inst.channel } );
 			});
 
 			return fn;
@@ -692,7 +692,7 @@ class Groups {
 				}).catch(err => {
 
 					log.error('发图失败', [member.member_id, err, chat]);
-					self.status( member.member_id, { api:'UploadMsgImgXml', err, chat } );
+					self.status( member.member_id, { api:'UploadMsgImgXml', err, chat, inst : self.inst.channel } );
 
 					//群已经失效
 					if( err == 'MM_ERR_NOTCHATROOMCONTACT' ){
@@ -711,7 +711,7 @@ class Groups {
 					log.info('视频成功', [member.member_id, chat, ret.msgId]);
 				}).catch(err => {
 					log.error('视频失败', [member.member_id, err, chat]);
-					self.status( member.member_id, { api:'UploadVideoXml', err, chat } );
+					self.status( member.member_id, { api:'UploadVideoXml', err, chat, inst : self.inst.channel } );
 				});
 			}
 
@@ -724,7 +724,7 @@ class Groups {
 					log.info('表情成功', [member.member_id, chat, ret]);
 				}).catch(err => {
 					log.error('表情失败', [member.member_id, err, chat]);
-					self.status( member.member_id, { api:'SendEmojiXml', err, chat } );
+					self.status( member.member_id, { api:'SendEmojiXml', err, chat, inst : self.inst.channel } );
 				});
 			}
 
@@ -737,7 +737,7 @@ class Groups {
 					log.info('小程序成功', [member.member_id, chat, ret.msgId]);
 				}).catch(err => {
 					log.error('小程序失败', [member.member_id, err, chat]);
-					self.status( member.member_id, { api:'SendAppMsgXml', err, chat } );
+					self.status( member.member_id, { api:'SendAppMsgXml', err, chat, inst : self.inst.channel } );
 				});
 			}
 
