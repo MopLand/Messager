@@ -670,11 +670,6 @@ class Groups {
 			log.info('替换UID', detail);
 		}
 
-		//表情, TEMP
-		function sleep(ms) {
-			return new Promise(resolve => setTimeout(resolve, ms));
-		}
-
 		//媒体
 		for( var i = 0; i < member.roomid.length; i++ ){
 
@@ -686,19 +681,9 @@ class Groups {
 				var fn = this.wx.UploadMsgImgXml(member.weixin_id, chat, detail);
 
 				fn.then(ret => {
-
 					log.info('发图成功', [member.member_id, chat, ret.msgId]);
-
 				}).catch(err => {
-
-					log.error('发图失败', [member.member_id, err, chat]);
-					self.status( member.member_id, { api:'UploadMsgImgXml', err, chat, inst : self.inst.channel } );
-
-					//群已经失效
-					if( err == 'MM_ERR_NOTCHATROOMCONTACT' ){
-						self.delGroup( member.member_id, chat );
-					}
-
+					self.sendErr( member.member_id, 'UploadMsgImgXml', err, chat );
 				});
 			}
 
@@ -710,8 +695,7 @@ class Groups {
 				fn.then(ret => {
 					log.info('视频成功', [member.member_id, chat, ret.msgId]);
 				}).catch(err => {
-					log.error('视频失败', [member.member_id, err, chat]);
-					self.status( member.member_id, { api:'UploadVideoXml', err, chat, inst : self.inst.channel } );
+					self.sendErr( member.member_id, 'UploadVideoXml', err, chat );
 				});
 			}
 
@@ -723,8 +707,7 @@ class Groups {
 				fn.then(ret => {
 					log.info('表情成功', [member.member_id, chat, ret]);
 				}).catch(err => {
-					log.error('表情失败', [member.member_id, err, chat]);
-					self.status( member.member_id, { api:'SendEmojiXml', err, chat, inst : self.inst.channel } );
+					self.sendErr( member.member_id, 'SendEmojiXml', err, chat );
 				});
 			}
 
@@ -736,95 +719,35 @@ class Groups {
 				fn.then(ret => {
 					log.info('小程序成功', [member.member_id, chat, ret.msgId]);
 				}).catch(err => {
-					log.error('小程序失败', [member.member_id, err, chat]);
-					self.status( member.member_id, { api:'SendAppMsgXml', err, chat, inst : self.inst.channel } );
+					self.sendErr( member.member_id, 'SendAppMsgXml', err, chat );
 				});
 			}
-
-			//await sleep(1000);
 
 		}
 
 		return fn;
 
-		/*
-		//图片
-		if ( msg.msgtype == 3 ) {
+	}
 
-			for( let i = 0; i < member.roomid.length; i++ ){
-				var fn = this.wx.UploadMsgImgXml(member.weixin_id, member.roomid[i], detail);				
-			}
+	/**
+	 * 转发出错了
+	 * @param integer 用户ID
+	 * @param string API名称
+	 * @param string 错误消息
+	 * @param string 微信群ID
+	 */
+	sendErr( member_id, api, err, chat ){
+		
+		//写入日志
+		log.error( api, [member_id, err, chat]);
 
-			fn.then(ret => {
-				log.info('发图成功', [member.member_id, ret.msgId]);
-			}).catch(err => {
-				log.error('发图失败', [member.member_id, err]);
-				self.status( member.member_id, { api:'UploadMsgImgXml', err } );
-			});
+		//更新状态
+		this.status( member_id, { api: api, err, chat, inst : this.inst.channel } );
 
-			return fn;
-
+		//群已经失效
+		if( err == 'MM_ERR_NOTCHATROOMCONTACT' ){
+			this.delGroup( member_id, chat );
 		}
-
-		//视频
-		if ( msg.msgtype == 43 ) {
-
-			for( let i = 0; i < member.roomid.length; i++ ){
-				var fn = this.wx.UploadVideoXml(member.weixin_id, member.roomid[i], detail);
-			}
-
-			fn.then(ret => {
-				log.info('视频成功', [member.member_id, ret.msgId]);
-			}).catch(err => {
-				log.error('视频失败', [member.member_id, err]);
-				self.status( member.member_id, { api:'UploadVideoXml', err } );
-			});
-
-			return fn;
-
-		}
-
-
-		//表情
-		if ( msg.msgtype == 47 ) {
-
-			for( let i = 0; i < member.roomid.length; i++ ){
-				var fn = this.wx.SendEmojiXml(member.weixin_id, member.roomid[i], detail);
-			}
-
-			fn.then(ret => {
-				log.info('表情成功', [member.member_id, ret.emojiItemCount]);
-			}).catch(err => {
-				log.error('表情失败', [member.member_id, err]);
-				self.status( member.member_id, { api:'SendEmojiXml', err } );
-			});
-
-			return fn;
-
-		}
-
-		//小程序
-		if ( msg.msgtype == 49 ) {
-
-			detail = detail.replace(/userid=(\d*)/g, 'userid=' + member.member_id);
-
-			log.info('替换UID', detail);
-
-			for( let i = 0; i < member.roomid.length; i++ ){
-				var fn = this.wx.SendAppMsgXml(member.weixin_id, member.roomid[i], detail);
-			}
-
-			fn.then(ret => {
-				log.info('小程序成功', [member.member_id, ret.msgId]);
-			}).catch(err => {
-				log.error('小程序失败', [member.member_id, err]);
-				self.status( member.member_id, { api:'SendAppMsgXml', err } );
-			});
-
-			return fn;
-
-		}
-		*/
 
 	}
 
