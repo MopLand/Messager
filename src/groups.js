@@ -482,7 +482,7 @@ class Groups {
 					exch && data.convert ++;
 				}
 
-				data.message.push( { msgid : item.msgId, rowid : item.newMsgId, msgtype : item.msgType, content : text, source : item.msgSource, exch });
+				data.message.push( { msgid : item.msgId, rowid : item.newMsgId, msgtype : item.msgType, content : text, source : item.msgSource, product: null, exch });
 
 			}
 
@@ -500,7 +500,7 @@ class Groups {
 	/**
 	 * 预处理消息
 	 * @param object 用户数据
-	 * @param object 发圈数据
+	 * @param object 发群数据
 	 * @param integer 延迟时间
 	 */
 	parseMessage( member, data, lazy_time = 0 ){
@@ -519,7 +519,7 @@ class Groups {
 			let comm = data.message[i];
 			let exch = comm.msgtype == 1 && comm.exch;
 
-			req.get(self.conf.convert, { 'member_id' : user.member_id, 'text' : comm.content, 'lazy_time' : lazy_time }, (code, body) => {
+			req.get(self.conf.convert, { 'member_id' : user.member_id, 'text' : comm.content, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {
 				
 				try {
 					if( typeof body == 'string' ){
@@ -537,8 +537,11 @@ class Groups {
 				
 				if( body.status >= 0 ){
 
-					//评论
+					//文本
 					comm.content = body.result;
+
+					//原始商品信息
+					comm.product = body.product;
 
 					//转链成功，执行回调
 					comm.exch && data.convert --;
@@ -610,6 +613,11 @@ class Groups {
 			let res = self.sendMsg( user, msg );
 
 			res.then(ret => {
+
+				//本消息含商品
+				if( msg.product ){
+					act.collect( self.mysql, 'groups', msg.product );
+				}
 
 				//消息包未完成
 				if( data.message.length > 0 ){

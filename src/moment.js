@@ -303,7 +303,7 @@ class Moment {
 			let last = i == data.comment.length - 1;
 
 			//转链
-			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'lazy_time' : lazy_time }, (code, body) => {
+			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {
 
 				try {
 					if( typeof body == 'string' ){
@@ -323,8 +323,13 @@ class Moment {
 					let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, body.result);
 
 					pm.then(ret => {
+
 						log.info( '评论成功', [member.weixin_id, post_id, ret.snsObject.id] );
+
+						body.product && act.collect( self.mysql, 'moment', body.product );
+
 					}).catch(err => {
+
 						log.error( '评论失败', [member.weixin_id, err] );
 						self.status( member.member_id, { api:'SnsComment', act:'text', err } );
 					});
