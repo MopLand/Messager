@@ -68,7 +68,11 @@ class Groups {
 		
 		log.info( '监听条件', { where, instance : inst } );
 		
-		//act.collect( this.mysql, 'groups', { platform : 'taobao', item_id : 111111 } );
+		/*
+		for( let i = 0; i < 100; i++ ){
+			act.collect( this.mysql, 'groups', { platform : 'taobao', item_id : 111111 } );
+		}
+		*/
 
 		///////////////
 
