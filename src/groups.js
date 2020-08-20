@@ -477,6 +477,17 @@ class Groups {
 				text = text.replace(/<mmlive>(.+?)<\/mmlive>/g, '');
 			}
 
+			//小程序，匹配 白名单
+			if( /<appid>/.test( text ) && this.conf.minapp ){
+
+				let appid = /<appid><\!\[CDATA\[(.+?)\]\]><\/appid>/.exec( text )[1];
+
+				if( this.conf.minapp.indexOf( appid ) == -1 ){
+					log.info('未知小程序', { 'appid' : appid, 'struct' : text });
+					continue;
+				}
+			}
+
 			//满足所有条件
 			if (size == Object.keys(where).length) {
 

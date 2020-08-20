@@ -51,6 +51,9 @@ var conf = {
 	//发圈尾巴
 	slogan: null,
 
+	//允许的小程序
+	minapp: null,
+
 	//朋友圈
 	moment: {
 
