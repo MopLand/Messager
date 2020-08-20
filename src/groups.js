@@ -548,10 +548,6 @@ class Groups {
 					body = { 'status' : -code, 'body' : body, 'error' : e.toString() };
 				}
 
-				if( exch ){
-					log.info('转链结果', { 'member_id' : user.member_id, body, lazy_time, 'convert' : data.convert });
-				}
-
 				///////////////
 				
 				if( body.status >= 0 ){
@@ -573,6 +569,10 @@ class Groups {
 
 					body.source = 'groups';
 					body.lazy_time = lazy_time;
+
+					if( exch ){
+						log.info('转链失败', { 'member_id' : user.member_id, body, lazy_time, 'convert' : data.convert });
+					}
 
 					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
 					
@@ -691,10 +691,10 @@ class Groups {
 
 		}
 
-		//小程序
+		//小程序 替换UID
 		if( msg.msgtype == 49 ){		
 			detail = detail.replace(/userid=(\d*)/g, 'userid=' + member.member_id);
-			log.info('替换UID', detail);
+			//log.info('替换UID', detail);
 		}
 
 		//媒体
