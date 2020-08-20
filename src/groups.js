@@ -480,13 +480,14 @@ class Groups {
 			//小程序，匹配 白名单
 			if( /<appid>/.test( text ) && this.conf.minapp ){
 
-				//let appid = /<appid><\!\[CDATA\[(.+?)\]\]><\/appid>/.exec( text )[1];
+				let appid = /<appid>(.+?)<\/appid>/.exec( text )[1];
+				let allow = this.conf.minapp.indexOf( appid ) >= 0;
+				
+				log.info('小程序', { 'appid' : appid, 'allow' : allow, 'struct' : text });
 
-				//if( this.conf.minapp.indexOf( appid ) == -1 ){
-					//log.info('未知小程序', { 'appid' : appid, 'struct' : text });
-					log.info('小程序', { 'struct' : text });
-				//	continue;
-				//}
+				if( !allow ){
+					continue;
+				}
 			}
 
 			//满足所有条件
