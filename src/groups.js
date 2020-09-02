@@ -550,7 +550,8 @@ class Groups {
 
 				///////////////
 				
-				if( body.status >= 0 ){
+				//成功转链数量
+				if( body.status > 0 ){
 
 					//文本
 					comm.content = body.result;
@@ -592,7 +593,7 @@ class Groups {
 				if( exch ){
 					return { 'request' : true };
 				}else{
-					return { 'request' : false, 'respond' : { 'status' : 0, 'result' : data.text } };
+					return { 'request' : false, 'respond' : { 'status' : 1, 'result' : data.text } };
 				}
 
 			} );

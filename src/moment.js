@@ -254,9 +254,11 @@ class Moment {
 
 		//追加消息尾巴
 		//<contentDesc><![CDATA[ MSG_DATA ]]></contentDesc>
+		/*
 		if( member.weixin_id == 'wxid_okvkiyguz1yh22' && this.conf.slogan ){
 			text = text.replace( /(\]\]><\/contentDesc>)/g, '\n' + com.sliced( this.conf.slogan ) + '$1' );
 		}
+		*/
 
 		let pm = this.wx.SnsPostXml(member.weixin_id, text);
 
@@ -317,7 +319,8 @@ class Moment {
 
 				///////////////
 				
-				if( body.status >= 0 ){
+				//成功转链数量
+				if( body.status > 0 ){
 
 					//评论
 					let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, body.result);
@@ -378,7 +381,7 @@ class Moment {
 				if( comm.exch ){
 					return { 'request' : true };
 				}else{
-					return { 'request' : false, 'respond' : { 'status' : 0, 'result' : data.text } };
+					return { 'request' : false, 'respond' : { 'status' : 1, 'result' : data.text } };
 				}
 
 			} );
