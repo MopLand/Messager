@@ -17,6 +17,17 @@
 	pm2 start moment.json
 	
 	pm2 start groups.json
+
+# Command
+
+## Moment
+
+	# KEEP
+	保持发圈原始格式
+
+	# SKIP
+	忽略这条发圈（不发送）
+
 	
 # Logs
 	tail -f /disk/www/Messager/logs/wx_groups_out.log

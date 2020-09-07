@@ -113,7 +113,7 @@ class Groups {
 					} );
 				}
 				
-				log.info( '消息数量', { '通知ID' : message, '原消息' : ret.cmdList.count, '筛选后' : size } );
+				log.info( '消息数量', { '通知ID' : message, 'Continue' : ret.continueFlag, '原消息' : ret.cmdList.count, '筛选后' : size } );
 				log.info( '有效消息', data );
 				
 				//记录消息标记
@@ -438,6 +438,16 @@ class Groups {
 			var size = 0;
 			var item = msgs[i].cmdBuf;
 			let text = item.content.string;
+
+			//撤回消息，查找之前的 rowid 并过滤掉 
+			if( item.msgType == 10002 ){				
+				log.info('撤回消息', text);
+				
+				let rawid = /<newmsgid>(.+?)<\/newmsgid>/.exec( text )[1];
+				data.message = data.message.filter( ele => {
+					return ele.rowid != rawid;
+				} );
+			}
 
 			//支持的消息类型：1 文字、3 图片、43 视频、47 表情、49 小程序
 			if( [1, 3, 43, 47, 49].indexOf( item.msgType ) == -1 ){
