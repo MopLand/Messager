@@ -440,13 +440,20 @@ class Groups {
 			let text = item.content.string;
 
 			//撤回消息，查找之前的 rowid 并过滤掉 
-			if( item.msgType == 10002 ){				
-				log.info('撤回消息', text);
+			if( item.msgType == 10002 ){
+
+				let rawid = com.match( text, /<newmsgid>(.+?)<\/newmsgid>/, 1 );
+
+				if( rawid ){
+
+					log.info('撤回消息', { 'rawid' : rawid, 'text' : text } );
+
+					data.message = data.message.filter( ele => {
+						return ele.rowid != rawid;
+					} );
+
+				}
 				
-				let rawid = /<newmsgid>(.+?)<\/newmsgid>/.exec( text )[1];
-				data.message = data.message.filter( ele => {
-					return ele.rowid != rawid;
-				} );
 			}
 
 			//支持的消息类型：1 文字、3 图片、43 视频、47 表情、49 小程序
