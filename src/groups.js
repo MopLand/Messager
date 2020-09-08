@@ -197,7 +197,7 @@ class Groups {
 					setTimeout( () => { self.sider.publish( channel, 'timer' ); }, 1000 * 50 );
 				}
 
-				req.status(conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : message, '拉取ID' : find } );
+				req.status(self.conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : message, '拉取ID' : find } );
 
 			}).catch(err => {
 
