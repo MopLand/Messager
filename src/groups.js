@@ -763,7 +763,7 @@ class Groups {
 
 				//多个微信群，适当延迟
 				if( member.roomid.length > 1 ){
-					com.sleep( 200 );
+				//	com.sleep( 300 );
 				}
 
 			}
