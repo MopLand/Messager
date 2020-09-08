@@ -68,7 +68,7 @@ class Groups {
 		///////////////
 
 		//订阅消息发送
-		this.subscribe( wechat, marker, channel );
+		this.subscribe( wechat, marker, channel, where );
 
 		//每分钟分批心跳
 		if( inst.heartbeat ){
@@ -137,8 +137,9 @@ class Groups {
      * @param string 微信ID
      * @param string 消息标记
      * @param string 消息频道
+     * @param object 消息过滤
      */
-	subscribe( wechat, marker, channel ) {
+	subscribe( wechat, marker, channel, where ) {
 
 		let self = this;
 		let wait = 60;
@@ -202,7 +203,7 @@ class Groups {
 
 				log.info( '读取错误', err );
 
-				req.status(conf.report, 'MM_Groups', 500, err);
+				req.status(self.conf.report, 'MM_Groups', 500, err);
 
 			}).finally( () => {
 
