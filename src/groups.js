@@ -147,7 +147,7 @@ class Groups {
 		//最近一次微信群消息ID
 		this.sider.get( marker, ( err, ret ) => {
 			keybuf = ret || keybuf;
-			log.info( item, keybuf );
+			//log.info( item, keybuf );
 		} );
 
 		//处理 Redis 消息
