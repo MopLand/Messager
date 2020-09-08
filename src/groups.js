@@ -32,11 +32,8 @@ class Groups {
 
 	init( item = 'groups' ){
 
-		var self = this;
 		var conf = this.conf;
 		var inst = this.conf[item];
-		var wait = 60;
-		var keybuf = '';
 
 		//监听的微信号
 		var wechat = inst.wechat || conf.wechat;
@@ -67,88 +64,11 @@ class Groups {
 		}
 		
 		log.info( '监听条件', { where, instance : inst } );
-		
-		/*
-		for( let i = 0; i < 100; i++ ){
-			act.collect( this.mysql, 'groups', { platform : 'taobao', item_id : 111111 } );
-		}
-		*/
 
 		///////////////
 
-		//最近一次微信群消息ID
-		this.sider.get( marker, ( err, ret ) => {
-			keybuf = ret || keybuf;
-			log.info( item, keybuf );
-		} );
-
-		//处理 Redis 消息
-		this.redis.on('message', function (channel, message) {
-
-			//正在读取消息，锁还未失效
-			if( self.locked && self.locked >= com.getTime() - wait ){
-				log.info( '读消息锁', self.locked );
-				return;
-			}else{
-				self.locked = com.getTime();
-				log.info( '拉取方式', message );
-			}
-
-			let pm = self.wx.NewSync( wechat, keybuf );
-
-			pm.then(ret => {
-
-				log.info( '原始消息', ret.cmdList.list );
-
-				//获取最新消息
-				var data = self.filterMessage( message, ret.cmdList.list, where );
-				var size = data.message.length;
-				var find = false;
-
-				//发送最新消息
-				if( size ){
-					self.send( data );
-					find = data.message.find( ele => {
-						return ele.rowid == message;
-					} );
-				}
-				
-				log.info( '消息数量', { '通知ID' : message, 'Continue' : ret.continueFlag, '原消息' : ret.cmdList.count, '筛选后' : size } );
-				log.info( '有效消息', data );
-				
-				//记录消息标记
-				keybuf = ret.keyBuf.buffer;
-
-				//临时存储一天
-				self.sider.set( marker, keybuf );
-				self.sider.expire( marker, 3600 * 14 );
-
-				//消息不完整
-				if( !find && message != 'timer' ){
-					setTimeout( () => { self.sider.publish( channel, 'timer' ); }, 1000 * 50 );
-				}
-
-				req.status(conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : message, '拉取ID' : find } );
-
-			}).catch(err => {
-
-				log.info( '读取错误', err );
-
-				req.status(conf.report, 'MM_Groups', 500, err);
-
-			}).finally( () => {
-
-				//解除读消息锁
-				self.locked = 0;
-
-			} );
-
-		});
-
-		//订阅 Redis 频道消息
-		this.redis.subscribe( channel );
-
-		///////////////
+		//订阅消息发送
+		this.subscribe( wechat, marker, channel );
 
 		//每分钟分批心跳
 		if( inst.heartbeat ){
@@ -210,6 +130,92 @@ class Groups {
 		}
 
 		return this.mysql.query('UPDATE `pre_member_weixin` SET pushed = ?, status = ?, status_time = ? WHERE member_id = ?', [ pushed, JSON.stringify( body ), com.getTime(), member_id ] );
+	}
+
+	/**
+     * 订阅消息
+     * @param string 微信ID
+     * @param string 消息标记
+     * @param string 消息频道
+     */
+	subscribe( wechat, marker, channel ) {
+
+		let self = this;
+		let wait = 60;
+		let keybuf = '';
+
+		//最近一次微信群消息ID
+		this.sider.get( marker, ( err, ret ) => {
+			keybuf = ret || keybuf;
+			log.info( item, keybuf );
+		} );
+
+		//处理 Redis 消息
+		this.redis.on('message', function (channel, message) {
+
+			//正在读取消息，锁还未失效
+			if( self.locked && self.locked >= com.getTime() - wait ){
+				log.info( '读消息锁', self.locked );
+				return;
+			}else{
+				self.locked = com.getTime();
+				log.info( '拉取方式', { channel, message } );
+			}
+
+			let pm = self.wx.NewSync( wechat, keybuf );
+
+			pm.then(ret => {
+
+				log.info( '原始消息', ret.cmdList.list );
+
+				//获取最新消息
+				var data = self.filterMessage( message, ret.cmdList.list, where );
+				var size = data.message.length;
+				var find = false;
+
+				//发送最新消息
+				if( size ){
+					self.send( data );
+					find = data.message.find( ele => {
+						return ele.rowid == message;
+					} );
+				}
+				
+				log.info( '消息数量', { '通知ID' : message, 'Continue' : ret.continueFlag, '原消息' : ret.cmdList.count, '筛选后' : size } );
+				log.info( '有效消息', data );
+				
+				//记录消息标记
+				keybuf = ret.keyBuf.buffer;
+
+				//临时存储一天
+				self.sider.set( marker, keybuf );
+				self.sider.expire( marker, 3600 * 14 );
+
+				//消息不完整
+				if( !find && message != 'timer' ){
+					setTimeout( () => { self.sider.publish( channel, 'timer' ); }, 1000 * 50 );
+				}
+
+				req.status(conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : message, '拉取ID' : find } );
+
+			}).catch(err => {
+
+				log.info( '读取错误', err );
+
+				req.status(conf.report, 'MM_Groups', 500, err);
+
+			}).finally( () => {
+
+				//解除读消息锁
+				self.locked = 0;
+
+			});
+
+		});
+
+		//订阅 Redis 频道消息
+		this.redis.subscribe( channel );
+
 	}
 
 	/**
@@ -712,7 +718,6 @@ class Groups {
 		//小程序 替换UID
 		if( msg.msgtype == 49 ){		
 			detail = detail.replace(/userid=(\d*)/g, 'userid=' + member.member_id);
-			//log.info('替换UID', detail);
 		}
 
 		//媒体
@@ -754,6 +759,12 @@ class Groups {
 				}).catch(err => {
 					self.sendErr( member.member_id, 'SendEmojiXml', err, chat );
 				});
+
+				//多个微信群，适当延迟
+				if( member.roomid.length > 1 ){
+					com.sleep( 500 );
+				}
+
 			}
 
 			//小程序
