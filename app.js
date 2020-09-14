@@ -39,6 +39,13 @@ if (func == 'groups') {
 		klas.init( item );
 }
 
+//云课程
+if (func == 'course') {
+	let item = Common.getArgv('item', 'course');
+	let klas = new Course(conf);
+		klas.init( item );
+}
+
 //联系人
 if (func == 'contact') {
 
