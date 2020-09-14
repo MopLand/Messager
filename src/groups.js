@@ -154,6 +154,8 @@ class Groups {
 		//处理 Redis 消息
 		this.redis.on('message', function (channel, message) {
 
+			let recv = JSON.parse( message );
+
 			//正在读取消息，锁还未失效
 			if( self.locked && self.locked >= com.getTime() - wait ){
 				log.info( '读消息锁', self.locked );
@@ -170,7 +172,7 @@ class Groups {
 				log.info( '原始消息', ret.cmdList.list );
 
 				//获取最新消息
-				var data = self.filterMessage( message, ret.cmdList.list, where );
+				var data = self.filterMessage( recv.msgid, ret.cmdList.list, where );
 				var size = data.message.length;
 				var find = false;
 
@@ -178,11 +180,11 @@ class Groups {
 				if( size ){
 					self.send( data );
 					find = data.message.find( ele => {
-						return ele.rowid == message;
+						return ele.rowid == recv.msgid;
 					} );
 				}
 				
-				log.info( '消息数量', { '通知ID' : message, 'Continue' : ret.continueFlag, '原消息' : ret.cmdList.count, '筛选后' : size } );
+				log.info( '消息数量', { '通知ID' : recv.msgid, 'Continue' : ret.continueFlag, '原消息' : ret.cmdList.count, '筛选后' : size } );
 				log.info( '有效消息', data );
 				
 				//记录消息标记
@@ -193,11 +195,11 @@ class Groups {
 				self.sider.expire( marker, 3600 * 14 );
 
 				//消息不完整
-				if( !find && message != 'timer' ){
-					setTimeout( () => { self.sider.publish( channel, 'timer' ); }, 1000 * 50 );
+				if( !find && recv.event != 'pull' ){
+					setTimeout( () => { self.sider.publish( channel, JSON.stringify( { 'event' : 'pull', 'msgid' : recv.msgid } ) ); }, 1000 * 50 );
 				}
 
-				req.status(self.conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : message, '拉取ID' : find } );
+				req.status(self.conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : recv.msgid, '拉取ID' : find } );
 
 			}).catch(err => {
 
