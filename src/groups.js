@@ -403,8 +403,9 @@ class Groups {
 				return;
 			}
 
-			if( res.length == 0 ){
+			if( res.length == 0 || !res[0].groups_list ){
 				log.info( '无效用户', res.length + ' 人' );
+				return;
 			}
 
 			//当前用户
