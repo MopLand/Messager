@@ -235,6 +235,11 @@ class Groups {
 			return com.getTime() - 60 * 30;
 		};
 
+		//更新用户心跳时间
+		var beat = ( member_id ) => {
+			self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member_id ] );
+		}
+
 		///////////////
 
 		//每半小时，计算一次心跳量
@@ -284,9 +289,8 @@ class Groups {
 	
 					pm.then(ret => {
 	
-						//更新群发设置
-						self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
-	
+						beat( row.member_id );
+						
 						log.info( '心跳成功', [row.weixin_id, row.member_id] );
 	
 					}).catch( err => {
@@ -294,11 +298,12 @@ class Groups {
 						log.debug( '心跳失败', [row.weixin_id, err] );
 	
 						//autoauth -> pushlogin -> qrcodelogin
-						if( err.indexOf('退出微信登录') > -1 ){
+						if( err.indexOf('退出微信') > -1 ){
 							
 							let pa = self.wx.AutoAuth( row.weixin_id );
 	
 							pa.then( ret => {
+								beat( row.member_id );
 								log.info( '登录成功', [row.weixin_id, ret] );
 							}).catch( err => {
 								log.debug( '登录失败', [row.weixin_id, err] );

@@ -284,7 +284,7 @@ class Groups {
 	
 						log.info( '心跳失败', [row.weixin_id, err] );
 	
-						if( err.indexOf('退出微信登录') > -1 ){
+						if( err.indexOf('退出微信') > -1 ){
 							klas.init( row.weixin_id );
 						}
 	
