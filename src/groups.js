@@ -28,6 +28,7 @@ class Groups {
 		this.members = [];
 		this.queues = [];
 		this.locked = 0;
+		this.sender = 0;
 	}
 
 	init( item = 'groups' ){
@@ -103,6 +104,13 @@ class Groups {
 			//本地测试，单用户
 			if( size == 1 ){
 				setTimeout( self.forwardMessage.bind( self ), 15 * 1000 );
+			}
+
+			//是不还在发送消息
+			if( i == size - 1 ){
+				self.sender = 1;
+			}else{
+				self.sender = 0;
 			}
 
 		}
@@ -335,7 +343,7 @@ class Groups {
 
 		var func = () => {
 
-			if( self.queues.length ){
+			if( self.sender ){
 				return log.info('正在推送');
 			}
 			
@@ -382,8 +390,8 @@ class Groups {
 
 		func();
 
-		//每十分钟同步一次
-		setInterval( func, 60 * 1000 * 10 );
+		//每6分钟同步一次
+		setInterval( func, 60 * 1000 * 6 );
 
 	}
 
