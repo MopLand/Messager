@@ -383,7 +383,7 @@ class Groups {
 		func();
 
 		//每十分钟同步一次
-		setInterval( func, 60 * 1000 * 9 );
+		setInterval( func, 60 * 1000 * 10 );
 
 	}
 
