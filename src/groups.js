@@ -336,7 +336,7 @@ class Groups {
 		var func = () => {
 
 			if( self.queues.length ){
-			//	return log.info('正在推送');
+				return log.info('正在推送');
 			}
 			
 			var time = com.getTime() - 60 * 20;
@@ -383,7 +383,7 @@ class Groups {
 		func();
 
 		//每十分钟同步一次
-		setInterval( func, 60 * 1000 * 7 );
+		setInterval( func, 60 * 1000 * 9 );
 
 	}
 
