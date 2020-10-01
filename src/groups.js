@@ -75,7 +75,7 @@ class Groups {
 			this.heartBeat();
 		}
 
-		//每分钟分批心跳
+		//定时拉有效用户
 		this.getMember();
 
 	}
@@ -336,7 +336,7 @@ class Groups {
 		var func = () => {
 
 			if( self.queues.length ){
-				return log.info('正在推送');
+			//	return log.info('正在推送');
 			}
 			
 			var time = com.getTime() - 60 * 20;
