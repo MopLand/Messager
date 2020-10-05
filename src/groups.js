@@ -108,9 +108,9 @@ class Groups {
 
 			//是不还在发送消息
 			if( i == size - 1 ){
-				self.sender = 1;
-			}else{
 				self.sender = 0;
+			}else{
+				self.sender = 1;
 			}
 
 		}
@@ -337,16 +337,26 @@ class Groups {
 
 		var self = this;
 
-		//昨天时间
-		var last = com.strtotime('-1 day');
-		var date = new Date(last * 1000).format('yyyyMMdd');
-
 		var func = () => {
 
 			if( self.sender ){
 				return log.info('正在推送');
 			}
-			
+
+			//工作时段
+			var work = new Date().format('h') >= self.conf.worked;
+
+			if( !work ){
+				return log.info('休息时间');
+			}
+
+			/////////
+
+			//昨天时间
+			var last = com.strtotime('-1 day');
+			var date = new Date(last * 1000).format('yyyyMMdd');
+
+			//二十分钟
 			var time = com.getTime() - 60 * 20;
 
 			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
@@ -391,7 +401,7 @@ class Groups {
 		func();
 
 		//每6分钟同步一次
-		setInterval( func, 60 * 1000 * 6 );
+		setInterval( func, 60 * 1000 * 5 );
 
 	}
 

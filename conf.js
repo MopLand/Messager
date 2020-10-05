@@ -43,7 +43,7 @@ var conf = {
 	},
 
 	//工作时间段
-	worked: 8,
+	worked: 7,
 
 	//当前微信号：清清
 	wechat: 'wxid_okvkiyguz1yh22',
