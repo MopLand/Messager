@@ -245,7 +245,6 @@ class Groups {
 		var self = this;
 		var klas = new Account(this.conf);
 		var span = 200;
-		var once = 0;
 		
 		//半小时以内有心跳
 		var time = () => {
@@ -259,8 +258,7 @@ class Groups {
 
 		///////////////
 
-		//每半小时，计算一次心跳量
-		setInterval( () => {
+		var calc = () => {
 
 			self.mysql.query('SELECT COUNT(*) AS count FROM `pre_member_weixin` WHERE heartbeat_time >= ?', [time()], function (err, res) {
 
@@ -275,12 +273,14 @@ class Groups {
 				
 			});
 
-		}, 60 * 1000 * 30 * once );
+		};
+
+		//每半小时，计算一次心跳量
+		setInterval( calc, 60 * 1000 * 30 );
 
 		///////////////
-		
-		//每分钟，分批次发送心跳
-		setInterval( () => {
+
+		var send = () => {
 
 			self.mysql.query('SELECT member_id, weixin_id, device_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
 
@@ -335,9 +335,16 @@ class Groups {
 	
 			});
 
-			once = 1;
+		};
+		
+		//每分钟，分批次发送心跳
+		setInterval( send, 60 * 1000 );
 
-		}, 60 * 1000 * once );
+		///////////////
+
+		//主动心跳一次
+		calc();
+		send();
 
 	}
 
