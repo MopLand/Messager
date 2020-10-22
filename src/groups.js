@@ -13,6 +13,14 @@ const Account = require('./account');
 const tag = com.fileName( __filename, false );
 const log = new Logger( tag );
 
+/**
+ * 用户 TAG
+ * 1 ： '测试通道'
+ * 2 ： '禁小程序'
+ * 4 ： 'example'
+ * 8 ： 'example'
+ */
+
 class Groups {
 
     /**
@@ -237,6 +245,7 @@ class Groups {
 		var self = this;
 		var klas = new Account(this.conf);
 		var span = 200;
+		var once = 0;
 		
 		//半小时以内有心跳
 		var time = () => {
@@ -266,7 +275,7 @@ class Groups {
 				
 			});
 
-		}, 60 * 1000 * 30 );
+		}, 60 * 1000 * 30 * once );
 
 		///////////////
 		
@@ -326,7 +335,9 @@ class Groups {
 	
 			});
 
-		}, 60 * 1000 );
+			once = 1;
+
+		}, 60 * 1000 * once );
 
 	}
 
@@ -359,7 +370,7 @@ class Groups {
 			//二十分钟
 			var time = com.getTime() - 60 * 20;
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
 
 				if( err ){
 					log.error( err );
