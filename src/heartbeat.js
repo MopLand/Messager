@@ -229,7 +229,7 @@ class Heartbeat {
 
 			} );
 
-			setTimeout( () => { self.handle( res ); }, 500 );
+			setTimeout( () => { self.handle( res ); }, 250 );
 
 		}
 
