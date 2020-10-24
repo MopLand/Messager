@@ -5,6 +5,7 @@ const Groups = require('./src/groups');
 const Moment = require('./src/moment');
 const Account = require('./src/account');
 const Messager = require('./src/messager');
+const Heartbeat = require('./src/heartbeat');
 
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
@@ -55,6 +56,12 @@ if (func == 'contact') {
 	let klas = new Account(conf);
 		klas.contact( weixin, room );
 		
+}
+
+//心跳
+if (func == 'heartbeat') {
+	let klas = new Heartbeat(conf);
+		klas.init();
 }
 
 //账号

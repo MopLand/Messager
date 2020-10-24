@@ -81,7 +81,7 @@ class Groups {
 
 		//每分钟分批心跳
 		if( inst.heartbeat ){
-			this.heartBeat();
+		//	this.heartBeat();
 		}
 
 		//定时拉有效用户
@@ -240,7 +240,7 @@ class Groups {
 	/**
 	 * 同步心跳
 	 */
-	heartBeat() {
+	heartBeat2() {
 
 		var self = this;
 		var klas = new Account(this.conf);
@@ -345,6 +345,101 @@ class Groups {
 		//主动心跳一次
 		calc();
 		send();
+
+	}
+
+	/**
+	 * 同步心跳
+	 */
+	heartBeat() {
+
+		var self = this;
+		var klas = new Account(this.conf);
+		var span = 300;
+		
+		//半小时以内有心跳
+		var time = () => {
+			return com.getTime() - 60 * 30;
+		};
+
+		//更新用户心跳时间
+		var beat = ( member_id ) => {
+			self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member_id ] );
+		}
+
+		//处理完成本轮心跳
+		var todo = ( res ) => {
+
+			if( res.length == 0 ){
+
+				log.info( '心跳完成' )
+				self.heartBeat();
+
+			}else{
+
+				//弹出一个人
+				let row = res.shift();
+
+				//获取群消息
+				let pm = self.wx.Heartbeat( row.weixin_id );
+
+				pm.then(ret => {
+					
+					log.info( '心跳成功', [row.weixin_id, row.member_id] );
+
+					beat( row.member_id );
+
+					//todo( res );
+
+				}).catch( err => {
+
+					log.debug( '心跳失败', [row.weixin_id, err] );
+
+					//autoauth -> pushlogin -> qrcodelogin
+					if( err.indexOf('退出微信') > -1 ){
+						
+						let pa = self.wx.AutoAuth( row.weixin_id );
+
+						pa.then( ret => {
+							beat( row.member_id );
+							log.info( '登录成功', [row.weixin_id, ret] );
+						}).catch( err => {
+							log.debug( '登录失败', [row.weixin_id, err] );
+							klas.init( row.weixin_id, row.device_id );
+						});
+						
+					}
+
+					//setTimeout( () => { todo( res ); }, 1000 );
+
+				} ).finally( () =>{					
+
+				} );
+
+				setTimeout( () => { todo( res ); }, 1000 );
+
+			}
+
+		}
+
+		///////////////
+
+		self.mysql.query('SELECT member_id, weixin_id, device_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
+
+			if( err ){
+				log.error( err );
+				return;
+			}else{
+				log.info( '本次心跳', res.length + ' 人' );
+			}
+
+			if( res.length == 0 ){
+				return setTimeout( self.heartBeat, 1000 * 60 );
+			}else{
+				todo( res );
+			}
+
+		});
 
 	}
 

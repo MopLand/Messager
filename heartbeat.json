@@ -1,0 +1,16 @@
+{
+  "name"			: "MM_Heartbeat",
+  "script"			: "app.js",
+  "args"			: "heartbeat",
+  "cwd"				: "/disk/www/Messager",
+  "error_file"		: "./logs/wx_heartbeat_err.log",
+  "out_file"		: "./logs/wx_heartbeat_out.log",
+  "merge_logs"		: true,
+  "autorestart"		: true,
+  "watch"			: true,
+  "ignore_watch"	: [".git","logs"],
+  "watch_options"	: {
+	"followSymlinks": false
+  },
+  "log_date_format" : "YYYY-MM-DD"
+}
