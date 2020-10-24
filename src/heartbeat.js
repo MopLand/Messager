@@ -27,6 +27,15 @@ class Heartbeat {
 
 	init( ){
 
+		//每分钟预计人数
+		this.count = 300;
+
+		//每个人预计间隔
+		this.space = 1000 * 60 / this.count;
+
+		//半小时以内有心跳
+		this.range = com.getTime() - 60 * 30;
+
 		//每分钟分批心跳
 		this.heartBeat();
 
@@ -149,20 +158,19 @@ class Heartbeat {
 	heartBeat() {
 
 		var self = this;
-		var span = 300;
-
-		//半小时以内有心跳
-		var time = com.getTime() - 60 * 30;
+		var date = new Date( this.range * 1000 ).format("yyyy-M-d h:m:s");
 
 		///////////////
 
-		self.mysql.query('SELECT member_id, weixin_id, device_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time, span], function (err, res) {
+		log.info( '心跳范围', this.range + ' / ' + date );
+
+		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [this.range, this.count], function (err, res) {
 
 			if( err ){
 				log.error( err );
 				return;
 			}else{
-				log.info( '本次心跳', res.length + ' 人' );
+				log.info( '本次心跳', res.length + ' 人，间隔 ' + self.space + ' 毫秒' );
 			}
 
 			if( res.length == 0 ){
@@ -195,6 +203,9 @@ class Heartbeat {
 
 			//获取群消息
 			let pm = self.wx.Heartbeat( row.weixin_id );
+
+			//更新心跳范围
+			self.range = row.heartbeat_time;
 
 			pm.then(ret => {
 				
@@ -229,7 +240,7 @@ class Heartbeat {
 
 			} );
 
-			setTimeout( () => { self.handle( res ); }, 250 );
+			setTimeout( () => { self.handle( res ); }, self.space );
 
 		}
 
