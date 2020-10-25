@@ -36,6 +36,9 @@ class Heartbeat {
 		//半小时以内有心跳
 		this.range = com.getTime() - 60 * 30;
 
+		//远程服务重启时段
+		this.pause = '02:30';
+
 		//每分钟分批心跳
 		this.heartBeat();
 
@@ -198,47 +201,52 @@ class Heartbeat {
 
 		}else{
 
-			//弹出一个人
-			let row = res.shift();
+			//工作时段
+			var work = new Date().format('hh:mm') != self.pause;
 
-			//获取群消息
-			let pm = self.wx.Heartbeat( row.weixin_id );
-
-			//更新心跳范围
-			self.range = row.heartbeat_time;
-
-			pm.then(ret => {
+			if( work ){
 				
-				log.info( '心跳成功', [row.weixin_id, row.member_id] );
+				//弹出一个人
+				let row = res.shift();
 
-				self.update( row.member_id );
+				//获取群消息
+				let pm = self.wx.Heartbeat( row.weixin_id );
 
-				//todo( res );
+				//更新心跳范围
+				self.range = row.heartbeat_time;
 
-			}).catch( err => {
-
-				log.debug( '心跳失败', [row.weixin_id, err] );
-
-				//autoauth -> pushlogin -> qrcodelogin
-				if( err.indexOf('退出微信') > -1 ){
+				pm.then(ret => {
 					
-					let pa = self.wx.AutoAuth( row.weixin_id );
+					log.info( '心跳成功', [row.weixin_id, row.member_id] );
 
-					pa.then( ret => {
-						self.update( row.member_id );
-						log.info( '登录成功', [row.weixin_id, ret] );
-					}).catch( err => {
-						log.debug( '登录失败', [row.weixin_id, err] );
-						self.klas.init( row.weixin_id, row.device_id );
-					});
-					
-				}
+					self.update( row.member_id );
 
-				//setTimeout( () => { todo( res ); }, 1000 );
+				}).catch( err => {
 
-			} ).finally( () =>{
+					log.debug( '心跳失败', [row.weixin_id, err] );
 
-			} );
+					//autoauth -> pushlogin -> qrcodelogin
+					if( err.indexOf('退出微信') > -1 ){
+						
+						let pa = self.wx.AutoAuth( row.weixin_id );
+
+						pa.then( ret => {
+							self.update( row.member_id );
+							log.info( '登录成功', [row.weixin_id, ret] );
+						}).catch( err => {
+							log.debug( '登录失败', [row.weixin_id, err] );
+							self.klas.init( row.weixin_id, row.device_id );
+						});
+						
+					}
+
+				} ).finally( () =>{
+
+				} );
+
+			}
+
+			///////////////
 
 			setTimeout( () => { self.handle( res ); }, self.space );
 

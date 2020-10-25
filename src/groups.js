@@ -470,7 +470,7 @@ class Groups {
 			var date = new Date(last * 1000).format('yyyyMMdd');
 
 			//二十分钟
-			var time = com.getTime() - 60 * 20;
+			var time = com.getTime() - 60 * 25;
 
 			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
 
