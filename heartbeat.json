@@ -1,8 +1,10 @@
 {
   "name"			: "MM_Heartbeat",
   "script"			: "app.js",
-  "args"			: "heartbeat",
+  "args"			: "heartbeat -inst 2",
   "cwd"				: "/disk/www/Messager",
+  "instances"		: "2",
+  "exec_mode"		: "cluster",
   "error_file"		: "./logs/wx_heartbeat_err.log",
   "out_file"		: "./logs/wx_heartbeat_out.log",
   "merge_logs"		: true,

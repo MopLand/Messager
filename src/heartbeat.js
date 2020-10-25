@@ -25,19 +25,27 @@ class Heartbeat {
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 	}
 
-	init( ){
+	init( inst ){
 
 		//每分钟预计人数
-		this.count = 300;
+		this.count = 250;
 
 		//每个人预计间隔
 		this.space = 1000 * 60 / this.count;
 
+		//远程服务重启时段
+		this.pause = '02:30';
+
 		//半小时以内有心跳
 		this.range = com.getTime() - 60 * 30;
 
-		//远程服务重启时段
-		this.pause = '02:30';
+		//当前 PM2 实例数量
+		this.nodes = inst;
+
+		//实例ID，PM2 分流
+		this.insid = process.env.NODE_APP_INSTANCE || 0;
+
+		log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid );
 
 		//每分钟分批心跳
 		this.heartBeat();
@@ -165,9 +173,9 @@ class Heartbeat {
 
 		///////////////
 
-		log.info( '心跳范围', this.range + ' / ' + date );
+		log.info( '心跳范围', this.range + ' / ' + date + ' / INST ' + this.insid );
 
-		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [this.range, this.count], function (err, res) {
+		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_member_weixin` WHERE heartbeat_time >= ? AND member_id % ? = ? ORDER BY heartbeat_time ASC LIMIT ?', [this.range, this.nodes, this.insid, this.count], function (err, res) {
 
 			if( err ){
 				log.error( err );
@@ -201,10 +209,13 @@ class Heartbeat {
 
 		}else{
 
-			//工作时段
-			var work = new Date().format('hh:mm') != self.pause;
+			//当前时间
+			var date = new Date();
 
-			if( work ){
+			//重启时段
+			var stop = date.format('hh:mm') == self.pause && date.format('ss') <= 20;
+
+			if( stop == false ){
 				
 				//弹出一个人
 				let row = res.shift();
