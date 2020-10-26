@@ -17,7 +17,7 @@ const log = new Logger( tag );
  * 用户 TAG
  * 1 ： '测试通道'
  * 2 ： '禁小程序'
- * 4 ： 'example'
+ * 4 ： '禁止转链'
  * 8 ： 'example'
  */
 
@@ -542,7 +542,7 @@ class Groups {
 			}, ( data ) =>{
 
 				//是口令，需要转链
-				if( exch ){
+				if( exch && user.tag & 4 == 0 ){
 					return { 'request' : true };
 				}else{
 					return { 'request' : false, 'respond' : { 'status' : 1, 'result' : data.text } };
@@ -562,8 +562,9 @@ class Groups {
 	 */
 	forwardMessage() {
 
+		//暂无队列
 		if( this.queues.length == 0 ){
-			return log.info('暂无队列');
+			return;
 		}
 
 		var self = this;
@@ -697,7 +698,7 @@ class Groups {
 			}
 
 			//小程序
-			if( msg.msgtype == 49 ){
+			if( msg.msgtype == 49 && member.tag & 2 == 0 ){
 
 				var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, detail);
 

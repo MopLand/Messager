@@ -255,6 +255,8 @@ class Heartbeat {
 
 				} );
 
+			}else{
+				log.info( '暂停心跳' );
 			}
 
 			///////////////

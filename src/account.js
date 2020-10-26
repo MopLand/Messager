@@ -59,22 +59,22 @@ class Account {
 
 						clearInterval( clok );
 
-						log.info( ret.notify );
+						log.info( 'NOTIFY', ret.notify );
 
 						////////
 
 						let pm = self.submit( ret.notify.userName );
 
 						pm.then(ret=>{
-							log.info( ret );
+							log.info( '提交登录', ret );
 						}).catch(err=>{
-							log.error( err );
+							log.error( '提交失败', err );
 						});
 						
 					}
 
 				}).catch(err => {
-					log.info(err);
+					log.info( '检查状态', err );
 				});
 
 			}
@@ -82,7 +82,7 @@ class Account {
 			if( init >= 15 ){
 				clearInterval( clok );
 				Common.DelFile( self.code );
-				log.info('扫码登录超时，请重试');
+				log.info( '扫码超时', { wxid, device } );
 			}else{
 				init++;
 			}
