@@ -287,7 +287,7 @@ class Groups {
 					} );
 
 					if( roomid.length > 0 ){
-						member.push( { member_id : res[i].member_id, weixin_id : res[i].weixin_id, roomid } );
+						member.push( { member_id : res[i].member_id, weixin_id : res[i].weixin_id, tag, roomid } );
 					}
 
 				}
@@ -542,7 +542,7 @@ class Groups {
 			}, ( data ) =>{
 
 				//是口令，需要转链
-				if( exch && user.tag & 4 == 0 ){
+				if( exch && ( user.tag & 4 ) == 0 ){
 					return { 'request' : true };
 				}else{
 					return { 'request' : false, 'respond' : { 'status' : 1, 'result' : data.text } };
@@ -621,7 +621,7 @@ class Groups {
 
 	/**
 	 * 转发群消息
-	 * @param object 用户数据
+	 * @param object 用户信息
 	 * @param object 单条消息
 	 */
 	sendMsg( member, msg ){
@@ -698,7 +698,7 @@ class Groups {
 			}
 
 			//小程序
-			if( msg.msgtype == 49 && member.tag & 2 == 0 ){
+			if( msg.msgtype == 49 && ( member.tag & 2 ) == 0 ){
 
 				var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, detail);
 
