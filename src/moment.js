@@ -94,7 +94,7 @@ class Moment {
 		}, 60 * 1000 * 5 );
 
 		//每分钟补发一次
-		setInterval( this.reissueComment.bind(this), 60 * 990 );
+		setInterval( this.reissueComment.bind(this), 60 * 1000 );
 
 	}
 
@@ -104,7 +104,7 @@ class Moment {
 	send(post) {
 
 		var self = this;
-		var time = com.getTime() - 60 * 25;
+		var time = com.getTime() - self.conf.active;
 		var data = self.parseMoment( post );
 
 		//昨天时间

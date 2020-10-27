@@ -34,6 +34,7 @@ class Groups {
 		this.sider = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 		this.members = [];
+		this.newdata = null;
 		this.queues = [];
 		this.locked = 0;
 		this.sender = 0;
@@ -111,7 +112,15 @@ class Groups {
 
 			//是不还在发送消息
 			if( i == size - 1 ){
+
 				self.sender = 0;
+
+				if( self.newdata ){
+					log.info( '更新名单', '原名单长度 '+ self.members.length +'，新名单长度 '+ self.newdata.length );
+					self.members = self.newdata;
+					self.newdata = null;
+				}
+
 			}else{
 				self.sender = 1;
 			}
@@ -138,6 +147,10 @@ class Groups {
 
 		if( body.err && body.err.indexOf('退出微信') > -1 ){
 			pushed = '请检查微信是否在登录状态?';
+		}
+
+		if( body.err && body.err.indexOf('转链失败') > -1 ){
+			pushed = '请检查淘宝备案是否有效?';
 		}
 
 		return this.mysql.query('UPDATE `pre_member_weixin` SET pushed = ?, status = ?, status_time = ? WHERE member_id = ?', [ pushed, JSON.stringify( body ), com.getTime(), member_id ] );
@@ -241,10 +254,6 @@ class Groups {
 
 		var func = () => {
 
-			if( self.sender ){
-				return log.info('正在推送');
-			}
-
 			//工作时段
 			var work = new Date().format('h') >= self.conf.worked;
 
@@ -259,7 +268,7 @@ class Groups {
 			var date = new Date(last * 1000).format('yyyyMMdd');
 
 			//二十分钟
-			var time = com.getTime() - 60 * 25;
+			var time = com.getTime() - self.conf.active;
 
 			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
 
@@ -292,9 +301,14 @@ class Groups {
 
 				}
 
-				self.members = member;
+				//正在发送中，暂存名单
+				if( self.sender ){
+					self.newdata = member;
+				}else{
+					self.members = member;
+				}
 
-				log.info( '筛选用户', '在线用户' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人' );
+				log.info( '筛选用户', '在线用户' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人，发送状态 ' +  self.sender );
 
 			});
 
@@ -520,6 +534,7 @@ class Groups {
 
 				}else{
 
+					body.err	= '转链失败';
 					body.source = 'groups';
 					body.lazy_time = lazy_time;
 
