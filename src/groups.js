@@ -718,15 +718,25 @@ class Groups {
 			}
 
 			//小程序
-			if( msg.msgtype == 49 && ( member.tag & 2 ) == 0 ){
+			if( msg.msgtype == 49 ){
 
-				var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, detail);
+				//发送小程序
+				if( ( member.tag & 2 ) == 0 ){
 
-				fn.then(ret => {
-					log.info('小程序成功', [member.member_id, chat, ret.msgId]);
-				}).catch(err => {
-					self.sendErr( member.member_id, 'SendAppMsgXml', err, chat );
-				});
+					var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, detail);
+
+					fn.then(ret => {
+						log.info('小程序成功', [member.member_id, chat, ret.msgId]);
+					}).catch(err => {
+						self.sendErr( member.member_id, 'SendAppMsgXml', err, chat );
+					});
+
+				}else{
+
+					var fn = com.Promise( true, { 'status' : 0, 'result' : '已经忽略小程序发送' } );
+
+				}
+				
 			}
 
 		}
