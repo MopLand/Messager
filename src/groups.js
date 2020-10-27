@@ -296,7 +296,7 @@ class Groups {
 					} );
 
 					if( roomid.length > 0 ){
-						member.push( { member_id : res[i].member_id, weixin_id : res[i].weixin_id, tag, roomid } );
+						member.push( { member_id : res[i].member_id, weixin_id : res[i].weixin_id, tag : res[i].tag, roomid } );
 					}
 
 				}
