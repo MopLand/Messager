@@ -104,7 +104,7 @@ class Moment {
 	send(post) {
 
 		var self = this;
-		var time = com.getTime() - 60 * 15;
+		var time = com.getTime() - 60 * 25;
 		var data = self.parseMoment( post );
 
 		//昨天时间
@@ -129,7 +129,7 @@ class Moment {
 				if( res.length == 0 ){
 					return log.info( '处理完毕', time );
 				}else{
-					log.info( '本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条' );
+					log.info( '本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto );
 				}
 	
 				for (var i = 0; i < res.length; i++) {
@@ -378,7 +378,7 @@ class Moment {
 			}, ( data ) =>{
 
 				//是口令，需要转链
-				if( comm.exch ){
+				if( comm.exch && ( member.tag & 4 ) == 0 ){
 					return { 'request' : true };
 				}else{
 					return { 'request' : false, 'respond' : { 'status' : 1, 'result' : data.text } };

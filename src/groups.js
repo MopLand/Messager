@@ -568,6 +568,7 @@ class Groups {
 		}
 
 		var self = this;
+		let rkey = this.inst.channel + '_active';
 		let item = this.queues.shift();
 		let user = item.member;
 		let data = item.data;
@@ -603,6 +604,10 @@ class Groups {
 					
 					//更新发群时间
 					self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ user.member_id ] );
+
+					//最后发群时间
+					//self.sider.set( rkey, com.getTime() );
+					//self.sider.expire( rkey, 3600 );
 
 					//消息队列未完成
 					self.forwardMessage();
