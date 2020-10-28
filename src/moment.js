@@ -138,7 +138,7 @@ class Moment {
 					self.forwardMoment(res[i], data);
 	
 					//更新发圈时间
-					self.mysql.query('UPDATE `pre_member_weixin` SET moment_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ res[i].member_id ] );
+					self.mysql.query('UPDATE `pre_member_weixin` SET moment_time = UNIX_TIMESTAMP(), moment_send = moment_send + 1 WHERE member_id = ?', [ res[i].member_id ] );
 	
 				}
 
@@ -165,6 +165,10 @@ class Moment {
 
 		if( typeof body.err == 'string' && body.err.indexOf('退出微信') > -1 ){
 			pushed = '请检查微信是否在登录状态?';
+		}
+
+		if( typeof body.err == 'string' && body.err.indexOf('转链失败') > -1 ){
+			pushed = '请检查淘宝备案是否有效?';
 		}
 
 		return this.mysql.query('UPDATE `pre_member_weixin` SET pushed = ?, status = ?, status_time = ? WHERE member_id = ?', [ pushed, JSON.stringify( body ), com.getTime(), member_id ] );
@@ -339,10 +343,10 @@ class Moment {
 
 					//////////////
 
-					//链接
+					//口令链接
 					let kl = act.extractTbc( body.result );
 
-					if( kl && member.tag > 0 ){
+					if( kl && ( member.tag & 1 ) > 0 ){
 						
 						let lm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, '下单链接 http://wx.bhurl.net/wx?c=' + kl );
 
@@ -357,6 +361,7 @@ class Moment {
 
 				}else{
 
+					body.err	= '转链失败';
 					body.source = 'moment';
 					body.lazy_time = lazy_time;
 
