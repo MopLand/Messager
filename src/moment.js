@@ -148,7 +148,7 @@ class Moment {
 				}
 
 				//再次执行，传入最后ID
-				setTimeout( () => { func( res[i - 1].auto_id ); }, 1000 );
+				setTimeout( () => { func( res[i - 1].auto_id ); }, 2000 );
 	
 			});
 

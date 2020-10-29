@@ -99,7 +99,7 @@ class Groups {
 			self.parseMessage( self.members[i], msgs );
 
 			if( i < size - 1 ){
-				setTimeout( () => { func( i + 1 ); }, 100 );
+				setTimeout( () => { func( i + 1 ); }, 250 );
 			}
 
 			if( i > 0 ){
