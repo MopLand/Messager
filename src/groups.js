@@ -608,12 +608,8 @@ class Groups {
 					act.collect( self.mysql, 'groups', msg.product );
 				}
 
-				//消息包未完成
-				if( data.message.length > 0 ){
-
-					setTimeout( () => { func(); }, 3500 );
-
-				}else{
+				//消息包已完成
+				if( data.message.length == 0 ){
 
 					log.info('群发完毕', [user.member_id, data.package]);
 					
@@ -630,8 +626,17 @@ class Groups {
 				}
 
 			}).catch(err => {
-				//log.error('发群失败', [member.member_id, err]);
-			});
+
+				log.error('发群失败', [user.member_id, data.package, err]);
+
+			}).finally( () => {
+
+				//消息包未完成
+				if( data.message.length > 0 ){
+					setTimeout( () => { func(); }, 3500 );
+				}
+
+			} );
 
 		};
 
