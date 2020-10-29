@@ -133,10 +133,9 @@ class Moment {
 					act.record( self.mysql, self.item, { heartbeat_time, auto_id }, '发送完成' );
 					return log.info( '处理完毕', time );
 				}else{
+					act.record( self.mysql, self.item, { 'quantity' : res.length, 'members' : res }, '批次用户' );
 					log.info( '本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto );
 				}
-
-				act.record( self.mysql, self.item, res, '批次用户' );
 	
 				for (var i = 0; i < res.length; i++) {
 	

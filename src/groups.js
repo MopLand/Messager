@@ -289,7 +289,7 @@ class Groups {
 					self.newdata = member;
 				}else{
 					self.members = member;
-					act.record( self.mysql, self.item, useids, '有效用户' );
+					act.record( self.mysql, self.item, { 'quantity' : useids.length, 'member_ids' : useids }, '有效用户' );
 				}
 
 				log.info( '筛选用户', '在线用户' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人，发送状态 ' +  self.sender );
@@ -528,7 +528,7 @@ class Groups {
 
 					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
 					
-					self.pushed( self.mysql, user.member_id, body );
+					act.pushed( self.mysql, user.member_id, body );
 
 					//写入延迟消息
 					if( lazy_time == 0 ){
@@ -646,8 +646,9 @@ class Groups {
 			fn.then(ret => {
 				log.info('文本成功', [member.member_id, ret.count]);
 			}).catch(err => {
-				log.error('文本失败', [member.member_id, err]);
-				self.pushed( self.mysql, member.member_id, { api:'NewSendMsg', err, inst : self.inst.channel } );
+				self.sendErr( member.member_id, 'NewSendMsg', err, member.roomid );
+				//log.error('文本失败', [member.member_id, err]);
+				//act.pushed( self.mysql, member.member_id, { api:'NewSendMsg', err, inst : self.inst.channel } );
 			});
 
 			return fn;
@@ -742,10 +743,10 @@ class Groups {
 		log.error( api, [member_id, err, chat]);
 
 		//更新状态
-		this.pushed( this.mysql, member_id, { api: api, err, chat, inst : this.inst.channel } );
+		act.pushed( this.mysql, member_id, { api: api, err, chat, inst : this.inst.channel } );
 
 		//群已经失效
-		if( err == 'MM_ERR_NOTCHATROOMCONTACT' ){
+		if( err == 'MM_ERR_NOTCHATROOMCONTACT' && typeof chat == 'string' ){
 			this.delGroup( member_id, chat );
 		}
 
