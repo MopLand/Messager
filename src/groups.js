@@ -59,6 +59,7 @@ class Groups {
 		//消息筛选条件
 		var where = {}
 
+		this.item = item;
 		this.inst = inst;
 
 		if( inst.follow ){
@@ -110,7 +111,7 @@ class Groups {
 				setTimeout( self.forwardMessage.bind( self ), 15 * 1000 );
 			}
 
-			//是不还在发送消息
+			//发送完成，最末尾
 			if( i == size - 1 ){
 
 				self.sender = 0;
@@ -121,6 +122,8 @@ class Groups {
 					self.newdata = null;
 				}
 
+				act.record( self.mysql, self.item, self.newdata, '发送完成' );
+
 			}else{
 				self.sender = 1;
 			}
@@ -130,30 +133,6 @@ class Groups {
 		//开始执行
 		func( 0 );
 
-	}
-
-	/**
-     * 更新状态
-     * @param integer 用户Id
-     * @param object 状态信息
-     */
-	status( member_id, body ) {
-
-		var pushed = null;
-
-		if( body.err && body.err.indexOf('NOTCHATROOMCONTACT') > -1 ){
-			pushed = '请检查您的微信群是否有效?';
-		}
-
-		if( body.err && body.err.indexOf('退出微信') > -1 ){
-			pushed = '请检查微信是否在登录状态?';
-		}
-
-		if( body.err && body.err.indexOf('转链失败') > -1 ){
-			pushed = '请检查淘宝备案是否有效?';
-		}
-
-		return this.mysql.query('UPDATE `pre_member_weixin` SET pushed = ?, status = ?, status_time = ? WHERE member_id = ?', [ pushed, JSON.stringify( body ), com.getTime(), member_id ] );
 	}
 
 	/**
@@ -217,6 +196,8 @@ class Groups {
 				//临时存储一天
 				self.sider.set( marker, keybuf );
 				self.sider.expire( marker, 3600 * 14 );
+				
+				act.record( self.mysql, self.item, data, '发群消息' );
 
 				//消息不完整
 				if( !find && recv.event != 'pull' ){
@@ -306,6 +287,7 @@ class Groups {
 					self.newdata = member;
 				}else{
 					self.members = member;
+					act.record( self.mysql, self.item, member, '有效用户' );
 				}
 
 				log.info( '筛选用户', '在线用户' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人，发送状态 ' +  self.sender );
@@ -544,7 +526,7 @@ class Groups {
 
 					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
 					
-					self.status( user.member_id, body );
+					self.pushed( self.mysql, user.member_id, body );
 
 					//写入延迟消息
 					if( lazy_time == 0 ){
@@ -663,7 +645,7 @@ class Groups {
 				log.info('文本成功', [member.member_id, ret.count]);
 			}).catch(err => {
 				log.error('文本失败', [member.member_id, err]);
-				self.status( member.member_id, { api:'NewSendMsg', err, inst : self.inst.channel } );
+				self.pushed( self.mysql, member.member_id, { api:'NewSendMsg', err, inst : self.inst.channel } );
 			});
 
 			return fn;
@@ -715,11 +697,6 @@ class Groups {
 					self.sendErr( member.member_id, 'SendEmojiXml', err, chat );
 				});
 
-				//多个微信群，适当延迟
-				if( member.roomid.length > 1 ){
-				//	com.sleep( 300 );
-				}
-
 			}
 
 			//小程序
@@ -763,7 +740,7 @@ class Groups {
 		log.error( api, [member_id, err, chat]);
 
 		//更新状态
-		this.status( member_id, { api: api, err, chat, inst : this.inst.channel } );
+		this.pushed( this.mysql, member_id, { api: api, err, chat, inst : this.inst.channel } );
 
 		//群已经失效
 		if( err == 'MM_ERR_NOTCHATROOMCONTACT' ){

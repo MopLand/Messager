@@ -39,6 +39,7 @@ class Moment {
 
 		///////////////
 
+		this.item = item;
 		this.inst = inst;
 
 		//最近一次朋友圈消息ID
@@ -76,6 +77,8 @@ class Moment {
 				}else{
 					log.info( '暂无发圈', { 'maxid' : maxid, 'post.id' : post.id, 'post.time' : post.createTime } );
 				}
+
+				act.record( self.mysql, self.item, post, '发圈消息' );
 
 				//临时存储一天
 				self.redis.set( stamp, post.id );
@@ -127,10 +130,13 @@ class Moment {
 				}
 
 				if( res.length == 0 ){
+					act.record( self.mysql, self.item, { heartbeat_time, auto_id }, '发送完成' );
 					return log.info( '处理完毕', time );
 				}else{
 					log.info( '本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto );
 				}
+
+				act.record( self.mysql, self.item, res, '批次用户' );
 	
 				for (var i = 0; i < res.length; i++) {
 	
@@ -152,26 +158,6 @@ class Moment {
 		//开始执行
 		data.sending && func( 0 );
 
-	}
-
-	/**
-     * 更新状态
-     * @param integer 用户Id
-     * @param object 状态信息
-     */
-	status( member_id, body ) {
-
-		var pushed = null;
-
-		if( typeof body.err == 'string' && body.err.indexOf('退出微信') > -1 ){
-			pushed = '请检查微信是否在登录状态?';
-		}
-
-		if( typeof body.err == 'string' && body.err.indexOf('转链失败') > -1 ){
-			pushed = '请检查淘宝备案是否有效?';
-		}
-
-		return this.mysql.query('UPDATE `pre_member_weixin` SET pushed = ?, status = ?, status_time = ? WHERE member_id = ?', [ pushed, JSON.stringify( body ), com.getTime(), member_id ] );
 	}
 
 	/**
@@ -276,7 +262,7 @@ class Moment {
 		}).catch(err => {
 
 			log.error( '发圈出错', [member.member_id, err] );
-			self.status( member.member_id, { api:'SnsPostXml', err } );
+			self.pushed( self.mysql, member.member_id, { api:'SnsPostXml', err } );
 
 			//判定为垃圾消息
 			if( typeof err == 'string' && self.inst.cancel ){
@@ -338,7 +324,7 @@ class Moment {
 					}).catch(err => {
 
 						log.error( '评论失败', [member.weixin_id, err] );
-						self.status( member.member_id, { api:'SnsComment', act:'text', err } );
+						self.pushed( self.mysql, member.member_id, { api:'SnsComment', act:'text', err } );
 					});
 
 					//////////////
@@ -354,7 +340,7 @@ class Moment {
 							log.info( '链接成功', [member.weixin_id, post_id, ret.snsObject.id] );
 						}).catch(err => {
 							log.error( '链接失败', [member.weixin_id, err] );
-							self.status( member.member_id, { api:'SnsComment', act:'link', err } );
+							self.pushed( self.mysql, member.member_id, { api:'SnsComment', act:'link', err } );
 						});
 
 					}
@@ -367,7 +353,7 @@ class Moment {
 
 					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
-					self.status( member.member_id, body );
+					self.pushed( self.mysql, member.member_id, body );
 
 					//是延迟补发的消息，删除这条朋友圈，否则写入延迟消息
 					if( lazy_time ){
