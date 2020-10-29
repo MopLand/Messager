@@ -259,6 +259,7 @@ class Groups {
 				}
 
 				var member = [];
+				var useids = [];
 
 				for (let i = 0; i < res.length; i++) {
 
@@ -277,6 +278,7 @@ class Groups {
 					} );
 
 					if( roomid.length > 0 ){
+						useids.push( res[i].member_id );
 						member.push( { member_id : res[i].member_id, weixin_id : res[i].weixin_id, tag : res[i].tag, roomid } );
 					}
 
@@ -287,7 +289,7 @@ class Groups {
 					self.newdata = member;
 				}else{
 					self.members = member;
-					act.record( self.mysql, self.item, member, '有效用户' );
+					act.record( self.mysql, self.item, useids, '有效用户' );
 				}
 
 				log.info( '筛选用户', '在线用户' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人，发送状态 ' +  self.sender );
