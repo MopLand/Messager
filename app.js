@@ -10,6 +10,7 @@ const Heartbeat = require('./src/heartbeat');
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
 
+process.env.UV_THREADPOOL_SIZE = 128;
 console.log( '-------------' + Common.getTime() +'-------------' );
 
 //消息推送，默认方法

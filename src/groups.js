@@ -646,7 +646,7 @@ class Groups {
 			fn.then(ret => {
 				log.info('文本成功', [member.member_id, ret.count]);
 			}).catch(err => {
-				self.sendErr( member.member_id, 'NewSendMsg', err, member.roomid );
+				self.sendErr( member.member_id, 'NewSendMsg', err );
 				//log.error('文本失败', [member.member_id, err]);
 				//act.pushed( self.mysql, member.member_id, { api:'NewSendMsg', err, inst : self.inst.channel } );
 			});
