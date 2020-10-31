@@ -130,7 +130,7 @@ class Moment {
 				}
 
 				if( res.length == 0 ){
-					act.record( self.mysql, self.item, { heartbeat_time, auto_id }, '发送完成' );
+					act.record( self.mysql, self.item, { 'heartbeat_time' : time, auto_id }, '发送完成' );
 					return log.info( '处理完毕', time );
 				}else{
 					act.record( self.mysql, self.item, { 'quantity' : res.length, 'members' : res }, '批次用户' );
@@ -261,7 +261,7 @@ class Moment {
 		}).catch(err => {
 
 			log.error( '发圈出错', [member.member_id, err] );
-			self.pushed( self.mysql, member.member_id, { api:'SnsPostXml', err } );
+			act.pushed( self.mysql, member.member_id, { api:'SnsPostXml', err } );
 
 			//判定为垃圾消息
 			if( typeof err == 'string' && self.inst.cancel ){
@@ -323,7 +323,7 @@ class Moment {
 					}).catch(err => {
 
 						log.error( '评论失败', [member.weixin_id, err] );
-						self.pushed( self.mysql, member.member_id, { api:'SnsComment', act:'text', err } );
+						act.pushed( self.mysql, member.member_id, { api:'SnsComment', act:'text', err } );
 					});
 
 					//////////////
@@ -339,7 +339,7 @@ class Moment {
 							log.info( '链接成功', [member.weixin_id, post_id, ret.snsObject.id] );
 						}).catch(err => {
 							log.error( '链接失败', [member.weixin_id, err] );
-							self.pushed( self.mysql, member.member_id, { api:'SnsComment', act:'link', err } );
+							act.pushed( self.mysql, member.member_id, { api:'SnsComment', act:'link', err } );
 						});
 
 					}
@@ -352,7 +352,7 @@ class Moment {
 
 					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
-					self.pushed( self.mysql, member.member_id, body );
+					act.pushed( self.mysql, member.member_id, body );
 
 					//是延迟补发的消息，删除这条朋友圈，否则写入延迟消息
 					if( lazy_time ){

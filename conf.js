@@ -46,7 +46,7 @@ var conf = {
 	worked: 7,
 
 	//有效心跳秒
-	active : 60 * 25,
+	active : 60 * 30,
 
 	//当前微信号：清清
 	wechat: 'wxid_okvkiyguz1yh22',

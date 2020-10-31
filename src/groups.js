@@ -96,36 +96,22 @@ class Groups {
 		var size = self.members.length;
 		var func = ( i ) => {
 
+			//预处理消息
 			self.parseMessage( self.members[i], msgs );
 
-			if( i < size - 1 ){
-				setTimeout( () => { func( i + 1 ); }, 250 );
-			}
-
+			//开始发消息
 			if( i > 0 ){
 				self.forwardMessage();
+			}
+
+			//下一下用户
+			if( i < size - 1 ){
+				setTimeout( () => { func( i + 1 ); }, 250 );
 			}
 
 			//本地测试，单用户
 			if( size == 1 ){
 				setTimeout( self.forwardMessage.bind( self ), 15 * 1000 );
-			}
-
-			//发送完成，最末尾
-			if( i == size - 1 ){
-
-				self.sender = 0;
-
-				if( self.newdata ){
-					log.info( '更新名单', '原名单长度 '+ self.members.length +'，新名单长度 '+ self.newdata.length );
-					self.members = self.newdata;
-					self.newdata = null;
-				}
-
-				act.record( self.mysql, self.item, self.newdata, '发送完成' );
-
-			}else{
-				self.sender = 1;
 			}
 
 		}
@@ -300,7 +286,7 @@ class Groups {
 
 		func();
 
-		//每6分钟同步一次
+		//每5分钟同步一次
 		setInterval( func, 60 * 1000 * 5 );
 
 	}
@@ -563,8 +549,25 @@ class Groups {
 
 		//暂无队列
 		if( this.queues.length == 0 ){
+
+			if( this.newdata ){
+				log.info( '更新名单', '原名单长度 '+ this.members.length +'，新名单长度 '+ this.newdata.length );
+				this.members = this.newdata;
+				this.newdata = null;
+			}
+
+			if( this.sender ){
+				act.record( this.mysql, this.item, this.newdata, '发送完成' );
+				this.sender = 0;
+			}
+
 			return;
+
+		}else{
+			this.sender = 1;
 		}
+
+		/////////
 
 		var self = this;
 		let rkey = this.inst.channel + '_active';
