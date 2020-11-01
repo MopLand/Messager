@@ -130,7 +130,7 @@ class Moment {
 				}
 
 				if( res.length == 0 ){
-					act.record( self.mysql, self.item, { 'heartbeat_time' : time, auto_id }, '发送完成' );
+					act.record( self.mysql, self.item, { 'heartbeat_time' : time, 'auto_id' : auto }, '发送完成' );
 					return log.info( '处理完毕', time );
 				}else{
 					act.record( self.mysql, self.item, { 'quantity' : res.length, 'members' : res }, '批次用户' );

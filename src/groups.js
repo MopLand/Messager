@@ -278,7 +278,7 @@ class Groups {
 					act.record( self.mysql, self.item, { 'quantity' : useids.length, 'member_ids' : useids }, '有效用户' );
 				}
 
-				log.info( '筛选用户', '在线用户' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人，发送状态 ' +  self.sender );
+				log.info( '筛选用户', '在线用户 ' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人，发送状态 ' +  self.sender );
 
 			});
 
@@ -551,7 +551,7 @@ class Groups {
 		if( this.queues.length == 0 ){
 
 			if( this.newdata ){
-				log.info( '更新名单', '原名单长度 '+ this.members.length +'，新名单长度 '+ this.newdata.length );
+				log.info( '更新名单', this.item + ' 原名单长度 '+ this.members.length +'，新名单长度 '+ this.newdata.length );
 				this.members = this.newdata;
 				this.newdata = null;
 			}
