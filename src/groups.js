@@ -114,6 +114,13 @@ class Groups {
 				setTimeout( self.forwardMessage.bind( self ), 15 * 1000 );
 			}
 
+			////////////
+
+			//锁定 GIT
+			if( i == 0 ){
+				com.locked( self.item );
+			}
+
 		}
 
 		//开始执行
@@ -556,7 +563,9 @@ class Groups {
 				this.newdata = null;
 			}
 
-			if( this.sender ){
+			if( this.sender ){				
+				//解锁 GIT
+				com.unlock();
 				act.record( this.mysql, this.item, this.newdata, '发送完成' );
 				this.sender = 0;
 			}

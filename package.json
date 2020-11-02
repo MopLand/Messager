@@ -33,6 +33,7 @@
 		"mysql": "*",
 		"pm2": "*",
 		"redis": "*",
+		"request": "*",
 		"umeng-push-server-sdk": "*",
 		"xml2js": "^0.4.23"
 	}
