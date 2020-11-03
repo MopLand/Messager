@@ -56,7 +56,7 @@ if (func == 'contact') {
 
 	let klas = new Account(conf);
 		klas.contact( weixin, room );
-		
+
 }
 
 //心跳
