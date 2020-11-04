@@ -136,7 +136,7 @@ class Moment {
 
 				//发送完成，解锁 GIT
 				if( res.length == 0 ){
-					com.unlock();
+					com.unlock( self.item );
 					act.record( self.mysql, self.item, { 'heartbeat_time' : time, 'auto_id' : auto }, '发送完成' );
 					return log.info( '处理完毕', time );
 				}else{

@@ -565,7 +565,7 @@ class Groups {
 
 			if( this.sender ){				
 				//解锁 GIT
-				com.unlock();
+				com.unlock( this.item );
 				act.record( this.mysql, this.item, this.newdata, '发送完成' );
 				this.sender = 0;
 			}
