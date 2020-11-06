@@ -558,7 +558,7 @@ class Groups {
 			if( end && this.sender ){
 				//解锁 GIT
 				com.unlock( this.item );
-				act.record( this.mysql, this.item, { '用户数量' : this.members, '新用户数' : ( this.newdata ? this.newdata.length : null ) }, '发送完成' );
+				act.record( this.mysql, this.item, { '用户数量' : this.members.length, '新用户数' : ( this.newdata ? this.newdata.length : null ) }, '发送完成' );
 				this.sender = 0;
 			}
 
