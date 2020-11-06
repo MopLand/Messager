@@ -101,7 +101,7 @@ class Groups {
 
 			//开始发消息
 			if( i > 0 ){
-				self.forwardMessage();
+				self.forwardMessage( i == size - 1 );
 			}
 
 			//下一下用户
@@ -548,22 +548,20 @@ class Groups {
 
 	/**
 	 * 转发群消息
-	 * @param object 消息数据
-	 * @param object 用户信息
-	 * @param integer 延迟时间
+	 * @param boolean 用户末尾
 	 */
-	forwardMessage() {
+	forwardMessage( end ) {
 
 		//暂无队列
 		if( this.queues.length == 0 ){
 
-			if( this.newdata ){
+			if( end && this.newdata ){
 				log.info( '更新名单', this.item + ' 原名单长度 '+ this.members.length +'，新名单长度 '+ this.newdata.length );
 				this.members = this.newdata;
 				this.newdata = null;
 			}
 
-			if( this.sender ){				
+			if( end && this.sender ){
 				//解锁 GIT
 				com.unlock( this.item );
 				act.record( this.mysql, this.item, this.newdata, '发送完成' );
