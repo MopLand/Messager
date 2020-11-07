@@ -282,8 +282,9 @@ class Groups {
 					self.newdata = member;
 				}else{
 					self.members = member;
-					act.record( self.mysql, self.item, { 'quantity' : useids.length, 'member_ids' : useids }, '有效用户' );
 				}
+
+				act.record( self.mysql, self.item, { 'quantity' : useids.length, 'member_ids' : useids }, ( self.sender ? '暂存用户' : '拉取用户' ) );
 
 				log.info( '筛选用户', '在线用户 ' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人，发送状态 ' +  self.sender );
 
@@ -294,7 +295,7 @@ class Groups {
 		func();
 
 		//每5分钟同步一次
-		setInterval( func, 60 * 1000 * 5 );
+		setInterval( func, 60 * 1000 * 7 );
 
 	}
 
