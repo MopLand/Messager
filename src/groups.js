@@ -94,7 +94,7 @@ class Groups {
 
 		var self = this;
 
-		this.getMember( () => {
+		self.getMember( () => {
 
 			var size = self.members.length;
 			var func = ( i ) => {
