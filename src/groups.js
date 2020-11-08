@@ -34,7 +34,7 @@ class Groups {
 		this.sider = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 		this.members = [];
-		this.newdata = null;
+		this.updated = 0;
 		this.queues = [];
 		this.locked = 0;
 		this.sender = 0;
@@ -93,38 +93,43 @@ class Groups {
 	send(msgs) {
 
 		var self = this;
-		var size = self.members.length;
-		var func = ( i ) => {
 
-			//预处理消息
-			self.parseMessage( self.members[i], msgs );
+		this.getMember( () => {
 
-			//开始发消息
-			if( i > 0 ){
-				self.forwardMessage( i == size - 1 );
+			var size = self.members.length;
+			var func = ( i ) => {
+
+				//预处理消息
+				self.parseMessage( self.members[i], msgs );
+
+				//开始发消息
+				if( i > 0 ){
+					self.forwardMessage( i == size - 1 );
+				}
+
+				//下一下用户
+				if( i < size - 1 ){
+					setTimeout( () => { func( i + 1 ); }, 250 );
+				}
+
+				//本地测试，单用户
+				if( size == 1 ){
+					setTimeout( self.forwardMessage.bind( self ), 15 * 1000 );
+				}
+
+				////////////
+
+				//锁定 GIT
+				if( i == 0 ){
+					com.locked( self.item );
+				}
+
 			}
 
-			//下一下用户
-			if( i < size - 1 ){
-				setTimeout( () => { func( i + 1 ); }, 250 );
-			}
+			//开始执行
+			func( 0 );
 
-			//本地测试，单用户
-			if( size == 1 ){
-				setTimeout( self.forwardMessage.bind( self ), 15 * 1000 );
-			}
-
-			////////////
-
-			//锁定 GIT
-			if( i == 0 ){
-				com.locked( self.item );
-			}
-
-		}
-
-		//开始执行
-		func( 0 );
+		} );
 
 	}
 
@@ -221,81 +226,69 @@ class Groups {
 
 	/**
 	 * 拉取有效用户
+     * @param function 回调方法
 	 */
-	getMember() {
+	getMember( func ) {
 
 		var self = this;
 
-		var func = () => {
-
-			//工作时段
-			var work = new Date().format('h') >= self.conf.worked;
-
-			if( !work ){
-				return log.info('休息时间');
-			}
-
-			/////////
-
-			//昨天时间
-			var last = com.strtotime('-1 day');
-			var date = new Date(last * 1000).format('yyyyMMdd');
-
-			//二十分钟
-			var time = com.getTime() - self.conf.active;
-
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
-
-				if( err ){
-					log.error( err );
-					return;
-				}
-
-				var member = [];
-				var useids = [];
-
-				for (let i = 0; i < res.length; i++) {
-
-					var groups = JSON.parse( res[i].groups_list );
-
-					//过滤有效群
-					groups = groups.filter( ele => {
-						if( !self.inst.source || ele.status == self.inst.source ){
-							return ele.userName;
-						}
-					} );
-
-					//提取群ID
-					var roomid = groups.map( ele => {
-						return ele.userName;
-					} );
-
-					if( roomid.length > 0 ){
-						useids.push( res[i].member_id );
-						member.push( { member_id : res[i].member_id, weixin_id : res[i].weixin_id, tag : res[i].tag, roomid } );
-					}
-
-				}
-
-				//正在发送中，暂存名单
-				if( self.sender ){
-					self.newdata = member;
-				}else{
-					self.members = member;
-				}
-
-				act.record( self.mysql, self.item, { 'quantity' : useids.length, 'member_ids' : useids }, ( self.sender ? '暂存用户' : '拉取用户' ) );
-
-				log.info( '筛选用户', '在线用户 ' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人，发送状态 ' +  self.sender );
-
-			});
-
+		//用户列表最近 5 分钟内更新过
+		if( self.members.length && com.getTime() - self.updated <= 60 * 5 ){
+			return func();
 		}
 
-		func();
+		/////////
 
-		//每5分钟同步一次
-		setInterval( func, 60 * 1000 * 7 );
+		//昨天时间
+		var last = com.strtotime('-1 day');
+		var date = new Date(last * 1000).format('yyyyMMdd');
+
+		//二十分钟
+		var time = com.getTime() - self.conf.active;
+
+		self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
+
+			if( err ){
+				log.error( err );
+				return;
+			}
+
+			var member = [];
+			var useids = [];
+
+			for (let i = 0; i < res.length; i++) {
+
+				var groups = JSON.parse( res[i].groups_list );
+
+				//过滤有效群
+				groups = groups.filter( ele => {
+					if( !self.inst.source || ele.status == self.inst.source ){
+						return ele.userName;
+					}
+				} );
+
+				//提取群ID
+				var roomid = groups.map( ele => {
+					return ele.userName;
+				} );
+
+				if( roomid.length > 0 ){
+					useids.push( res[i].member_id );
+					member.push( { member_id : res[i].member_id, weixin_id : res[i].weixin_id, tag : res[i].tag, roomid } );
+				}
+
+			}
+
+			self.members = member;
+			self.updated = com.getTime();
+
+			act.record( self.mysql, self.item, { 'quantity' : useids.length, 'member_ids' : useids } );
+
+			log.info( '筛选用户', '在线用户 ' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人，发送状态 ' +  self.sender );
+			
+			func();
+
+		});
 
 	}
 
@@ -559,14 +552,8 @@ class Groups {
 			if( end && this.sender ){
 				//解锁 GIT
 				com.unlock( this.item );
-				act.record( this.mysql, this.item, { '用户数量' : this.members.length, '新用户数' : ( this.newdata ? this.newdata.length : null ) }, '发送完成' );
+				act.record( this.mysql, this.item, { '用户数量' : this.members.length }, '发送完成' );
 				this.sender = 0;
-			}
-
-			if( end && this.newdata ){
-				log.info( '更新名单', this.item + ' 原名单长度 '+ this.members.length +'，新名单长度 '+ this.newdata.length );
-				this.members = this.newdata;
-				this.newdata = null;
 			}
 
 			return;
