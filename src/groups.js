@@ -81,9 +81,6 @@ class Groups {
 		//订阅消息发送
 		this.subscribe( wechat, marker, channel, where );
 
-		//定时拉有效用户
-		this.getMember();
-
 	}
 
 	/**
