@@ -22,6 +22,7 @@ class Moment {
 		this.conf = conf;
 		this.wx = new wx( conf.weixin, conf.reserve, conf.special );
 		this.redis = com.redis(conf.redis);
+		this.sider = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 		this.delay = [];
 		this.abort = false;
@@ -294,6 +295,7 @@ class Moment {
 	forwardComment(member, data, post_id, lazy_time = 0) {
 
 		var self = this;
+		let rkey = this.item + '_active';
 
 		for( let i = 0; i < data.comment.length; i ++ ){
 
@@ -350,6 +352,12 @@ class Moment {
 						});
 
 					}
+
+					//////////////
+
+					//最后发圈时间
+					self.sider.set( rkey, com.getTime() );
+					self.sider.expire( rkey, 7200 );
 
 				}else{
 

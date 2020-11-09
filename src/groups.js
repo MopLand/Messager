@@ -106,7 +106,7 @@ class Groups {
 
 				//下一下用户
 				if( i < size - 1 ){
-					setTimeout( () => { func( i + 1 ); }, 250 );
+					setTimeout( () => { func( i + 1 ); }, 200 );
 				}
 
 				//本地测试，单用户
@@ -517,7 +517,7 @@ class Groups {
 					//写入延迟消息
 					if( lazy_time == 0 ){
 						var time = com.getTime();
-						setTimeout( () => { self.parseMessage( user, data, time ); }, 60 * 1000 * 5 );
+						setTimeout( () => { self.parseMessage( user, data, time ); }, 60 * 1000 * 3 );
 					}
 
 				}
@@ -562,7 +562,7 @@ class Groups {
 		/////////
 
 		var self = this;
-		let rkey = this.inst.channel + '_active';
+		let rkey = this.item + '_active';
 		let item = this.queues.shift();
 		let user = item.member;
 		let data = item.data;
@@ -596,8 +596,8 @@ class Groups {
 					self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP(), groups_send = groups_send + 1 WHERE member_id = ?', [ user.member_id ] );
 
 					//最后发群时间
-					//self.sider.set( rkey, com.getTime() );
-					//self.sider.expire( rkey, 3600 );
+					self.sider.set( rkey, com.getTime() );
+					self.sider.expire( rkey, 7200 );
 
 					//消息队列未完成
 					self.forwardMessage();
@@ -612,7 +612,7 @@ class Groups {
 
 				//消息包未完成
 				if( data.message.length > 0 ){
-					setTimeout( () => { func(); }, 3500 );
+					setTimeout( () => { func(); }, 3000 );
 				}
 
 			} );
