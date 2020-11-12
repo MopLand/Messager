@@ -81,6 +81,25 @@ class Groups {
 		//订阅消息发送
 		this.subscribe( wechat, marker, channel, where );
 
+		//////////
+
+		/*
+		req.get(this.conf.convert, { 'member_id' : 10008, 'text' : 'content', 'product' : 'true' }, (code, body) => {
+				
+			console.log( body );
+
+		}, ( data ) =>{
+
+			return { 'request' : true };
+
+		}, this.conf.options );
+
+		var a = [1, 2];
+		var b = com.clone( a );
+
+		console.log( a, b, a == b );
+		*/
+
 	}
 
 	/**
@@ -93,11 +112,12 @@ class Groups {
 
 		self.getMember( () => {
 
-			var size = self.members.length;
+			var user = com.clone( self.members );
+			var size = user.length;
 			var func = ( i ) => {
 
 				//预处理消息
-				self.parseMessage( self.members[i], msgs );
+				self.parseMessage( user[i], msgs );
 
 				//开始发消息
 				if( i > 0 ){
@@ -472,7 +492,7 @@ class Groups {
 			let comm = data.message[i];
 			let exch = comm.msgtype == 1 && comm.exch;
 
-			req.get(self.conf.convert, { 'member_id' : user.member_id, 'text' : comm.content, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {
+			req.get( self.conf.convert, { 'member_id' : user.member_id, 'text' : comm.content, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {
 				
 				try {
 					if( typeof body == 'string' ){
@@ -516,8 +536,7 @@ class Groups {
 
 					//写入延迟消息
 					if( lazy_time == 0 ){
-						var time = com.getTime();
-						setTimeout( () => { self.parseMessage( user, data, time ); }, 60 * 1000 * 3 );
+						setTimeout( () => { self.parseMessage( user, data, com.getTime() ); }, 60 * 1000 * 3 );
 					}
 
 				}
@@ -531,7 +550,7 @@ class Groups {
 					return { 'request' : false, 'respond' : { 'status' : 1, 'result' : data.text } };
 				}
 
-			} );
+			}, self.conf.options );
 
 		}
 

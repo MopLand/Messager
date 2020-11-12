@@ -303,7 +303,7 @@ class Moment {
 			let last = i == data.comment.length - 1;
 
 			//转链
-			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {
+			req.get( self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {
 
 				try {
 					if( typeof body == 'string' ){
@@ -389,7 +389,7 @@ class Moment {
 					return { 'request' : false, 'respond' : { 'status' : 1, 'result' : data.text } };
 				}
 
-			} );
+			}, self.conf.options );
 
 		}
 
