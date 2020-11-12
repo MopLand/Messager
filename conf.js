@@ -22,6 +22,7 @@ var conf = {
 
 	//转链接口
 	convert: 'http://api.example.com/transtxt',
+	options: { },
 
 	//微信通信
 	weixin: 'http://127.0.0.1/',
@@ -111,9 +112,6 @@ var conf = {
 
 		//Redis消息频道
 		channel: 'mm_groups',
-
-		//处理心跳
-		heartbeat: true,
 
 	}
 
