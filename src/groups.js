@@ -94,10 +94,20 @@ class Groups {
 
 		}, this.conf.options );
 
-		var a = [1, 2];
+		////////////
+
+		var a = [1, 2, { a: 3, b: 4 }];
 		var b = com.clone( a );
 
-		console.log( a, b, a == b );
+		console.log( a, b, typeof b, Array.isArray(a), a == b );
+
+		////////////
+
+		var a = { a: 1, b: 2, c: [1,2,3] };
+		var b = com.clone( a );
+
+		console.log( a, b, typeof b, Array.isArray(a), a == b );
+
 		*/
 
 	}
