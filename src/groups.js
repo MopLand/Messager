@@ -93,21 +93,27 @@ class Groups {
 			return { 'request' : true };
 
 		}, this.conf.options );
+		*/
 
 		////////////
 
+		/*
 		var a = [1, 2, { a: 3, b: 4 }];
 		var b = com.clone( a );
 
-		console.log( a, b, typeof b, Array.isArray(a), a == b );
+		//console.log( a, b, typeof b, Array.isArray(a), a == b );
+
+		a.shift();
+		console.log( a, b );
+		*/
 
 		////////////
 
+		/*
 		var a = { a: 1, b: 2, c: [1,2,3] };
 		var b = com.clone( a );
 
 		console.log( a, b, typeof b, Array.isArray(a), a == b );
-
 		*/
 
 	}
@@ -130,9 +136,9 @@ class Groups {
 				self.parseMessage( user[i], msgs );
 
 				//开始发消息
-				if( i > 0 ){
-					self.forwardMessage( i == size - 1 );
-				}
+				//if( i > 0 ){
+				//	self.forwardMessage( i == size - 1 );
+				//}
 
 				//下一下用户
 				if( i < size - 1 ){
@@ -304,6 +310,11 @@ class Groups {
 					member.push( { member_id : res[i].member_id, weixin_id : res[i].weixin_id, tag : res[i].tag, roomid } );
 				}
 
+			}
+
+			//最后一个用户加个标记
+			if( useids.length ){
+				member[ useids.length - 1 ].end = true;
 			}
 
 			self.members = member;
@@ -494,7 +505,9 @@ class Groups {
 
 		//无需转链，直接回调
 		if( data.convert == 0 ){
-			return self.queues.push( { 'member' : user, data } );
+			self.queues.push( { 'member' : user, data } );
+			self.forwardMessage();
+			return;
 		}
 
 		for (let i = 0; i < data.message.length; i++) {
@@ -528,6 +541,7 @@ class Groups {
 
 					if( data.convert == 0 ){
 						self.queues.push( { 'member' : user, data } );
+						self.forwardMessage();
 					}
 
 				}else{
@@ -549,6 +563,11 @@ class Groups {
 						setTimeout( () => { self.parseMessage( user, data, com.getTime() ); }, 60 * 1000 * 3 );
 					}
 
+					//最后一个人，第二次尝试失败，强制解锁
+					if( user.end && lazy_time ){
+						self.completeMessage( user );
+					}
+
 				}
 
 			}, ( data ) =>{
@@ -567,23 +586,24 @@ class Groups {
 	}
 
 	/**
+	 * 完成消息发送
+	 * @param object 用户对象
+	 */
+	completeMessage( user ){
+		this.sender = 0;
+		com.unlock( this.item );
+		act.record( this.mysql, this.item, { '用户数量' : this.members.length, '末尾用户' : user }, '发送完成' );
+	}
+
+	/**
 	 * 转发群消息
 	 * @param boolean 用户末尾
 	 */
-	forwardMessage( end ) {
+	forwardMessage( ) {
 
 		//暂无队列
 		if( this.queues.length == 0 ){
-
-			if( end && this.sender ){
-				//解锁 GIT
-				com.unlock( this.item );
-				act.record( this.mysql, this.item, { '用户数量' : this.members.length }, '发送完成' );
-				this.sender = 0;
-			}
-
 			return;
-
 		}else{
 			this.sender = 1;
 		}
@@ -629,7 +649,7 @@ class Groups {
 					self.sider.expire( rkey, 7200 );
 
 					//消息队列未完成
-					self.forwardMessage();
+					//self.forwardMessage();
 
 				}
 
@@ -642,6 +662,11 @@ class Groups {
 				//消息包未完成
 				if( data.message.length > 0 ){
 					setTimeout( () => { func(); }, 3000 );
+				}
+
+				//消息全部完成，解锁 GIT
+				if( data.message.length == 0 && user.end ){
+					self.completeMessage( user );
 				}
 
 			} );
