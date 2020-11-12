@@ -320,7 +320,7 @@ class Groups {
 			self.members = member;
 			self.updated = com.getTime();
 
-			act.record( self.mysql, self.item, { 'quantity' : useids.length, 'member_ids' : useids } );
+			act.record( self.mysql, self.item, { 'quantity' : useids.length, 'member_ids' : useids }, '筛选用户' );
 
 			log.info( '筛选用户', '在线用户 ' + res.length + ' 人，群发用户（'+ self.inst.source +'）'+ member.length + ' 人，发送状态 ' +  self.sender );
 			
@@ -592,7 +592,7 @@ class Groups {
 	completeMessage( user ){
 		this.sender = 0;
 		com.unlock( this.item );
-		act.record( this.mysql, this.item, { '用户数量' : this.members.length, '末尾用户' : user }, '发送完成' );
+		act.record( this.mysql, this.item, { 'quantity' : this.members.length, 'last_man' : user }, '发送完成' );
 	}
 
 	/**
