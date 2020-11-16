@@ -154,7 +154,7 @@ class Groups {
 
 				//锁定 GIT
 				if( i == 0 ){
-					self.setLocked( self.item );
+					self.setLocked( self.item, user[ size - 1 ] );
 				}
 
 			}
@@ -168,9 +168,10 @@ class Groups {
 
 	/**
 	 * 设置消息锁
-	 * @param object 用户对象
+	 * @param string 锁名称
+	 * @param object 最后一个用户
 	 */
-	setLocked( item ){		
+	setLocked( item, last ){		
 
 		var self = this;
 		var clok = setInterval( () => {
@@ -190,7 +191,7 @@ class Groups {
 
 			//删除锁文件
 			com.unlock( item );
-			act.record( self.mysql, self.item, { 'quantity' : self.members.length, 'last_man' : user }, '发送完成' );
+			act.record( self.mysql, self.item, { 'quantity' : self.members.length, 'last_man' : last }, '发送完成' );
 
 			//清除定时器
 			clearInterval( clok );
