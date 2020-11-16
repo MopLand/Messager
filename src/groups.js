@@ -154,7 +154,7 @@ class Groups {
 
 				//锁定 GIT
 				if( i == 0 ){
-					com.locked( self.item );
+					self.setLocked( self.item );
 				}
 
 			}
@@ -163,6 +163,47 @@ class Groups {
 			func( 0 );
 
 		} );
+
+	}
+
+	/**
+	 * 设置消息锁
+	 * @param object 用户对象
+	 */
+	setLocked( item ){		
+
+		var self = this;
+		var clok = setInterval( () => {
+
+			//队列中还有消息
+			if( self.queues.length ){
+				return;
+			}
+
+			//消息可能还在发送中
+			if( com.getTime() - self.sender <= 30 ){
+				return;
+			}
+
+			//清掉发送状态
+			self.sender = 0;
+
+			//删除锁文件
+			com.unlock( item );
+			act.record( self.mysql, self.item, { 'quantity' : self.members.length, 'last_man' : user }, '发送完成' );
+
+			//清除定时器
+			clearInterval( clok );
+
+		}, 1000 * 10 );
+
+		///////////////
+
+		//创建锁文件
+		com.locked( item );
+
+		//开始发送状态
+		self.sender = com.getTime();
 
 	}
 
@@ -558,14 +599,12 @@ class Groups {
 					
 					act.pushed( self.mysql, user.member_id, body );
 
-					//写入延迟消息
+					//写入延迟消息，更新发送状态
 					if( lazy_time == 0 ){
-						setTimeout( () => { self.parseMessage( user, data, com.getTime() ); }, 60 * 1000 * 3 );
-					}
-
-					//最后一个人，第二次尝试失败，强制解锁
-					if( user.end && lazy_time ){
-						self.completeMessage( user );
+						let time = com.getTime();
+						let span = 60 * 1000 * 3;
+						self.sender = time + span;
+						setTimeout( () => { self.parseMessage( user, data, time ); }, span );
 					}
 
 				}
@@ -586,16 +625,6 @@ class Groups {
 	}
 
 	/**
-	 * 完成消息发送
-	 * @param object 用户对象
-	 */
-	completeMessage( user ){
-		this.sender = 0;
-		com.unlock( this.item );
-		act.record( this.mysql, this.item, { 'quantity' : this.members.length, 'last_man' : user }, '发送完成' );
-	}
-
-	/**
 	 * 转发群消息
 	 * @param boolean 用户末尾
 	 */
@@ -604,8 +633,6 @@ class Groups {
 		//暂无队列
 		if( this.queues.length == 0 ){
 			return;
-		}else{
-			this.sender = 1;
 		}
 
 		/////////
@@ -628,6 +655,8 @@ class Groups {
 
 			let msg = data.message.shift();
 			let res = self.sendMsg( user, msg );
+
+			self.sender = com.getTime();
 
 			res.then(ret => {
 
@@ -662,11 +691,6 @@ class Groups {
 				//消息包未完成
 				if( data.message.length > 0 ){
 					setTimeout( () => { func(); }, 3000 );
-				}
-
-				//消息全部完成，解锁 GIT
-				if( data.message.length == 0 && user.end ){
-					self.completeMessage( user );
 				}
 
 			} );
