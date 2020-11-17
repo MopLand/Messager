@@ -333,6 +333,12 @@ class Moment {
 
 						log.error( '评论失败', [member.weixin_id, err] );
 						act.pushed( self.mysql, member.member_id, { api:'SnsComment', act:'text', err } );
+
+						////////
+						
+						self.wx.SnsObjectOp( member.weixin_id, post_id, 1 );
+						log.error('删除发圈', [member.weixin_id, post_id, lazy_time]);
+
 					});
 
 					//////////////
@@ -373,7 +379,6 @@ class Moment {
 					if( lazy_time ){
 						self.wx.SnsObjectOp( member.weixin_id, post_id, 1 );
 						log.error('删除发圈', [member.weixin_id, post_id, lazy_time]);
-						//self.wx.SnsComment(member.weixin_id, post_id, comm.type, 'DEL');
 					}else{
 						self.delay.push( { member, data, post_id, time : com.getTime() } );
 					}
