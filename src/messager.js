@@ -15,8 +15,6 @@ class Messager {
      */
 	constructor(conf, test) {
 
-		new logger().clean();
-
 		this.conf = conf;
 
 		this.setAlias(conf.aliastag);

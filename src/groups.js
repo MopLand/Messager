@@ -42,6 +42,9 @@ class Groups {
 
 	init( item = 'groups' ){
 
+		//日志清理
+		log.clean();
+
 		var conf = this.conf;
 		var inst = this.conf[item];
 
