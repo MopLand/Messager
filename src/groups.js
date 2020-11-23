@@ -780,7 +780,7 @@ class Groups {
 
 				//多个微信群，适当延迟
 				if( size > 1 && i < size - 1 ){
-					await com.sleep( 500 );
+					await com.sleep( 1000 );
 				}
 
 			}
