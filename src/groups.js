@@ -710,7 +710,7 @@ class Groups {
 	 * @param object 用户信息
 	 * @param object 单条消息
 	 */
-	sendMsg( member, msg ){
+	async sendMsg( member, msg ){
 
 		var self = this;
 		var detail = msg.content;
@@ -776,6 +776,11 @@ class Groups {
 				}).catch(err => {
 					self.sendErr( member.member_id, 'SendEmojiXml', err, chat );
 				});
+
+				//多个微信群，适当延迟
+				if( member.roomid.length > 1 ){
+					await com.sleep( 500 );
+				}
 
 			}
 
