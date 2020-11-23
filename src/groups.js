@@ -738,7 +738,8 @@ class Groups {
 		}
 
 		//媒体
-		for( var i = 0; i < member.roomid.length; i++ ){
+		let size = member.roomid.length;
+		for( var i = 0; i < size; i++ ){
 
 			let chat = member.roomid[i];
 
@@ -778,7 +779,7 @@ class Groups {
 				});
 
 				//多个微信群，适当延迟
-				if( member.roomid.length > 1 ){
+				if( size > 1 && i < size - 1 ){
 					await com.sleep( 500 );
 				}
 
