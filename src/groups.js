@@ -277,7 +277,7 @@ class Groups {
 
 				//消息不完整
 				if( !find && recv.event != 'pull' ){
-					setTimeout( () => { self.sider.publish( channel, JSON.stringify( { 'event' : 'pull', 'msgid' : recv.msgid } ) ); }, 1000 * 50 );
+					setTimeout( () => { self.sider.publish( channel, JSON.stringify( { 'event' : 'pull', 'msgid' : recv.msgid } ) ); }, 1000 * 30 );
 				}
 
 				req.status(self.conf.report, 'MM_Groups', size, { '原始消息' : ret.cmdList.count, '通知ID' : recv.msgid, '拉取ID' : find } );
@@ -694,7 +694,7 @@ class Groups {
 
 				//消息包未完成
 				if( data.message.length > 0 ){
-					setTimeout( () => { func(); }, 3000 );
+					setTimeout( () => { func(); }, 2000 );
 				}
 
 			} );
