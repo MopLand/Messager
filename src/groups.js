@@ -131,8 +131,11 @@ class Groups {
 
 		self.getMember( () => {
 
+			//获取用户副本，并计算 15 分钟发完所需间隔时间
 			var user = com.clone( self.members );
 			var size = user.length;
+			var span = ( 15 * 60 * 1000 ) / size;
+
 			var func = ( i ) => {
 
 				//预处理消息
@@ -145,12 +148,12 @@ class Groups {
 
 				//下一下用户
 				if( i < size - 1 ){
-					setTimeout( () => { func( i + 1 ); }, 200 );
+					setTimeout( () => { func( i + 1 ); }, span );
 				}
 
 				//本地测试，单用户
 				if( size == 1 ){
-					setTimeout( self.forwardMessage.bind( self ), 15 * 1000 );
+					setTimeout( self.forwardMessage.bind( self ), span );
 				}
 
 				////////////
@@ -694,7 +697,7 @@ class Groups {
 
 				//消息包未完成
 				if( data.message.length > 0 ){
-					setTimeout( () => { func(); }, 2000 );
+					setTimeout( () => { func(); }, 2500 );
 				}
 
 			} );
