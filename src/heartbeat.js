@@ -68,14 +68,14 @@ class Heartbeat {
 
 		//更新用户心跳时间
 		var beat = ( member_id ) => {
-			self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member_id ] );
+			self.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member_id ] );
 		}
 
 		///////////////
 
 		var calc = () => {
 
-			self.mysql.query('SELECT COUNT(*) AS count FROM `pre_member_weixin` WHERE heartbeat_time >= ?', [time()], function (err, res) {
+			self.mysql.query('SELECT COUNT(*) AS count FROM `pre_weixin_list` WHERE heartbeat_time >= ?', [time()], function (err, res) {
 
 				if( err ){
 					return log.error( '心跳统计', err );
@@ -97,7 +97,7 @@ class Heartbeat {
 
 		var send = () => {
 
-			self.mysql.query('SELECT member_id, weixin_id, device_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
+			self.mysql.query('SELECT member_id, weixin_id, device_id FROM `pre_weixin_list` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
 
 				if( err ){
 					log.error( err );
@@ -175,7 +175,7 @@ class Heartbeat {
 
 		log.info( '心跳范围', this.range + ' / ' + date + ' / INST ' + this.insid );
 
-		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_member_weixin` WHERE heartbeat_time >= ? AND member_id % ? = ? ORDER BY heartbeat_time ASC LIMIT ?', [this.range, this.nodes, this.insid, this.count], function (err, res) {
+		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE heartbeat_time >= ? AND member_id % ? = ? ORDER BY heartbeat_time ASC LIMIT ?', [this.range, this.nodes, this.insid, this.count], function (err, res) {
 
 			if( err ){
 				log.error( err );
@@ -271,7 +271,7 @@ class Heartbeat {
 	 * 完成心跳
 	 */
 	update( member_id ) {
-		this.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member_id ] );
+		this.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member_id ] );
 	}
 
 }

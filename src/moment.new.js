@@ -92,7 +92,7 @@ class Moment {
 
 		var func = ( auto ) => {
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id FROM `pre_member_weixin` WHERE moment > 0 AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [time, auto], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id FROM `pre_weixin_list` WHERE moment > 0 AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [time, auto], function (err, res) {
 
 				if( err ){
 					log.error( err );
@@ -112,7 +112,7 @@ class Moment {
 					self.forwardMoment(res[i], data);
 	
 					//更新发圈时间
-					self.mysql.query('UPDATE `pre_member_weixin` SET moment_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ res[i].member_id ] );
+					self.mysql.query('UPDATE `pre_weixin_list` SET moment_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ res[i].member_id ] );
 	
 				}
 
@@ -235,7 +235,7 @@ class Moment {
 
 					log.error( '转链错误', [member.member_id, body] );
 
-					self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+					self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
 				}
 

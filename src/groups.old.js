@@ -151,7 +151,7 @@ class Groups {
 
 		var func = ( auto ) => {
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_member_weixin` WHERE groups > 0 AND groups_num > 0 AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [time, auto], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list FROM `pre_weixin_list` WHERE groups > 0 AND groups_num > 0 AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [time, auto], function (err, res) {
 
 				if( err ){
 					log.error( err );
@@ -189,7 +189,7 @@ class Groups {
 
 		var self = this;
 
-		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_member_weixin` ORDER BY auto_id ASC', function (err, res) {
+		this.mysql.query('SELECT member_id, weixin_id, groups_list FROM `pre_weixin_list` ORDER BY auto_id ASC', function (err, res) {
 
 			for (let i = 0; i < res.length; i++) {
 
@@ -227,7 +227,7 @@ class Groups {
 					}
 
 					//更新群发设置
-					self.mysql.query('UPDATE `pre_member_weixin` SET groups_list = ?, groups_num, updated_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ JSON.stringify( gps ), num, row.member_id ] );
+					self.mysql.query('UPDATE `pre_weixin_list` SET groups_list = ?, groups_num, updated_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ JSON.stringify( gps ), num, row.member_id ] );
 					
 					wx.SendTxtMessage(member.weixin_id, gid, gid + ' 设置成功');
 
@@ -257,7 +257,7 @@ class Groups {
 
 		var func = () => {
 
-			self.mysql.query('SELECT member_id, weixin_id FROM `pre_member_weixin` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
+			self.mysql.query('SELECT member_id, weixin_id FROM `pre_weixin_list` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
 
 				if( err ){
 					log.error( err );
@@ -276,7 +276,7 @@ class Groups {
 					pm.then(ret => {
 	
 						//更新群发设置
-						self.mysql.query('UPDATE `pre_member_weixin` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
+						self.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ row.member_id ] );
 	
 						log.info( '心跳成功', [row.weixin_id, row.member_id] );
 	
@@ -300,7 +300,7 @@ class Groups {
 
 		log.info( '心跳范围', time() );
 
-		self.mysql.query('SELECT COUNT(*) AS count FROM `pre_member_weixin` WHERE heartbeat_time >= ?', [time()], function (err, res) {
+		self.mysql.query('SELECT COUNT(*) AS count FROM `pre_weixin_list` WHERE heartbeat_time >= ?', [time()], function (err, res) {
 
 			if( err ){
 				log.error( '心跳统计', err );
@@ -503,7 +503,7 @@ class Groups {
 					body.source = 'groups';
 					body.lazy_time = lazy_time;
 
-					self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+					self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
 					//写入延迟消息
 					if( lazy_time == 0 ){
@@ -575,7 +575,7 @@ class Groups {
 						log.info('群发完毕', member.member_id);
 						
 						//更新发群时间
-						self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member.member_id ] );
+						self.mysql.query('UPDATE `pre_weixin_list` SET groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member.member_id ] );
 					}
 
 				}).catch(err => {
@@ -640,7 +640,7 @@ class Groups {
 
 						log.error('转链错误', [member.member_id, body]);
 
-						self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+						self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
 					}
 

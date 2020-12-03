@@ -327,7 +327,7 @@ class Groups {
 		//二十分钟
 		var time = com.getTime() - self.conf.active;
 
-		self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_member_weixin` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
+		self.mysql.query('SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? ORDER BY auto_id ASC', [date, time], function (err, res) {
 
 			if( err ){
 				log.error( err );
@@ -387,7 +387,7 @@ class Groups {
 
 		var self = this;
 
-		self.mysql.query('SELECT * FROM `pre_member_weixin` WHERE member_id = ? LIMIT 1', [member_id], function (err, res) {
+		self.mysql.query('SELECT * FROM `pre_weixin_list` WHERE member_id = ? LIMIT 1', [member_id], function (err, res) {
 
 			if( err ){
 				log.error( err );
@@ -409,7 +409,7 @@ class Groups {
 			} );
 					
 			//更新微信群
-			self.mysql.query('UPDATE `pre_member_weixin` SET groups_num = ?, groups_list = ?, updated_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ newgrp.length, JSON.stringify( newgrp ), member_id ] );
+			self.mysql.query('UPDATE `pre_weixin_list` SET groups_num = ?, groups_list = ?, updated_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ newgrp.length, JSON.stringify( newgrp ), member_id ] );
 			
 			log.info( '删除群组', { member_id, group_id, groups, newgrp } );
 
@@ -602,7 +602,7 @@ class Groups {
 						log.info('转链失败', { 'member_id' : user.member_id, body, lazy_time, 'convert' : data.convert });
 					}
 
-					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
+					//self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
 					
 					act.pushed( self.mysql, user.member_id, body );
 
@@ -678,7 +678,7 @@ class Groups {
 					log.info('群发完毕', [user.member_id, data.package]);
 					
 					//更新发群时间
-					self.mysql.query('UPDATE `pre_member_weixin` SET groups_time = UNIX_TIMESTAMP(), groups_send = groups_send + 1 WHERE member_id = ?', [ user.member_id ] );
+					self.mysql.query('UPDATE `pre_weixin_list` SET groups_time = UNIX_TIMESTAMP(), groups_send = groups_send + 1 WHERE member_id = ?', [ user.member_id ] );
 
 					//最后发群时间
 					self.sider.set( rkey, com.getTime() );

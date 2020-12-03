@@ -451,7 +451,7 @@ class Forward {
             //二十分钟
             var time = com.getTime() - self.conf.active;
 
-            const sql = 'SELECT auto_id, member_id, weixin_id, groups_list, moment, groups, tag FROM `pre_member_weixin` WHERE member_id = ? AND created_date <= ? AND heartbeat_time >= ? LIMIT 1';
+            const sql = 'SELECT auto_id, member_id, weixin_id, groups_list, moment, groups, tag FROM `pre_weixin_list` WHERE member_id = ? AND created_date <= ? AND heartbeat_time >= ? LIMIT 1';
 
             self.mysql.query(sql, [memberId, date, time], function (err, res) {
                 if (err) {

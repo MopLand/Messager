@@ -129,7 +129,7 @@ class Moment {
 				com.locked( self.item );
 			}
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, tag FROM `pre_member_weixin` WHERE moment = 1 AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [date, time, auto], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, tag FROM `pre_weixin_list` WHERE moment = 1 AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [date, time, auto], function (err, res) {
 
 				if( err ){
 					return log.error( '读取错误', err );
@@ -151,7 +151,7 @@ class Moment {
 					self.forwardMoment(res[i], data);
 	
 					//更新发圈时间
-					self.mysql.query('UPDATE `pre_member_weixin` SET moment_time = UNIX_TIMESTAMP(), moment_send = moment_send + 1 WHERE member_id = ?', [ res[i].member_id ] );
+					self.mysql.query('UPDATE `pre_weixin_list` SET moment_time = UNIX_TIMESTAMP(), moment_send = moment_send + 1 WHERE member_id = ?', [ res[i].member_id ] );
 	
 				}
 
@@ -371,7 +371,7 @@ class Moment {
 					body.source = 'moment';
 					body.lazy_time = lazy_time;
 
-					//self.mysql.query('UPDATE `pre_member_weixin` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
+					//self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
 					act.pushed( self.mysql, member.member_id, body );
 
