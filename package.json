@@ -34,6 +34,7 @@
 		"pm2": "*",
 		"redis": "*",
 		"crypto": "*",
+		"fast-xml-parser": "*",
 		"request": "*",
 		"umeng-push-server-sdk": "*",
 		"xml2js": "^0.4.23"
