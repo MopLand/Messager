@@ -6,12 +6,19 @@ const Moment = require('./src/moment');
 const Account = require('./src/account');
 const Messager = require('./src/messager');
 const Heartbeat = require('./src/heartbeat');
+const Forward = require('./src/forward');
 
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
 
 process.env.UV_THREADPOOL_SIZE = 128;
 console.log( '-------------' + Common.getTime() +'-------------' );
+
+// 用户直接消息推送
+if (!func || func == 'forward') {
+	let klas = new Forward(conf);
+		klas.init();
+}
 
 //消息推送，默认方法
 if (!func || func == 'messager') {

@@ -1,0 +1,20 @@
+{
+    "name": "MM_Forward",
+    "script": "app.js",
+    "args": "forward",
+    "cwd": "/disk/www/Messager",
+    "error_file": "./logs/wx_forward_err.log",
+    "out_file": "./logs/wx_forward_out.log",
+    "merge_logs": true,
+    "autorestart": true,
+    "watch": true,
+    "ignore_watch": [
+        "logs",
+        ".git",
+        "*.gitlock"
+    ],
+    "watch_options": {
+        "followSymlinks": false
+    },
+    "log_date_format": "YYYY-MM-DD"
+}
