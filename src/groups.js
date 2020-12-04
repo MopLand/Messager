@@ -131,10 +131,11 @@ class Groups {
 
 		self.getMember( () => {
 
-			//获取用户副本，并计算 15 分钟发完所需间隔时间
+			//获取用户副本，限定每分钟发送量，并计算每人所需间隔时间
 			var user = com.clone( self.members );
 			var size = user.length;
-			var span = ( 15 * 60 * 1000 ) / size;
+			var mins = size / 500;
+			var span = ( mins * 60 * 1000 ) / size;
 
 			var func = ( i ) => {
 
