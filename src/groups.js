@@ -179,7 +179,7 @@ class Groups {
 	 * @param object 最后一个用户
 	 * @param string 消息ID
 	 */
-	setLocked( item, last, package ){
+	setLocked( item, last, pakId ){
 
 		var self = this;
 		var clok = setInterval( () => {
@@ -199,7 +199,7 @@ class Groups {
 
 			//删除锁文件
 			com.unlock( item );
-			act.record( self.mysql, self.item, { 'quantity' : self.members.length, 'package' : package, 'last_man' : last }, '发送完成' );
+			act.record( self.mysql, self.item, { 'quantity' : self.members.length, 'package' : pakId, 'last_man' : last }, '发送完成' );
 
 			//清除定时器
 			clearInterval( clok );
