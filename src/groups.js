@@ -125,7 +125,7 @@ class Groups {
      * 循环发送微信群
 	 * @param object 消息数据
      */
-	send(msgs) {
+	send( data ) {
 
 		var self = this;
 
@@ -140,7 +140,7 @@ class Groups {
 			var func = ( i ) => {
 
 				//预处理消息
-				self.parseMessage( user[i], msgs );
+				self.parseMessage( user[i], data );
 
 				//开始发消息
 				//if( i > 0 ){
@@ -161,7 +161,7 @@ class Groups {
 
 				//锁定 GIT
 				if( i == 0 ){
-					self.setLocked( self.item, user[ size - 1 ] );
+					self.setLocked( self.item, user[ size - 1 ], data.package );
 				}
 
 			}
@@ -177,8 +177,9 @@ class Groups {
 	 * 设置消息锁
 	 * @param string 锁名称
 	 * @param object 最后一个用户
+	 * @param string 消息ID
 	 */
-	setLocked( item, last ){		
+	setLocked( item, last, package ){
 
 		var self = this;
 		var clok = setInterval( () => {
@@ -198,7 +199,7 @@ class Groups {
 
 			//删除锁文件
 			com.unlock( item );
-			act.record( self.mysql, self.item, { 'quantity' : self.members.length, 'last_man' : last }, '发送完成' );
+			act.record( self.mysql, self.item, { 'quantity' : self.members.length, 'package' : package, 'last_man' : last }, '发送完成' );
 
 			//清除定时器
 			clearInterval( clok );
