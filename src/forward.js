@@ -9,7 +9,6 @@ const Logger = require('../lib/logger');
 const Moment = require('../src/moment');
 const Groups = require('../src/groups');
 
-
 const tag = com.fileName(__filename, false);
 const log = new Logger(tag);
 
@@ -37,10 +36,6 @@ class Forward {
     }
 
     init() {
-        //日志清理
-        log.clean();
-
-
         //订阅消息发送
         this.subscribe('mm_forward');
     }

@@ -14,12 +14,6 @@ let func = Common.getFunc();
 process.env.UV_THREADPOOL_SIZE = 128;
 console.log( '-------------' + Common.getTime() +'-------------' );
 
-// 用户直接消息推送
-if (!func || func == 'forward') {
-	let klas = new Forward(conf);
-		klas.init();
-}
-
 //消息推送，默认方法
 if (!func || func == 'messager') {
 	let test = Common.getArgv('debug');
@@ -33,6 +27,12 @@ if (func == 'loader') {
 
 	let klas = new Loader();
 		klas.init( html, dist );
+}
+
+//用户自主推送
+if (func == 'forward') {
+	let klas = new Forward(conf);
+		klas.init();
 }
 
 //朋友圈
