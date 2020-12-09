@@ -3,6 +3,7 @@
 const fxp = require("fast-xml-parser");
 const wx = require('../lib/weixin');
 const com = require('../lib/common');
+const req = require('../lib/request');
 const act = require('../lib/activity');
 const Logger = require('../lib/logger');
 const Moment = require('../src/moment');
@@ -28,9 +29,6 @@ class Forward {
 
         // 发圈
         this.moment = new Moment(conf);
-
-        // 发群
-        this.groups = new Groups(conf);
 
         // 订阅锁
         this.locked = 0;
@@ -73,6 +71,7 @@ class Forward {
             //     "member_id": 16189,
             //     "type": "groups", // groups 发群 ， moment 发圈
             //     "source": "taobao", // 发群源
+            //     "roomids": [],
             //     "data": [
             //         {
             //             'content': 'hehehehehehhehe',
@@ -118,7 +117,6 @@ class Forward {
             // }
 
             let recv = JSON.parse(message);
-            // console.log(recv);return;
 
             // 正在读取消息，锁还未失效
             if (self.locked && self.locked >= com.getTime() - wait) {
@@ -134,26 +132,25 @@ class Forward {
                 self.inst.source = recv.source;
             }
 
-            let member = self.getMember(recv.member_id);
+            let roomids = recv.roomid ? recv.roomid : []
+            let member = self.getMember(recv.member_id, roomids);
 
             member.then(data => {
                 if (data.member_id == undefined) {
-                    console.log('no number')
+                    log.info('用户信息', '用户不存在');
                     return;
                 }
 
-                if (recv.type == 'groups' && data.groups == 1) {
-                    log.info('发群日志', '暂未开通发群');
-                    return;
+                if (recv.type == 'groups') {
                     self.sendGroups(data, recv);
                 }
 
-                if (recv.type == 'moment' && data.moment == 1) {
+                if (recv.type == 'moment') {
                     self.sendMoment(data, recv);
                 }
 
             }).catch(err => {
-                console.log('get member err');
+                log.error(err);
             });
 
         });
@@ -169,15 +166,14 @@ class Forward {
      */
     async sendGroups(member, msg) {
         var self = this;
+
         const sendGroup = this.filterGroupsMessage(member, msg);
 
         sendGroup.then(data => {
-            // console.log(data);
-            // return;
-            self.groups.parseMessage(member, data);
+            self.parseMessage(member, data);
 
         }).catch(err => {
-            log.info('读取错误', err);
+            log.info('消息错误', err);
         });
     }
 
@@ -186,7 +182,7 @@ class Forward {
      * @param member 云发单用户信息
      * @param msg 发送消息
      */
-    async filterGroupsMessage(member, msg) {
+    filterGroupsMessage(member, msg) {
         //构造数据包
         var data = {
 
@@ -209,11 +205,6 @@ class Forward {
             const msgId = `${member.member_id}${Date.now()}`;
             const newMsgId = `${member.member_id}${i}${Date.now()}`;
 
-            // 图片
-            if (item.msgType == 3) {
-                text = await this.uploadMediaToWechat(member.weixin_id, text);
-            }
-
             //不转链，文本类型，没有配置原样规则 或 文本不匹配
             if (item.msgType == 1 && (!this.inst.origin || !this.inst.origin.test(text))) {
                 exch = (act.detectTbc(text) || act.detectUrl(text));
@@ -227,37 +218,202 @@ class Forward {
     }
 
     /**
-     * 上传媒体信息加密
-     * @param userName 微信ID
-     * @param url 媒体链接
+     * 预处理消息
+     * @param object 用户数据
+     * @param object 发群数据
+     * @param integer 延迟时间
      */
-    uploadMediaToWechat(userName, url) {
+    parseMessage(member, data, lazy_time = 0) {
+
+        var user = com.clone(member);
+        var data = com.clone(data);
         var self = this;
-        var wxImgKey = 'wx_media_' + com.md5(url);
 
-        const test = `<?xml version="1.0"?>
-        <msg>
-            <img aeskey="151b7e3b1c469f816fca6359f660eb46" encryver="1" cdnthumbaeskey="151b7e3b1c469f816fca6359f660eb46" cdnthumburl="3053020100044730450201000204aa7a562602032f54cd0204b33ca17b02045fc066a5042066303538343761363861656561663436383964623364643565663537343734630204010828010201000405004c52ad00" cdnthumblength="4806" cdnthumbheight="0" cdnthumbwidth="0" cdnmidheight="0" cdnmidwidth="0" cdnhdheight="0" cdnhdwidth="0" cdnmidimgurl="3053020100044730450201000204aa7a562602032f54cd0204b33ca17b02045fc066a5042066303538343761363861656561663436383964623364643565663537343734630204010828010201000405004c52ad00" length="71116" cdnbigimgurl="3053020100044730450201000204aa7a562602032f54cd0204b33ca17b02045fc066a5042066303538343761363861656561663436383964623364643565663537343734630204010828010201000405004c52ad00" hdlength="71160" md5="2784c030fc1f3b9921700aafeb95e4d3" />
-        </msg>`;
+        //无需转链，直接回调
+        if (data.convert == 0) {
+            self.queues.push({ 'member': user, data });
+            self.forwardMessage();
+            return;
+        }
 
-        return new Promise((resolve, reject) => {
+        for (let i = 0; i < data.message.length; i++) {
 
-            // 判断图片是否上传
-            self.redis.get(wxImgKey, (err, ret) => {
-                console.log('redis ret', ret);
+            let comm = data.message[i];
+            let exch = comm.msgtype == 1 && comm.exch;
 
-                if (!err && ret) {
-                    resolve(ret);
-                } else {
-                    // 上传图片到微信
-                    self.redis.set(wxImgKey, test, (_err, _ret) => {
-                        console.log('redis set _ret', _ret);
-                    });
-                    self.redis.expire(wxImgKey, 3600 * 24 * 7);
-                    resolve(test);
+            req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': 'true', 'lazy_time': lazy_time }, (code, body) => {
+
+                try {
+                    if (typeof body == 'string') {
+                        body = JSON.parse(body);
+                    }
+                } catch (e) {
+                    body = { 'status': -code, 'body': body, 'error': e.toString() };
                 }
+
+                ///////////////
+
+                //成功转链数量
+                if (body.status > 0) {
+
+                    //文本
+                    comm.content = body.result;
+
+                    //原始商品信息
+                    comm.product = body.product;
+
+                    //转链成功，执行回调
+                    comm.exch && data.convert--;
+
+                    if (data.convert == 0) {
+                        self.queues.push({ 'member': user, data });
+                        self.forwardMessage();
+                    }
+
+                } else {
+
+                    body.err = '转链失败';
+                    body.source = 'groups';
+                    body.lazy_time = lazy_time;
+
+                    if (exch) {
+                        log.info('转链失败', { 'member_id': user.member_id, body, lazy_time, 'convert': data.convert });
+                    }
+
+                    //写入延迟消息，更新发送状态
+                    if (lazy_time == 0) {
+                        let time = com.getTime();
+                        let span = 60 * 1000 * 3;
+                        self.sender = time + span;
+                        setTimeout(() => { self.parseMessage(user, data, time); }, span);
+                    }
+
+                }
+
+            }, (data) => {
+
+                //是口令，需要转链
+                if (exch && (user.tag & 4) == 0) {
+                    return { 'request': true };
+                } else {
+                    return { 'request': false, 'respond': { 'status': 1, 'result': data.text } };
+                }
+
+            }, self.conf.options);
+
+        }
+
+    }
+
+    /**
+     * 转发群消息
+     * @param boolean 用户末尾
+     */
+    forwardMessage() {
+
+        //暂无队列
+        if (this.queues.length == 0) {
+            return;
+        }
+
+        /////////
+
+        var self = this;
+        let item = this.queues.shift();
+        let user = item.member;
+        let data = item.data;
+
+        if (typeof user.member_id == 'undefined') {
+            return log.info('异常队列', user);
+        }
+
+        log.info('当前微信', { '用户ID': user.member_id, '微信号': user.weixin_id, '群数量': user.roomid.length, '消息量': data.message.length });
+
+        var func = () => {
+
+            log.info('消息拆包', { '用户ID': user.member_id, '消息包': data.package, '待发送': data.message.length });
+
+            let msg = data.message.shift();
+            let res = self.sendMsg(user, msg);
+
+            self.sender = com.getTime();
+
+            res.then(ret => {
+
+                //消息包已完成
+                if (data.message.length == 0) {
+
+                    log.info('群发完毕', [user.member_id, data.package]);
+
+                }
+
+            }).catch(err => {
+
+                log.error('发群失败', [user.member_id, data.package, err]);
+
+            }).finally(() => {
+
+                //消息包未完成
+                if (data.message.length > 0) {
+                    setTimeout(() => { func(); }, 2500);
+                }
+
             });
-        })
+
+        };
+
+        func();
+
+    }
+
+    /**
+     * 转发群消息
+     * @param object 用户信息
+     * @param object 单条消息
+     */
+    async sendMsg(member, msg) {
+
+        var detail = msg.content;
+
+        //文本
+        if (msg.msgtype == 1) {
+
+            let fn = this.wx.NewSendMsg(member.weixin_id, member.roomid, detail, msg.source);
+
+            fn.then(ret => {
+                log.info('文本成功', [member.member_id, ret.count]);
+            }).catch(err => {
+                log.error('文本失败', err);
+            });
+
+            return fn;
+
+        }
+
+        //媒体
+        let size = member.roomid.length;
+        for (var i = 0; i < size; i++) {
+
+            let chat = member.roomid[i];
+
+            //图片
+            if (msg.msgtype == 3) {
+
+                var fn = this.wx.SnsUploadMsgPut(member.weixin_id, chat, detail);
+
+                fn.then(ret => {
+
+                    log.info('发图成功', [member.member_id, chat, ret.msgId]);
+
+                }).catch(err => {
+
+                    log.error('发图失败', [member.member_id, err]);
+
+                });
+            }
+        }
+
+        return fn;
     }
 
     //////////// 朋友圈 /////////////
@@ -352,9 +508,9 @@ class Forward {
                     },
                     "thumb": {
                         _attrs: {
-                            "type": wximages.thumbUrls[0].type,
+                            "type": wximages.thumbUrls.type,
                         },
-                        "#text": wximages.thumbUrls[0].url
+                        "#text": wximages.thumbUrls.url
                     },
                     "size": {
                         _attrs: {
@@ -367,7 +523,7 @@ class Forward {
             }
 
             if (i > 0) {
-                await com.sleep(300);
+                await com.sleep(400);
             }
         }
 
@@ -402,20 +558,27 @@ class Forward {
                     // 上传图片到微信
                     self.wx.SnsUploadPut(userName, url).then(res => {
 
-                        console.log('SnsUploadPut res', res);
+                        // console.log('SnsUploadPut res', res);
 
                         if (res != null
                             && res.baseResponse.ret == "MM_OK"
                             && res.thumbUrls
                             && res.thumbUrls[0]
-                            && res.bufferUrl) {
+                            && res.bufferUrl
+                            && res.thumbUrlCount > 0) {
 
-                            self.redis.set(wxImgKey, JSON.stringify(res), (_err, _ret) => {
-                                console.log('redis set _ret', _ret);
-                            });
+                                const temp = {
+                                    id: res.id,
+                                    type: res.type,
+                                    totalLen: res.totalLen,
+                                    bufferUrl: res.bufferUrl,
+                                    thumbUrls: res.thumbUrls[0]
+                                };
+
+                            self.redis.set(wxImgKey, JSON.stringify(temp));
                             self.redis.expire(wxImgKey, 3600 * 24 * 7);
 
-                            resolve(res);
+                            resolve(temp);
                             return;
                         }
 
@@ -439,7 +602,7 @@ class Forward {
      * @param int member_id
      * @return array
      */
-    getMember(memberId) {
+    getMember(memberId, roomidList = []) {
 
         var self = this;
 
@@ -469,7 +632,7 @@ class Forward {
                         let groups = JSON.parse(res.groups_list);
 
                         groups = groups.filter(ele => {
-                            if (!self.inst.source || ele.status == self.inst.source) {
+                            if (roomidList.length == 0 || (roomidList.length > 0 && roomidList.indexOf(ele.userName) > -1)) {
                                 return ele.userName;
                             }
                         });
@@ -478,6 +641,8 @@ class Forward {
                         res.roomid = groups.map(ele => {
                             return ele.userName;
                         });
+                    } else {
+                        res.roomid = roomidList;
                     }
                 }
 
