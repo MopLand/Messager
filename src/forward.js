@@ -647,11 +647,11 @@ class Forward {
 
             let status = 0;
 
-            if (sendTimes == msgLen) {
+            if (sendTimes > 0 && sendTimes == msgLen) {
                 status = 2;
             } else if (sendTimes > 0 && sendTimes < msgLen) {
                 status = 1;
-            } else if (msgLen > 0 && sendTimes == 0) {
+            } else if (sendTimes == 0) {
                 status = -1;
             }
 
