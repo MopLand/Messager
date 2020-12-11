@@ -60,57 +60,6 @@ class Forward {
         //处理 Redis 消息
         this.publish.on('message', async function (channel, message) {
 
-            // groups message
-            // let message = {
-            //     "msgid": 123,
-            //     "member_id": 16189,
-            //     "type": "groups", // groups 发群 ， moment 发圈
-            //     "source": "taobao", // 发群源
-            //     "roomids": [],
-            //     "data": [
-            //         {
-            //             'content': 'hehehehehehhehe',
-            //             'msgType': 1, // 1 文本， 3 图片， 43 视频， 47 表情， 49 小程序， 
-            //         },
-            //         {
-            //             'content': '13saads',
-            //             'msgType': 3, // 1 文本， 3 图片， 43 视频， 47 表情， 49 小程序， 
-            //         },
-            //         {
-            //             'content': 'https://item.jd.com/67734136286.html',
-            //             'msgType': 1,
-            //             'exch': 1
-            //         }
-            //     ]
-            // };
-
-            // moment message
-            // let message = {
-            //     "msgid": 123,
-            //     "member_id": 16189,
-            //     "type": "moment", // groups 发群 ， moment 发圈
-            //     "data": {
-            //         "moment": {
-            //             "desc": "半斤开心果9.8元❗❗\n半斤开心果9.8元❗❗\n好评再返1✔\n\n罐装发货，颗粒饱满\n营养价值特高，家庭必备坚果[嘿哈]",
-            //             "scene": 0,
-            //             "style": 1,
-            //             "images": [
-            //                 "https://img.pddpic.com/mms-material-img/2020-11-13/240d7019-d9f4-4237-a000-d59846a769db.jpeg.a.jpeg",
-            //                 "https://img.pddpic.com/mms-material-img/2020-08-10/0275152f-9e18-430c-b9dd-743e0decb36a.jpg.a.jpeg",
-            //                 "https://img.pddpic.com/mms-material-img/2020-11-13/46979655-6184-455f-878e-3850801b5fd1.jpeg.a.jpeg",
-            //                 "https://img.pddpic.com/mms-material-img/2020-08-12/e03bbf00-b9c4-4e2c-a685-cb71e337bbcd.jpg.a.jpeg",
-            //             ]
-            //         },
-            //         "comment": [
-            //             {
-            //                 "text": "https://item.jd.com/67734136286.html",
-            //                 "type": 2,
-            //                 "exch": 1
-            //             }
-            //         ]
-            //     }
-            // }
-
             let recv = JSON.parse(message);
 
             // 正在读取消息，锁还未失效
@@ -132,7 +81,7 @@ class Forward {
 
             member.then(data => {
                 if (data.member_id == undefined) {
-                    log.info('用户信息', '用户不存在');
+                    log.info('用户信息', '用户不存在或者已不再心跳有效时间');
                     return;
                 }
 
@@ -161,6 +110,7 @@ class Forward {
      */
     async sendGroups(member, msg) {
         var self = this;
+        var forwardId = msg.forward_id ? msg.forward_id : 0;
 
         const sendGroup = this.filterGroupsMessage(member, msg);
 
@@ -168,6 +118,7 @@ class Forward {
             self.parseMessage(member, data);
 
         }).catch(err => {
+            self.updateForward(forwardId, '[filterGroupsMessage]方法格式化数据失败'); // 更新数据库发送信息
             log.info('消息错误', err);
         });
     }
@@ -178,8 +129,11 @@ class Forward {
      * @param msg 发送消息
      */
     filterGroupsMessage(member, msg) {
+        const forwardId = msg.forward_id ? msg.forward_id : 0;
+
         //构造数据包
         var data = {
+            forwardId: forwardId,
 
             //需要转链
             convert: 0,
@@ -272,6 +226,8 @@ class Forward {
                     body.lazy_time = lazy_time;
 
                     if (exch) {
+                        self.updateForward(data.forwardId, {err: '转链失败', text: comm.content}); // 更新数据库发送信息
+
                         log.info('转链失败', { 'member_id': user.member_id, body, lazy_time, 'convert': data.convert });
                     }
 
@@ -318,11 +274,15 @@ class Forward {
         let user = item.member;
         let data = item.data;
 
+        let sendTimes = 0;
+
         if (typeof user.member_id == 'undefined') {
             return log.info('异常队列', user);
         }
 
         log.info('当前微信', { '用户ID': user.member_id, '微信号': user.weixin_id, '群数量': user.roomid.length, '消息量': data.message.length });
+
+        let msgLen = data.message.length;
 
         var func = () => {
 
@@ -335,14 +295,19 @@ class Forward {
 
             res.then(ret => {
 
+                sendTimes += 1;
+
                 //消息包已完成
                 if (data.message.length == 0) {
+
+                    self.updateForward(data.forwardId, '群发完毕', sendTimes, msgLen); // 更新数据库发送信息
 
                     log.info('群发完毕', [user.member_id, data.package]);
 
                 }
 
             }).catch(err => {
+                self.updateForward(data.forwardId, err); // 更新数据库发送信息
 
                 log.error('发群失败', [user.member_id, data.package, err]);
 
@@ -421,14 +386,24 @@ class Forward {
     sendMoment(member, msg) {
         var self = this;
 
+        const forwardId = msg.forward_id ? msg.forward_id : 0;
+
         const userName = member.weixin_id;
 
         const sendData = this.filterMementMessage(userName, msg);
 
         sendData.then(data => {
-            // console.log(data);
-            // return;
-            self.moment.forwardMoment(member, data);
+
+            let result = self.moment.forwardMoment(member, data);
+
+            result.then(res => {
+                self.updateForward(forwardId, '发圈成功', 1, 1);
+            }).catch(err => {
+                console.log('err', err);
+                self.updateForward(forwardId, '发圈失败', 0, 1);
+            });
+
+
         }).catch(err => {
             log.info('读取错误', err);
         });
@@ -657,6 +632,31 @@ class Forward {
             textNodeName: "#text"
         };
         return new fxp.j2xParser(options).parse(object);
+    }
+
+    /**
+     * 更新发单效果
+     * @param string res 发送结果
+     */
+    updateForward(forwardId, res, sendTimes = 0, msgLen = 0) {
+        const resMsg = typeof res == 'string' ? res : JSON.stringify(res);
+
+        log.info('发单更新', [forwardId, resMsg, sendTimes, msgLen]);
+
+        if (forwardId > 0) {
+
+            let status = 0;
+
+            if (sendTimes == msgLen) {
+                status = 2;
+            } else if (sendTimes > 0 && sendTimes < msgLen) {
+                status = 1;
+            } else if (msgLen > 0 && sendTimes == 0) {
+                status = -1;
+            }
+
+            this.mysql.query('UPDATE `pre_weixin_forward` SET send_res = ?, send_time = UNIX_TIMESTAMP(), send_count = ? , status = ? WHERE id = ?', [ resMsg, sendTimes, status, forwardId ] );
+        }
     }
 
 }
