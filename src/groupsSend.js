@@ -245,7 +245,7 @@ class GroupsSend {
         //二十分钟
         var time = com.getTime() - self.conf.active;
 
-        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? AND member_id = ? ORDER BY auto_id ASC"
+        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? AND member_id = ? ORDER BY auto_id ASC"
 
         self.mysql.query(sql, [date, time, 1204583], function (err, res) {
 
