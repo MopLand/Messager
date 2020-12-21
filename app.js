@@ -7,6 +7,7 @@ const Account = require('./src/account');
 const Messager = require('./src/messager');
 const Heartbeat = require('./src/heartbeat');
 const Forward = require('./src/forward');
+const GroupsSend = require('./src/groupsSend');
 
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
@@ -32,6 +33,12 @@ if (func == 'loader') {
 //用户自主推送
 if (func == 'forward') {
 	let klas = new Forward(conf);
+		klas.init();
+}
+
+// 多群消息源
+if (func == 'groups_send') {
+	let klas = new GroupsSend(conf);
 		klas.init();
 }
 

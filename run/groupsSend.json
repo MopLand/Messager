@@ -1,0 +1,20 @@
+{
+    "name": "MM_Groups_Send",
+    "script": "app.js",
+    "args": "groups_send",
+    "cwd": "/disk/www/Messager",
+    "error_file": "./logs/wx_groups_send_err.log",
+    "out_file": "./logs/wx_groups_send_out.log",
+    "merge_logs": true,
+    "autorestart": true,
+    "watch": true,
+    "ignore_watch": [
+        "logs",
+        ".git",
+        "*.gitlock"
+    ],
+    "watch_options": {
+        "followSymlinks": false
+    },
+    "log_date_format": "YYYY-MM-DD"
+}
