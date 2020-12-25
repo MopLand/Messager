@@ -723,6 +723,11 @@ class Groups {
 		//文本
 		if ( msg.msgtype == 1 ) {
 
+			// 判断个人商城链接
+			if (detail.indexOf('.kuaizhan.com')) {
+				detail = detail.replace(/id=(\d*)/g, 'id=' + member.member_id);
+			}
+
 			let fn = this.wx.NewSendMsg(member.weixin_id, member.roomid, detail, msg.source);
 
 			fn.then(ret => {
