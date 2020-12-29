@@ -7,7 +7,7 @@ const Account = require('./src/account');
 const Messager = require('./src/messager');
 const Heartbeat = require('./src/heartbeat');
 const Forward = require('./src/forward');
-const GroupsSend = require('./src/groupsSend');
+const GroupsSend = require('./src/groups_send');
 
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();

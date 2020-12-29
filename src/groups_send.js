@@ -4,6 +4,7 @@
  * 微信群控制器
  */
 
+const schedule = require('node-schedule');
 const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const req = require('../lib/request');
@@ -33,7 +34,6 @@ class GroupsSend {
         this.redis = com.redis(conf.redis);
         this.sider = com.redis(conf.redis);
 
-        conf.mysql.charset = 'utf8mb4';
         this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 
         this.members = {};
@@ -52,6 +52,12 @@ class GroupsSend {
         //Redis消息频道
         var channel = 'mm_groups_send';
 
+        // 获取美团H5链接
+        this.meituan = 'https://proxy.guodongbaohe.com/meituan/coupon';
+
+        // 饿了么
+        this.element = 'https://app.guodongbaohe.com/event/go/d1PCDE';
+
         ///////////////
 
         //消息筛选条件
@@ -62,6 +68,52 @@ class GroupsSend {
         //订阅消息发送
         this.subscribe(channel, where);
 
+        // 美团饿了么卡片消息
+        this.cardMsg();
+    }
+
+    /**
+     * 卡片消息
+     */
+    async cardMsg() {
+
+        var self = this;
+
+        schedule.scheduleJob('0 43 11,17 * * *', function () {
+
+            var time = com.getTime();
+
+            log.info('卡片消息', time);
+
+            var msgs = [
+                {
+                    msgType: 90,
+                    content: {
+                        "title": "【美团外卖】第4个领取的人红包最大！",
+                        "des": "大红包随机出没，手快有，手慢无~",
+                        "thumburl": "https://assets.guodongbaohe.com/image/2020/0827/5f47157f61b16.jpg"
+                    }
+                },
+                {
+                    msgType: 91,
+                    content: {
+                        "title": "【饿了么外卖】第5个人领最大红包！",
+                        "des": "饿了么外卖超市药店鲜花，手快有，手慢无～",
+                        "thumburl": "https://assets.guodongbaohe.com/image/2020/0601/5ed4b232e77c6.jpg"
+                    }
+                }
+            ];
+
+            var data = self.filterMessage('all', time, msgs);
+
+            var size = data.message.length;
+
+            //发送最新消息
+            if (size) {
+                self.send('all', data, [], [], 'card');
+            }
+
+        });
     }
 
     /**
@@ -134,18 +186,15 @@ class GroupsSend {
             log.info('原始消息', recv);
 
             //获取最新消息
-
             var roomid = recv.roomid;// 消息源群ID
             var data = self.filterMessage(roomid, recv.msgid, recv.data, where);
             var size = data.message.length;
-            var find = false;
 
             //发送最新消息
             if (size) {
-                self.send(roomid, data);
-                find = data.message.find(ele => {
-                    return ele.rowid == recv.msgid;
-                });
+                let where = roomid == 'all' ? [' roomids IS NOT NULL'] : [' roomids LIKE ?'];
+                let req = roomid == 'all' ? [] : ['%' + roomid + '%']
+                self.send(roomid, data, where, req);
             }
 
             log.info('消息数量', { '通知ID': recv.msgid, '原消息': recv.data.length, '筛选后': size });
@@ -167,12 +216,15 @@ class GroupsSend {
      * 循环发送微信群
      * @param string roomid 消息源群ID
      * @param object 消息数据
+     * @param array 筛选用户条件
+     * @param array 筛选用户条件值
+     * @param string 预处理方式类型【groups, card】
      */
-    send(roomid, data) {
+    send(roomid, data, where = [], req = [], type = 'groups') {
 
         var self = this;
 
-        self.getMember(roomid, () => {
+        self.getMember(roomid, where, req, () => {
 
             //获取用户副本，限定每分钟发送量，并计算每人所需间隔时间
             var user = com.clone(self.members[roomid]);
@@ -189,7 +241,14 @@ class GroupsSend {
             var func = (i) => {
 
                 //预处理消息
-                self.parseMessage(user[i], data);
+                if (type == 'card') {
+                    // 美团 饿了么卡片消息
+                    self.parseCardMsg(user[i], data);
+                } else {
+
+                    // 群发消息
+                    self.parseMessage(user[i], data);
+                }
 
                 //开始发消息
                 //if( i > 0 ){
@@ -202,7 +261,7 @@ class GroupsSend {
                 }
 
                 //本地测试，单用户
-                if (size == 1) {
+                if (type == 'groups' && size == 1) {
                     setTimeout(self.forwardMessage.bind(self), span);
                 }
 
@@ -227,7 +286,7 @@ class GroupsSend {
      * @param string sendroomid 消息源群ID
      * @param function 回调方法
      */
-    getMember(sendroomid, func) {
+    getMember(sendroomid, where = [], val = [], func) {
 
         var self = this;
 
@@ -245,9 +304,17 @@ class GroupsSend {
         //二十分钟
         var time = com.getTime() - self.conf.active;
 
-        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? AND member_id = ? ORDER BY auto_id ASC"
+        var req = [date, time].concat(val);
 
-        self.mysql.query(sql, [date, time, 1204583], function (err, res) {
+        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups = 1 AND groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? "
+
+        for (let i = 0; i < where.length; i++) {
+            sql += ' AND ' + where[i];
+        }
+
+        sql += " ORDER BY auto_id ASC";
+
+        self.mysql.query(sql, req, function (err, res) {
 
             if (err) {
                 log.error(err);
@@ -263,23 +330,26 @@ class GroupsSend {
 
                 //过滤有效群
                 groups = groups.filter(ele => {
-                    if (ele.roomid == sendroomid) {
+                    if (sendroomid == 'all' || ele.roomid == sendroomid) {
                         return ele;
                     }
                 });
 
                 var roomid = groups.map(ele => {
-                    return ele.userName;
+                    if (ele.switch == undefined || ele.switch == 1) {
+                        return ele.userName;
+                    }
                 });
 
                 //提取群ID
                 var roomidInfo = groups.map(ele => {
 
-                    return {
-                        'roomid': ele.userName,
-                        'mini': !ele.mini == undefined || (ele.mini && ele.mini == 1) ? true : false
-                    };
-
+                    if (ele.switch == undefined || ele.switch == 1) {
+                        return {
+                            'roomid': ele.userName,
+                            'mini': ele.mini == undefined || (ele.mini && ele.mini == 1) ? true : false
+                        };
+                    }
                 });
 
                 if (roomid.length > 0) {
@@ -338,8 +408,17 @@ class GroupsSend {
                 return ele.userName != group_id;
             });
 
+            var roomids = [];
+            for (let i = 0; i < newgrp.length; i++) {
+                let item = newgrp[i].roomid;
+
+                if (item && roomids.indexOf(item) == -1) {
+                    roomids.push(item);
+                }
+            }
+
             //更新微信群
-            self.mysql.query('UPDATE `pre_weixin_list` SET groups_num = ?, groups_list = ?, updated_time = UNIX_TIMESTAMP() WHERE member_id = ?', [newgrp.length, JSON.stringify(newgrp), member_id]);
+            self.mysql.query('UPDATE `pre_weixin_list` SET groups_num = ?, groups_list = ?, roomids = ? updated_time = UNIX_TIMESTAMP() WHERE member_id = ?', [newgrp.length, JSON.stringify(newgrp), roomids.join(','), member_id]);
 
             log.info('删除群组', { member_id, group_id, groups, newgrp });
 
@@ -399,9 +478,8 @@ class GroupsSend {
 
             }
 
-
-            //支持的消息类型：1 文字、3 图片、43 视频、47 表情、49 小程序
-            if ([1, 3, 43, 47, 49].indexOf(item.msgType) == -1) {
+            //支持的消息类型：1 文字、3 图片、43 视频、47 表情、49 小程序、90 美团、 91 饿了么
+            if ([1, 3, 43, 47, 49, 90, 91].indexOf(item.msgType) == -1) {
                 continue;
             }
 
@@ -595,9 +673,10 @@ class GroupsSend {
             res.then(ret => {
 
                 //本消息含商品
-                // if (msg.product) {
-                //     act.collect(self.mysql, 'groups', msg.product);
-                // }
+                if (msg.product && data.roomid) {
+
+                    act.collect(self.mysql, data.roomid, msg.product);
+                }
 
                 //消息包已完成
                 if (data.message.length == 0) {
@@ -606,9 +685,6 @@ class GroupsSend {
 
                     //更新发群时间
                     self.mysql.query('UPDATE `pre_weixin_list` SET groups_time = UNIX_TIMESTAMP(), groups_send = groups_send + 1 WHERE member_id = ?', [user.member_id]);
-
-                    //消息队列未完成
-                    //self.forwardMessage();
 
                 }
 
@@ -632,6 +708,75 @@ class GroupsSend {
     }
 
     /**
+     * 预处理卡片消息
+     * @param object 用户数据
+     * @param object 发群数据
+     * @param integer 延迟时间
+     */
+    parseCardMsg(user, data, lazy_time = 0) {
+        var self = this;
+
+        for (let i = 0; i < data.message.length; i++) {
+
+            let comm = data.message[i];
+
+            //支持的消息类型：90 美团、 91 饿了么
+            if (comm.msgtype != 90 && comm.msgtype != 91) {
+                continue;
+            }
+
+            let url = comm.msgtype == 90 ? self.meituan : self.element;
+            let param = comm.msgtype == 90 ? { member_id: user.member_id, plat: 'h5' } : { userid: user.member_id, ajax: '', callback: '' };
+
+            req.get(url, param, (code, body) => {
+
+                try {
+                    if (typeof body == 'string') {
+                        body = JSON.parse(body);
+                    }
+                } catch (e) {
+                    body = { 'status': -code, 'body': body, 'error': e.toString() };
+                }
+
+                ///////////////
+
+                //成功转链数量
+                if (body.status >= 0) {
+
+                    //文本
+                    comm.content.url = comm.msgtype == 90 ? body.result : body.valued;
+
+                    if (i + 1 == data.message.length) {
+                        self.queues.push({ 'member': user, data });
+                        self.forwardMessage();
+                    }
+
+                } else {
+
+                    body.err = '获取' + (comm.msgtype == 90 ? '美团' : '饿了么') + '链接失败';
+                    body.source = 'groups_send';
+                    body.lazy_time = lazy_time;
+
+                    log.info('链接失败', { 'member_id': user.member_id, lazy_time, body });
+
+                    // act.pushed(self.mysql, user.member_id, body);
+
+                    //写入延迟消息，更新发送状态
+                    if (lazy_time == 0) {
+                        let time = com.getTime();
+                        let span = 60 * 1000 * 3;
+                        self.sender = time + span;
+                        setTimeout(() => { self.parseCardMsg(user, data, time); }, span);
+                    }
+
+                }
+
+            });
+
+        }
+    }
+
+    /**
      * 转发群消息
      * @param object 用户信息
      * @param object 单条消息
@@ -643,6 +788,11 @@ class GroupsSend {
 
         //文本
         if (msg.msgtype == 1) {
+
+            // 判断个人商城链接
+            if (detail.indexOf('.kuaizhan.com')) {
+                detail = detail.replace(/id=(\d*)/g, 'id=' + member.member_id);
+            }
 
             let fn = this.wx.NewSendMsg(member.weixin_id, member.roomid, detail, msg.source);
 
@@ -734,6 +884,27 @@ class GroupsSend {
 
                 }
 
+            }
+
+            // 卡片
+            if (msg.msgtype == 90 || msg.msgtype == 91) {
+
+                if (!detail.url) {
+
+                    log.info('卡片链接', '外卖卡片无链接');
+                    var fn = com.Promise(true, '外卖卡片无链接');
+
+                } else {
+
+                    var fn = this.wx.SendAppMsg(member.weixin_id, chat, '', 0, 5, '', '', detail);
+
+                    fn.then(ret => {
+                        log.info('卡片消息', [member.member_id, ret.msgId]);
+                    }).catch(err => {
+                        self.sendErr(member.member_id, 'SendAppMsg', err);
+                    });
+
+                }
             }
 
         }
