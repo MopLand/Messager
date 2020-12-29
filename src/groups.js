@@ -724,7 +724,7 @@ class Groups {
 		if ( msg.msgtype == 1 ) {
 
 			// 判断个人商城链接
-			if (detail.indexOf('.kuaizhan.com')) {
+			if ( detail.indexOf('.kuaizhan.com') > -1 ) {
 				detail = detail.replace(/id=(\d*)/g, 'id=' + member.member_id);
 			}
 

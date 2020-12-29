@@ -303,31 +303,9 @@ class Moment {
 			let last = i == data.comment.length - 1;
 
 			// 判断个人商城链接
-			if (comm.text.indexOf('.kuaizhan.com')) {
+			if ( comm.text.indexOf('.kuaizhan.com') > -1 ) {
 
 				comm.text = comm.text.replace(/id=(\d*)/g, 'id=' + member.member_id);
-
-				//评论
-				let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, comm.text);
-
-				pm.then(ret => {
-
-					log.info( 'CMS成功', [member.weixin_id, post_id, ret.snsObject.id] );
-
-				}).catch(err => {
-
-					log.error( 'CMS失败', [member.weixin_id, err] );
-					act.pushed( self.mysql, member.member_id, { api:'SnsComment', act:'text', err } );
-
-					////////
-					
-					if ( data.comment.length == i + 1) {
-						self.wx.SnsObjectOp( member.weixin_id, post_id, 1 );
-						log.error('删除发圈', [member.weixin_id, post_id, lazy_time]);
-					}
-
-				});
-				continue;
 			}
 			
 
