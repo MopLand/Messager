@@ -43,7 +43,7 @@ class GroupsSend {
         this.sender = 0;
 
         this.cardCon = null; // 红包卡片配置
-        this.cardTime = [11, 15, 17]; // 发红包时间点
+        this.cardTime = [11, 17]; // 发红包时间点
         this.cardRooms = []; // 已发送过红包消息的源头群
     }
 
