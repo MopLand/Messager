@@ -2,7 +2,7 @@
     "name": "MM_Groups_Send",
     "script": "app.js",
     "args": "groups_send",
-    "cwd": "D:/soft/soft_workpace/php_projcet/Messager",
+    "cwd": "/disk/www/Messager",
     "error_file": "./logs/wx_groups_send_err.log",
     "out_file": "./logs/wx_groups_send_out.log",
     "merge_logs": true,
