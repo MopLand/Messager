@@ -325,11 +325,11 @@ class GroupsSend {
      * @param integer 用户ID
      * @param string 群ID
      */
-    delGroup(member_id, group_id) {
+    delGroup(member_id, weixin_id, group_id) {
 
         var self = this;
 
-        self.mysql.query('SELECT * FROM `pre_weixin_list` WHERE member_id = ? LIMIT 1', [member_id], function (err, res) {
+        self.mysql.query('SELECT * FROM `pre_weixin_list` WHERE member_id = ? AND weixin_id = ? LIMIT 1', [member_id, weixin_id], function (err, res) {
 
             if (err) {
                 log.error(err);
@@ -360,9 +360,9 @@ class GroupsSend {
             }
 
             //更新微信群
-            self.mysql.query('UPDATE `pre_weixin_list` SET groups_num = ?, groups_list = ?, roomids = ? updated_time = UNIX_TIMESTAMP() WHERE member_id = ?', [newgrp.length, JSON.stringify(newgrp), roomids.join(','), member_id]);
+            self.mysql.query('UPDATE `pre_weixin_list` SET groups_num = ?, groups_list = ?, roomids = ?, updated_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [newgrp.length, JSON.stringify(newgrp), roomids.join(','), member_id, weixin_id]);
 
-            log.info('删除群组', { member_id, group_id, groups, newgrp });
+            log.info('删除群组', { member_id, weixin_id, group_id, groups, newgrp });
 
         });
 
@@ -551,8 +551,7 @@ class GroupsSend {
                     }
 
                     //self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
-
-                    act.pushed(self.mysql, user.member_id, body);
+                    this.pushed(self.mysql, user, body);
 
                     //写入延迟消息，更新发送状态
                     if (lazy_time == 0) {
@@ -629,7 +628,7 @@ class GroupsSend {
                     self.sendCardMsg(user);
 
                     //更新发群时间
-                    self.mysql.query('UPDATE `pre_weixin_list` SET groups_time = UNIX_TIMESTAMP(), groups_send = groups_send + 1 WHERE member_id = ?', [user.member_id]);
+                    self.mysql.query('UPDATE `pre_weixin_list` SET groups_time = UNIX_TIMESTAMP(), groups_send = groups_send + 1 WHERE member_id = ? AND weixin_id = ?', [user.member_id, user.weixin_id]);
 
                 }
 
@@ -742,6 +741,8 @@ class GroupsSend {
             //成功转链数量
             if (body.status >= 0) {
 
+                log.info('链接成功', { 'user': user, body });
+
                 func(msgtype == 90 ? body.result : body.valued);
 
             } else {
@@ -840,12 +841,16 @@ class GroupsSend {
                 sendRoomid.push(roomid);
             }
 
+            if (msg.exch) {
+                detail = act.randomTbc( detail );
+            }
+
             let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source);
 
             fn.then(ret => {
                 log.info('文本成功', [member.member_id, ret.count]);
             }).catch(err => {
-                self.sendErr(member.member_id, 'NewSendMsg', err);
+                self.sendErr(member, 'NewSendMsg', err);
             });
 
             return fn;
@@ -874,7 +879,7 @@ class GroupsSend {
                 fn.then(ret => {
                     log.info('发图成功', [member.member_id, chat, ret.msgId]);
                 }).catch(err => {
-                    self.sendErr(member.member_id, 'UploadMsgImgXml', err, chat);
+                    self.sendErr(member, 'UploadMsgImgXml', err, chat);
                 });
             }
 
@@ -898,7 +903,7 @@ class GroupsSend {
                 fn.then(ret => {
                     log.info('表情成功', [member.member_id, chat, ret]);
                 }).catch(err => {
-                    self.sendErr(member.member_id, 'SendEmojiXml', err, chat);
+                    self.sendErr(member, 'SendEmojiXml', err, chat);
                 });
 
                 //多个微信群，适当延迟
@@ -919,7 +924,7 @@ class GroupsSend {
                     fn.then(ret => {
                         log.info('小程序成功', [member.member_id, chat, ret.msgId]);
                     }).catch(err => {
-                        self.sendErr(member.member_id, 'SendAppMsgXml', err, chat);
+                        self.sendErr(member, 'SendAppMsgXml', err, chat);
                     });
 
                 } else {
@@ -949,7 +954,7 @@ class GroupsSend {
 
                     }).catch(err => {
 
-                        self.sendErr(member.member_id, 'SendAppMsg', err);
+                        self.sendErr(member, 'SendAppMsg', err);
                     });
                 }
             }
@@ -962,24 +967,44 @@ class GroupsSend {
 
     /**
      * 转发出错了
-     * @param integer 用户ID
+     * @param integer 用户信息
      * @param string API名称
      * @param string 错误消息
      * @param string 微信群ID
      */
-    sendErr(member_id, api, err, chat) {
+    sendErr(user, api, err, chat) {
 
         //写入日志
-        log.error(api, [member_id, err, chat]);
+        log.error(api, [user, err, chat]);
 
         //更新状态
-        act.pushed(this.mysql, member_id, { api: api, err, chat, inst: this.inst.channel });
+        this.pushed(this.mysql, user.member_id, { api: api, err, chat, inst: this.inst.channel });
 
         //群已经失效
         if (err == 'MM_ERR_NOTCHATROOMCONTACT' && typeof chat == 'string') {
-            this.delGroup(member_id, chat);
+            this.delGroup(user.member_id, user.weixin_id, chat);
         }
 
+    }
+
+    /**
+     * @desc  更新状态信息
+     * @param object 数据库
+     * @param integer 用户Id
+     * @param object 状态信息
+     */
+	pushed( db, user, body ) {
+        var pushed = null;
+
+		if( body.err && body.err.indexOf('NOTCHATROOMCONTACT') > -1 ){
+			pushed = '请检查您的微信群是否有效?';
+		}
+
+		if( body.err && body.err.indexOf('已经失效') > -1 ){
+			pushed = '请检查您的微信登录状态?';
+		}
+
+		return db.query('UPDATE `pre_weixin_list` SET pushed = ?, status = ?, status_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [ pushed, JSON.stringify( body ), user.member_id, user.weixin_id ] );
     }
 
 }
