@@ -841,11 +841,7 @@ class GroupsSend {
                 sendRoomid.push(roomid);
             }
 
-            if (msg.exch) {
-                detail = act.randomTbc( detail );
-            }
-
-            let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source);
+            let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source, 1, msg.exch);
 
             fn.then(ret => {
                 log.info('文本成功', [member.member_id, ret.count]);
