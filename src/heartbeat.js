@@ -67,8 +67,8 @@ class Heartbeat {
 		};
 
 		//更新用户心跳时间
-		var beat = ( member_id ) => {
-			self.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member_id ] );
+		var beat = ( member_id, weixin_id ) => {
+			self.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [ member_id, weixin_id ] );
 		}
 
 		///////////////
@@ -121,7 +121,7 @@ class Heartbeat {
 	
 					pm.then(ret => {
 	
-						beat( row.member_id );
+						beat( row.member_id, row.weixin_id );
 						
 						log.info( '心跳成功', [row.weixin_id, row.member_id] );
 	
@@ -135,7 +135,7 @@ class Heartbeat {
 							let pa = self.wx.AutoAuth( row.weixin_id );
 	
 							pa.then( ret => {
-								beat( row.member_id );
+								beat( row.member_id, row.weixin_id );
 								log.info( '登录成功', [row.weixin_id, ret] );
 							}).catch( err => {
 								log.debug( '登录失败', [row.weixin_id, err] );
@@ -230,7 +230,7 @@ class Heartbeat {
 					
 					log.info( '心跳成功', [row.weixin_id, row.member_id] );
 
-					self.update( row.member_id );
+					self.update( row.member_id, row.weixin_id );
 
 				}).catch( err => {
 
@@ -242,7 +242,7 @@ class Heartbeat {
 						let pa = self.wx.AutoAuth( row.weixin_id );
 
 						pa.then( ret => {
-							self.update( row.member_id );
+							self.update( row.member_id, row.weixin_id );
 							log.info( '登录成功', [row.weixin_id, ret] );
 						}).catch( err => {
 							log.debug( '登录失败', [row.weixin_id, err] );
@@ -270,8 +270,8 @@ class Heartbeat {
 	/**
 	 * 完成心跳
 	 */
-	update( member_id ) {
-		this.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ member_id ] );
+	update( member_id, weixin_id ) {
+		this.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [ member_id, weixin_id ] );
 	}
 
 }
