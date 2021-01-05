@@ -551,7 +551,7 @@ class GroupsSend {
                     }
 
                     //self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
-                    this.pushed(self.mysql, user, body);
+                    self.pushed(self.mysql, user, body);
 
                     //写入延迟消息，更新发送状态
                     if (lazy_time == 0) {
@@ -974,7 +974,7 @@ class GroupsSend {
         log.error(api, [user, err, chat]);
 
         //更新状态
-        this.pushed(this.mysql, user.member_id, { api: api, err, chat, inst: this.inst.channel });
+        this.pushed(this.mysql, user, { api: api, err, chat, inst: this.inst.channel });
 
         //群已经失效
         if (err == 'MM_ERR_NOTCHATROOMCONTACT' && typeof chat == 'string') {
