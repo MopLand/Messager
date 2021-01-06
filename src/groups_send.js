@@ -267,13 +267,17 @@ class GroupsSend {
             var member = [];
             var useids = [];
 
+            // 是否符合发红包要求
+            let isHours = self.cardTime.indexOf((new Date).getHours()) > -1; // 是否到了发红包点
+            let isFrom = self.cardRooms.indexOf(fromroomid) == -1; // 该源头群是否发过红包
+
             for (let i = 0; i < res.length; i++) {
 
                 var groups = JSON.parse(res[i].groups_list);
 
                 //过滤包含消息源群的有效群
                 groups = groups.filter(ele => {
-                    if (fromroomid == 'all' || ele.roomid == fromroomid) {
+                    if ( ele.roomid == fromroomid ) {
                         return ele;
                     }
                 });
@@ -296,11 +300,18 @@ class GroupsSend {
                     }
                 });
 
+                let cardMsg = isHours && isFrom;
+
                 if (roomid.length > 0) {
                     useids.push(res[i].member_id);
-                    member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, roomid, roomidInfo, fromroomid: fromroomid });
+                    member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, roomid, roomidInfo, fromroomid: fromroomid, cardMsg });
                 }
 
+            }
+
+            // 避免源头群重复 发红包
+            if ( isHours && isFrom ) {
+                self.cardRooms.push(fromroomid);
             }
 
             //最后一个用户加个标记
@@ -663,7 +674,6 @@ class GroupsSend {
         var self = this;
 
         let isHours = self.cardTime.indexOf((new Date).getHours()) > -1; // 是否到了发红包点
-        let isFrom = self.cardRooms.indexOf(user.fromroomid) == -1; // 该源头群是否发过红包
 
         // 判断是否符合发红包时间
         if (!isHours) {
@@ -677,8 +687,8 @@ class GroupsSend {
             return;
         }
 
-        // 判断是否符合发红包 未发送消息的源群
-        if (!isFrom) {
+        // 用户红包属性判断
+        if (!user.cardMsg) {
             return;
         }
 
@@ -693,13 +703,12 @@ class GroupsSend {
         }
 
         // 保存已发送过红包的源群
-        self.cardRooms.push(user.fromroomid);
+        // self.cardRooms.push(user.fromroomid);
 
-        let data = self.cardCon;
+        let data = com.clone(self.cardCon);
 
-        for (let i = 0; i < data.length; i++) {
-
-            let item = data[i];
+        let send = () => {
+            let item = data.shift();
 
             self.parseCardMsg(user, item.msgtype, (card) => {
 
@@ -709,12 +718,23 @@ class GroupsSend {
                     let cardRet = self.sendMsg(user, item);
 
                     cardRet.then(_res => {
+
                         log.info('发送红包成功', { '发红包搜索源群': user.fromroomid, '红包用户': user.member_id });
+
+                    }).finally(() => {
+
+                        //红包包未完成
+                        if (data.length > 0) {
+                            setTimeout(() => { send(); }, 2000);
+                        }
+        
                     });
-                }
+                } 
 
             });
         }
+
+        send();
     }
 
     /**
