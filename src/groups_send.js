@@ -771,7 +771,7 @@ class GroupsSend {
 
             } else {
 
-                log.info('链接失败', { 'member_id': user.member_id, lazy_time, body });
+                log.info('链接失败', { 'member_id': user.member_id, body });
 
                 func(null);
             }
