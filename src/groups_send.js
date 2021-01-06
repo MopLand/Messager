@@ -68,6 +68,10 @@ class GroupsSend {
         //消息筛选条件
         var where = {};
 
+        this.inst = {
+            origin: /猫超券/
+        };
+
         ///////////////
 
         //订阅消息发送
@@ -839,6 +843,10 @@ class GroupsSend {
             for (var i = 0; i < size; i++) {
                 let roomid = member.roomidInfo[i] && member.roomidInfo[i].roomid ? member.roomidInfo[i].roomid : '';
                 sendRoomid.push(roomid);
+            }
+
+            if (this.inst.origin && this.inst.origin.test(detail)) {
+                msg.exch = true;
             }
 
             let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source, 1, msg.exch);
