@@ -1,6 +1,7 @@
 
 const Common = require('./lib/common');
 const Loader = require('./lib/loader');
+const Logger = require('./lib/logger');
 const Groups = require('./src/groups');
 const Moment = require('./src/moment');
 const Account = require('./src/account');
@@ -11,6 +12,12 @@ const GroupsSend = require('./src/groups_send');
 
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
+
+const tag = Common.fileName( __filename, false );
+const log = new Logger(tag);
+
+// 清理日志
+log.clean();
 
 process.env.UV_THREADPOOL_SIZE = 128;
 console.log( '-------------' + Common.getTime() +'-------------' );
