@@ -113,6 +113,32 @@ var conf = {
 		//Redis消息频道
 		channel: 'mm_groups',
 
+	},
+
+	// 多源头群
+	groups_send: {
+
+		// 红包链接缓存
+		card_cache: 'mm_wmcard_',
+
+		// 外卖红包卡片文案配置
+		card_config: 'https://proxy.guodongbaohe.com/assets/cardConfig',
+
+		// 生成美团外卖链接接口
+		meituan: 'https://proxy.guodongbaohe.com/meituan/coupon',
+
+		// 生成饿了么外卖链接接口
+		element: 'https://app.guodongbaohe.com/event/go/d1PCDE',
+
+		// 卡片时间
+		card_time: [11, 17],
+
+		// 禁发红包消息源头群
+		card_rooms: [],
+
+		// 猫超券
+		origin: /猫超券/,
+
 	}
 
 }

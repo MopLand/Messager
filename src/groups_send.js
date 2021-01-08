@@ -47,30 +47,33 @@ class GroupsSend {
         this.cardRooms = []; // 已发送过红包消息的源头群
     }
 
-    init() {
+    init( channel = 'mm_groups_send' ) {
 
         this.item = 'groups_send';
+        this.inst = this.conf[this.item];
 
         //Redis消息频道
-        var channel = 'mm_groups_send';
+        var channel = channel || 'mm_groups_send';
 
         // 获取卡片消息配置
-        this.cardConfig = 'https://proxy.guodongbaohe.com/assets/cardConfig'
+        this.cardConfig = this.inst.card_config
 
         // 获取美团H5链接
-        this.meituan = 'https://proxy.guodongbaohe.com/meituan/coupon';
+        this.meituan = this.inst.meituan;
 
         // 饿了么
-        this.element = 'https://app.guodongbaohe.com/event/go/d1PCDE';
+        this.element = this.inst.element;
+
+        // 发红包时间点
+        this.cardTime = this.inst.card_time;
+
+        // 已发送或禁发红包消息的源头群
+        this.cardRooms = this.inst.card_rooms;
 
         ///////////////
 
         //消息筛选条件
         var where = {};
-
-        this.inst = {
-            origin: /猫超券/
-        };
 
         ///////////////
 
@@ -744,38 +747,59 @@ class GroupsSend {
      * @param function 返回函数
      */
     parseCardMsg(user, msgtype, func) {
-
         var self = this;
+
+        if (!user.member_id) {
+            log.info('红包无效用户', { 'user': user, msgtype });
+            func(null);
+        }
+
+        var cacheKey = this.inst.card_cache + (msgtype == 90 ? 'meituan_' : 'element_') + user.member_id;
 
         let url = msgtype == 90 ? self.meituan : self.element;
         let param = msgtype == 90 ? { member_id: user.member_id, plat: 'h5' } : { userid: user.member_id, ajax: '', callback: '' };
 
-        req.get(url, param, (code, body) => {
+        // 获取红包链接缓存
+		this.sider.get( cacheKey, ( err, ret ) => {
+			if (!err && ret) {
 
-            try {
-                if (typeof body == 'string') {
-                    body = JSON.parse(body);
-                }
-            } catch (e) {
-                body = { 'status': -code, 'body': body, 'error': e.toString() };
-            }
-
-            ///////////////
-
-            //成功转链数量
-            if (body.status >= 0) {
-
-                log.info('链接成功', { 'user': user, body });
-
-                func(msgtype == 90 ? body.result : body.valued);
+                func(ret);
 
             } else {
 
-                log.info('链接失败', { 'member_id': user.member_id, body });
+                req.get(url, param, (code, body) => {
 
-                func(null);
+                    try {
+                        if (typeof body == 'string') {
+                            body = JSON.parse(body);
+                        }
+                    } catch (e) {
+                        body = { 'status': -code, 'body': body, 'error': e.toString() };
+                    }
+        
+                    //成功转链
+                    if (body.status >= 0) {
+        
+                        log.info('链接成功', { 'user': user, body });
+
+                        let url = msgtype == 90 ? body.result : body.valued
+        
+                        func(url);
+
+                        // 缓存红包链接 3 天
+                        self.sider.set(cacheKey, url);
+                        self.sider.expire(cacheKey, 3600 * 24 * 3);
+        
+                    } else {
+        
+                        log.info('链接失败', { 'member_id': user.member_id, body });
+        
+                        func(null);
+                    }
+        
+                });
+
             }
-
         });
     }
 
