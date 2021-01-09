@@ -28,7 +28,7 @@ class Heartbeat {
 	init( inst ){
 
 		//每分钟预计人数
-		this.count = 250;
+		this.count = 300;
 
 		//每个人预计间隔
 		this.space = 1000 * 60 / this.count;
