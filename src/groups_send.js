@@ -315,7 +315,7 @@ class GroupsSend {
             }
 
             // 避免源头群重复 发红包
-            if ( isHours && isFrom ) {
+            if ( isHours && isFrom && isMinute ) {
                 self.cardRooms.push(fromroomid);
             }
 
