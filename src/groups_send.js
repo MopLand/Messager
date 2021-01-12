@@ -271,8 +271,10 @@ class GroupsSend {
             var useids = [];
 
             // 是否符合发红包要求
-            let isHours = self.cardTime.indexOf((new Date).getHours()) > -1; // 是否到了发红包点
+            let date = new Date();
+            let isHours = self.cardTime.indexOf(date.getHours()) > -1; // 是否到了发红包点
             let isFrom = self.cardRooms.indexOf(fromroomid) == -1; // 该源头群是否发过红包
+            let isMinute = date.getMinutes() >= self.inst.card_minute;
 
             for (let i = 0; i < res.length; i++) {
 
@@ -303,7 +305,7 @@ class GroupsSend {
                     }
                 });
 
-                let cardMsg = isHours && isFrom;
+                let cardMsg = isHours && isFrom && isMinute;
 
                 if (roomid.length > 0) {
                     useids.push(res[i].member_id);
@@ -679,7 +681,7 @@ class GroupsSend {
         let isHours = self.cardTime.indexOf((new Date).getHours()) > -1; // 是否到了发红包点
 
         // 判断是否符合发红包时间
-        if (!isHours) {
+        if (!user.cardMsg && !isHours) {
 
             // 不在红包时间 重置全局数据
             if (!(self.cardCon === null)) {
@@ -713,12 +715,12 @@ class GroupsSend {
         let send = () => {
             let item = data.shift();
 
-            self.parseCardMsg(user, item.msgtype, (card) => {
+            self.parseCardMsg(user, item, (card) => {
 
                 if (card != null) {
 
-                    item.content['url'] = card;
-                    let cardRet = self.sendMsg(user, item);
+                    // item.content['url'] = card;
+                    let cardRet = self.sendMsg(user, card);
 
                     cardRet.then(_res => {
 
@@ -734,6 +736,13 @@ class GroupsSend {
                     });
                 } 
 
+            }, (item) => {
+                if (item.msgtype != 90 && item.msgtype != 91) {
+                    return { 'request' : false, 'respond' : item };
+                } else {
+                    return { 'request' : true };
+                }
+                
             });
         }
 
@@ -745,13 +754,24 @@ class GroupsSend {
      * @param object 用户数据
      * @param object 发群数据
      * @param function 返回函数
+     * @param function 拦截方法
      */
-    parseCardMsg(user, msgtype, func) {
+    parseCardMsg(user, data, func, blocker = null) {
         var self = this;
+        var msgtype = data.msgtype;
 
         if (!user.member_id) {
             log.info('红包无效用户', { 'user': user, msgtype });
             func(null);
+        }
+
+        if ( blocker ) {
+            let ret = blocker( data );
+
+            if( ret.request == false ){
+				func( ret.respond );
+				return;
+			}
         }
 
         var cacheKey = this.inst.card_cache + (msgtype == 90 ? 'meituan_' : 'element_') + user.member_id;
@@ -763,7 +783,8 @@ class GroupsSend {
 		this.sider.get( cacheKey, ( err, ret ) => {
 			if (!err && ret) {
 
-                func(ret);
+                data.content.url = ret;
+                func(data);
 
             } else {
 
@@ -784,7 +805,8 @@ class GroupsSend {
 
                         let url = msgtype == 90 ? body.result : body.valued
         
-                        func(url);
+                        data.content.url = url;
+                        func(data);
 
                         // 缓存红包链接 3 天
                         self.sider.set(cacheKey, url);
@@ -827,6 +849,13 @@ class GroupsSend {
                 if (body.status >= 0) {
 
                     var msgs = [];
+
+                    if (self.inst && self.inst.card_title) {
+                        msgs.push({
+                            msgtype: 1,
+                            content: self.inst.card_title
+                        });
+                    }
 
                     if (body.result && body.result.meituan) {
                         msgs.push({
