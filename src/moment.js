@@ -305,9 +305,13 @@ class Moment {
 			// 判断个人商城链接
 			if ( comm.text.indexOf('.kuaizhan.com') > -1 ) {
 
-				comm.text = comm.text.replace(/id=(\d*)/g, 'id=' + member.member_id);
+				// comm.text = comm.text.replace(/id=(\d*)/g, 'id=' + member.member_id);
+				if ( /uid=(\d*)/ig.test(comm.text) ) {
+                    comm.text = comm.text.replace(/uid=(\d*)/ig, 'uid=' + member.member_id);
+                } else {
+                    comm.text = comm.text.replace(/id=(\d*)/g, 'id=' + member.member_id);
+				}
 			}
-			
 
 			//转链
 			req.get( self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {

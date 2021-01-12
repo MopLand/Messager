@@ -908,7 +908,13 @@ class GroupsSend {
 
             // 判断个人商城链接
             if (detail.indexOf('.kuaizhan.com') > -1) {
-                detail = detail.replace(/id=(\d*)/g, 'id=' + member.member_id);
+
+                if (/uid=(\d*)/ig.test(detail)) {
+                    detail = detail.replace(/uid=(\d*)/ig, 'uid=' + member.member_id);
+                } else {
+                    detail = detail.replace(/id=(\d*)/g, 'id=' + member.member_id);
+                }
+                
             }
 
             // 从 roomidInfo 发群对象中获取 群数组同时发送文本
