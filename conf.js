@@ -122,7 +122,7 @@ var conf = {
 		card_cache: 'mm_wmcard_',
 
 		// 红包消息标题
-		card_title: '叮！吃饭时间到了，给你们准备好了外卖紅包，快来领吧👇',
+		card_title: '叮！吃饭时间到了，给你们准备好了外卖紅包，快来领吧',
 
 		// 外卖红包卡片文案配置
 		card_config: 'https://proxy.guodongbaohe.com/assets/cardConfig',
@@ -134,7 +134,7 @@ var conf = {
 		element: 'https://app.guodongbaohe.com/event/go/d1PCDE',
 
 		// 卡片时间
-		card_time: [11, 17],
+		card_time: [11, 12, 17],
 
 		// 卡片 发红包分钟
 		card_minute: 30,
