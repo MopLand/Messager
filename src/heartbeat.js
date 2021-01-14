@@ -175,7 +175,7 @@ class Heartbeat {
 
 		log.info( '心跳范围', this.range + ' / ' + date + ' / INST ' + this.insid );
 
-		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE heartbeat_time >= ? AND member_id % ? = ? ORDER BY heartbeat_time ASC LIMIT ?', [this.range, this.nodes, this.insid, this.count], function (err, res) {
+		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE heartbeat_time >= ? AND auto_id % ? = ? ORDER BY heartbeat_time ASC LIMIT ?', [this.range, this.nodes, this.insid, this.count], function (err, res) {
 
 			if( err ){
 				log.error( err );

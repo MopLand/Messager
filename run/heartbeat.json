@@ -1,7 +1,7 @@
 {
   "name"			: "MM_Heartbeat",
   "script"			: "app.js",
-  "args"			: "heartbeat -inst 2",
+  "args"			: "heartbeat -inst 3",
   "cwd"				: "/disk/www/Messager",
   "instances"		: "2",
   "exec_mode"		: "cluster",
