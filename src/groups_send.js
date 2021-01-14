@@ -907,15 +907,16 @@ class GroupsSend {
         if (msg.msgtype == 1) {
 
             // 判断个人商城链接
-            if (detail.indexOf('.kuaizhan.com') > -1) {
+            // if (detail.indexOf('.kuaizhan.com') > -1) {
 
-                if (/uid=(\d*)/ig.test(detail)) {
-                    detail = detail.replace(/uid=(\d*)/ig, 'uid=' + member.member_id);
-                } else {
-                    detail = detail.replace(/id=(\d*)/g, 'id=' + member.member_id);
-                }
+            //     if (/uid=(\d*)/ig.test(detail)) {
+            //         detail = detail.replace(/uid=(\d*)/ig, 'uid=' + member.member_id);
+            //     } else {
+            //         detail = detail.replace(/id=(\d*)/g, 'id=' + member.member_id);
+            //     }
                 
-            }
+            // }
+            detail = act.replaceUid(detail, member.member_id);
 
             // 从 roomidInfo 发群对象中获取 群数组同时发送文本
             let sendRoomid = [];
