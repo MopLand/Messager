@@ -54,7 +54,9 @@ class Moment {
 
 			//工作时段
 			var date = new Date();
-			var work = date.format('h') >= conf.worked;
+			var workHours = date.format('h');
+
+			var work = workHours >= conf.worked || workHours < 2; // 工作时间段 0-2 7-24
 
 			if( !work ) return;
 
