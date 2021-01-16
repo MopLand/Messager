@@ -274,7 +274,7 @@ class GroupsSend {
             let date = new Date();
             let isHours = self.cardTime.indexOf(date.getHours()) > -1; // 是否到了发红包点
             let isFrom = self.cardRooms.indexOf(fromroomid) == -1; // 该源头群是否发过红包
-            let isMinute = date.getMinutes() >= self.inst.card_minute;
+            let isMinute = isHours == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，，或者 17:30 发送
 
             for (let i = 0; i < res.length; i++) {
 
@@ -724,7 +724,7 @@ class GroupsSend {
 
                     cardRet.then(_res => {
 
-                        log.info('发送红包成功', { '发红包搜索源群': user.fromroomid, '红包用户': user.member_id });
+                        log.info('发送红包成功', { '发红包搜索源群': user.fromroomid, '红包用户': user.member_id, '消息': card });
 
                     }).finally(() => {
 
@@ -774,7 +774,12 @@ class GroupsSend {
 			}
         }
 
-        var cacheKey = this.inst.card_cache + (msgtype == 90 ? 'meituan_' : 'element_') + user.member_id;
+        if (!data.cache) {
+            log.info('红包缓存错误', { 'user': user, data });
+            func(null);
+        }
+
+        var cacheKey = this.inst.card_cache + data.cache + user.member_id;
 
         let url = msgtype == 90 ? self.meituan : self.element;
         let param = msgtype == 90 ? { member_id: user.member_id, plat: 'h5' } : { userid: user.member_id, ajax: '', callback: '' };
@@ -849,6 +854,7 @@ class GroupsSend {
                 if (body.status >= 0) {
 
                     var msgs = [];
+                    let size = 0;
 
                     if (self.inst && self.inst.card_title) {
                         msgs.push({
@@ -857,21 +863,51 @@ class GroupsSend {
                         });
                     }
 
+                    // 美团红包卡片配置
                     if (body.result && body.result.meituan) {
+
+                        let meituan = body.result.meituan;
+                        let mcache = 'cmeituan_';
+
+                        // 红包链接 缓存 key 设置
+                        if ( meituan.cache ) {
+                            // 防止缓存键值重名
+                            mcache = 'm' + meituan.cache;
+                            delete meituan['cache'];
+                        }
+
                         msgs.push({
+                            cache: mcache,
                             msgtype: 90,
-                            content: body.result.meituan
+                            content: meituan
                         });
+
+                        size +=1;
                     }
 
+                    // 饿了么红包卡片配置
                     if (body.result && body.result.elment) {
+
+                        let elment = body.result.elment;
+                        let ecache = 'element_';
+
+                        // 红包链接 缓存 key 设置
+                        if ( elment.cache ) {
+                            // 防止缓存键值重名
+                            ecache = 'e' + elment.cache;
+                            delete elment['cache'];
+                        }
+
                         msgs.push({
+                            cache: ecache,
                             msgtype: 91,
                             content: body.result.elment
                         });
+
+                        size +=1;
                     }
 
-                    if (msgs.length > 0) {
+                    if (size > 0) {
                         resolve(msgs);
                     }
 
