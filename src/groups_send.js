@@ -272,9 +272,10 @@ class GroupsSend {
 
             // 是否符合发红包要求
             let date = new Date();
-            let isHours = self.cardTime.indexOf(date.getHours()) > -1; // 是否到了发红包点
+            let hours = date.getHours();
+            let isHours = self.cardTime.indexOf(hours) > -1; // 是否到了发红包点
             let isFrom = self.cardRooms.indexOf(fromroomid) == -1; // 该源头群是否发过红包
-            let isMinute = isHours == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，，或者 17:30 发送
+            let isMinute = hours == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，，或者 17:30 发送
 
             for (let i = 0; i < res.length; i++) {
 
