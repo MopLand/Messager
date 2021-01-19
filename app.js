@@ -45,8 +45,10 @@ if (func == 'forward') {
 
 // 多群消息源
 if (func == 'groups_send') {
+	let scope = Common.getArgv( 'scope' );
+
 	let klas = new GroupsSend(conf);
-		klas.init();
+		klas.init( scope );
 }
 
 //朋友圈

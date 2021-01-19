@@ -47,14 +47,15 @@ class GroupsSend {
         this.cardRooms = []; // 已发送过红包消息的源头群
     }
 
-    init( channel = 'mm_groups_send' ) {
+    async init( scope ) {
 
         this.item = 'groups_send';
         this.inst = this.conf[this.item];
 
         //Redis消息频道
-        var channel = channel || 'mm_groups_send';
+        var channel = 'mm_groups_send';
 
+        ///////////////
         // 获取卡片消息配置
         this.cardConfig = this.inst.card_config
 
@@ -69,6 +70,35 @@ class GroupsSend {
 
         // 已发送或禁发红包消息的源头群
         this.cardRooms = this.inst.card_rooms;
+
+        ///////////////
+        // 分发消息范围
+        let userScope = scope ? scope.split(',') : [];
+        if (userScope.length == 2) {
+
+            if (userScope[0] > userScope[1]) {
+                let tmp = userScope[0];
+                userScope[0] = Number( userScope[1] );
+                userScope[1] = Number( tmp );
+            }
+
+            this.userScope = userScope;
+        } else {
+            this.userScope = [];
+        }
+
+        //当前 PM2 实例数量
+		this.nodes = process.env.instances ? process.env.instances : 0;
+
+		//实例ID，PM2 分流
+        this.insid = process.env.NODE_APP_INSTANCE || 0;
+
+        log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid + '用户[auto_id]区间：' + JSON.stringify( this.userScope ) );
+
+        ///////////////
+
+        // 淘口令分享随机文案组
+        this.tbcTexts = await this.getConfig( 'tbc' );
 
         ///////////////
 
@@ -147,6 +177,8 @@ class GroupsSend {
                 self.locked = com.getTime();
                 log.info('拉取方式', { channel, message });
             }
+
+            log.info( '应用实例', '实例数量 NODES：' + self.nodes + '，当前实例 INST：' + self.insid );
 
             log.info('原始消息', recv);
 
@@ -232,6 +264,8 @@ class GroupsSend {
 
     }
 
+    ////////// 用户信息相关方法 //////////
+
     /**
      * 拉取有效用户
      * @param string fromroomid 消息源群ID
@@ -258,67 +292,32 @@ class GroupsSend {
         //二十分钟
         var time = com.getTime() - self.conf.active;
 
-        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? AND roomids LIKE ? ORDER BY auto_id ASC"
+        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? AND roomids LIKE ?";
+        var req = [ Number( date ), time, '%' + fromroomid + '%'];
 
-        self.mysql.query(sql, [date, time, '%' + fromroomid + '%'], function (err, res) {
+        if (self.userScope.length == 2) {
+            sql += " AND auto_id > ? AND auto_id <= ?";
+            req.push( self.userScope[0], self.userScope[1] );
+        }
+
+        if (self.nodes && self.nodes > 1) {
+            sql += " AND auto_id % ? = ?";
+            req.push(self.nodes, self.insid);
+        }
+
+        sql += " ORDER BY auto_id ASC";
+
+        self.mysql.query(sql, req, function (err, res) {
 
             if (err) {
                 log.error(err);
                 return;
             }
 
-            var member = [];
-            var useids = [];
+            let userGroupsInfo = self.filterMemberGroups( res, fromroomid );
 
-            // 是否符合发红包要求
-            let date = new Date();
-            let hours = date.getHours();
-            let isHours = self.cardTime.indexOf(hours) > -1; // 是否到了发红包点
-            let isFrom = self.cardRooms.indexOf(fromroomid) == -1; // 该源头群是否发过红包
-            let isMinute = hours == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，，或者 17:30 发送
-
-            for (let i = 0; i < res.length; i++) {
-
-                var groups = JSON.parse(res[i].groups_list);
-
-                //过滤包含消息源群的有效群
-                groups = groups.filter(ele => {
-                    if ( ele.roomid == fromroomid ) {
-                        return ele;
-                    }
-                });
-
-                // 群开关
-                var roomid = groups.map(ele => {
-                    if (ele.switch == undefined || ele.switch == 1) {
-                        return ele.userName;
-                    }
-                });
-
-                // 群开关
-                var roomidInfo = groups.map(ele => {
-
-                    if (ele.switch == undefined || ele.switch == 1) {
-                        return {
-                            'roomid': ele.userName,
-                            'mini': ele.mini == undefined || (ele.mini && ele.mini == 1) ? true : false
-                        };
-                    }
-                });
-
-                let cardMsg = isHours && isFrom && isMinute;
-
-                if (roomid.length > 0) {
-                    useids.push(res[i].member_id);
-                    member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, roomid, roomidInfo, fromroomid: fromroomid, cardMsg });
-                }
-
-            }
-
-            // 避免源头群重复 发红包
-            if ( isHours && isFrom && isMinute ) {
-                self.cardRooms.push(fromroomid);
-            }
+            let member = userGroupsInfo.member;
+            let useids = userGroupsInfo.useids;
 
             //最后一个用户加个标记
             if (useids.length) {
@@ -339,6 +338,59 @@ class GroupsSend {
 
         });
 
+    }
+
+    /**
+     * 过滤每个用户发群信息
+     * @param {Object} res 
+     * @param {String} fromroomid
+     */
+    filterMemberGroups( res, fromroomid ) {
+
+        var self = this;
+        var member = [];
+        var useids = [];
+
+        // 是否符合发红包要求
+        let isCard = self.checkCardTime( fromroomid );
+
+        for (let i = 0; i < res.length; i++) {
+
+            var groups = JSON.parse(res[i].groups_list);
+
+            //过滤包含消息源群的有效群
+            groups = groups.filter(ele => {
+                if ( ele.roomid == fromroomid ) {
+                    return ele;
+                }
+            });
+
+            // 群开关
+            // var roomid = groups.map(ele => {
+            //     if (ele.switch == undefined || ele.switch == 1) {
+            //         return ele.userName;
+            //     }
+            // });
+
+            // 群开关
+            var roomidInfo = groups.map(ele => {
+
+                if (ele.switch == undefined || ele.switch == 1) {
+                    return {
+                        roomid: ele.userName,
+                        mini: ele.mini == undefined || (ele.mini && ele.mini == 1) ? true : false
+                    };
+                }
+            });
+
+            if (roomidInfo.length > 0) {
+                useids.push(res[i].member_id);
+                member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, roomidInfo, fromroomid: fromroomid, cardMsg: isCard });
+            }
+
+        }
+
+        return { member, useids };
     }
 
     /**
@@ -389,6 +441,8 @@ class GroupsSend {
 
     }
 
+    ////////// 群消息处理相关方法 //////////
+
     /**
      * 消息过滤器
      * @param string 群ID
@@ -410,6 +464,9 @@ class GroupsSend {
 
             // 群ID
             roomid: roomid,
+
+            // 实例
+            insid: this.insid,
 
             //消息列表，{ exch, msgid, msgtype, content, source }
             message: [],
@@ -572,7 +629,7 @@ class GroupsSend {
                     }
 
                     //self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
-                    self.pushed(self.mysql, user, body);
+                    act.updatePushed(self.mysql, user, body);
 
                     //写入延迟消息，更新发送状态
                     if (lazy_time == 0) {
@@ -621,7 +678,7 @@ class GroupsSend {
             return log.info('异常队列', user);
         }
 
-        log.info('当前微信', { '用户ID': user.member_id, '微信号': user.weixin_id, '群数量': user.roomid.length, '消息量': data.message.length });
+        log.info('当前微信', { '用户ID': user.member_id, '微信号': user.weixin_id, '群数量': user.roomidInfo.length, '消息量': data.message.length });
 
         var func = () => {
 
@@ -646,7 +703,9 @@ class GroupsSend {
                     log.info('群发完毕', [user.member_id, data.package]);
 
                     // 到点发送红包卡片
-                    self.sendCardMsg(user);
+                    setTimeout(() => {
+                        self.sendCardMsg(user);
+                    }, 2000);
 
                     //更新发群时间
                     self.mysql.query('UPDATE `pre_weixin_list` SET groups_time = UNIX_TIMESTAMP(), groups_send = groups_send + 1 WHERE member_id = ? AND weixin_id = ?', [user.member_id, user.weixin_id]);
@@ -671,6 +730,8 @@ class GroupsSend {
         func();
 
     }
+
+    ////////// 红包相关方法 //////////
 
     /**
      * 发送卡片消息
@@ -700,7 +761,7 @@ class GroupsSend {
 
         // 获取红包配置
         if (self.cardCon === null) {
-            self.cardCon = await self.getCardConfig();
+            self.cardCon = self.parseCardMessage( await self.getConfig() );
         }
 
         // 如果全局
@@ -832,17 +893,20 @@ class GroupsSend {
     }
 
     /**
-     * 卡片消息配置
+     * 发单配置
+     * @param string type
      */
-    getCardConfig() {
+    getConfig( type ) {
 
         var self = this;
 
+        let option = type ? { type: type } : {};
+
         return new Promise((resolve, reject) => {
 
-            req.get(self.cardConfig, {}, (code, body) => {
+            req.get(self.cardConfig, option, (code, body) => {
 
-                log.info('卡片配置', body);
+                log.info('配置结果', body);
 
                 try {
                     if (typeof body == 'string') {
@@ -854,73 +918,105 @@ class GroupsSend {
 
                 if (body.status >= 0) {
 
-                    var msgs = [];
-                    let size = 0;
-
-                    if (self.inst && self.inst.card_title) {
-                        msgs.push({
-                            msgtype: 1,
-                            content: self.inst.card_title
-                        });
-                    }
-
-                    // 美团红包卡片配置
-                    if (body.result && body.result.meituan) {
-
-                        let meituan = body.result.meituan;
-                        let mcache = 'cmeituan_';
-
-                        // 红包链接 缓存 key 设置
-                        if ( meituan.cache ) {
-                            // 防止缓存键值重名
-                            mcache = 'm' + meituan.cache;
-                            delete meituan['cache'];
-                        }
-
-                        msgs.push({
-                            cache: mcache,
-                            msgtype: 90,
-                            content: meituan
-                        });
-
-                        size +=1;
-                    }
-
-                    // 饿了么红包卡片配置
-                    if (body.result && body.result.elment) {
-
-                        let elment = body.result.elment;
-                        let ecache = 'element_';
-
-                        // 红包链接 缓存 key 设置
-                        if ( elment.cache ) {
-                            // 防止缓存键值重名
-                            ecache = 'e' + elment.cache;
-                            delete elment['cache'];
-                        }
-
-                        msgs.push({
-                            cache: ecache,
-                            msgtype: 91,
-                            content: body.result.elment
-                        });
-
-                        size +=1;
-                    }
-
-                    if (size > 0) {
-                        resolve(msgs);
-                    }
+                    resolve(body.result);
 
                 } else {
 
-                    log.info('卡片配置错误', body);
+                    log.info('配置错误', body);
 
                     resolve([])
                 }
             });
         })
     }
+
+    /**
+     * 配置红包消息包
+     * @param object 红包配置信息
+     */
+    parseCardMessage( data ) {
+
+        var self = this;
+        var msgs = [];
+        let size = 0;
+
+        if (self.inst && self.inst.card_title) {
+            msgs.push({
+                msgtype: 1,
+                content: self.inst.card_title
+            });
+        }
+
+        // 美团红包卡片配置
+        if ( data.meituan) {
+
+            let meituan = data.meituan;
+            let mcache = 'cmeituan_';
+
+            // 红包链接 缓存 key 设置
+            if ( meituan.cache ) {
+                // 防止缓存键值重名
+                mcache = 'm' + meituan.cache;
+                delete meituan['cache'];
+            }
+
+            msgs.push({
+                cache: mcache,
+                msgtype: 90,
+                content: meituan
+            });
+
+            size +=1;
+        }
+
+        // 饿了么红包卡片配置
+        if (data.elment) {
+
+            let elment = data.elment;
+            let ecache = 'element_';
+
+            // 红包链接 缓存 key 设置
+            if ( elment.cache ) {
+                // 防止缓存键值重名
+                ecache = 'e' + elment.cache;
+                delete elment['cache'];
+            }
+
+            msgs.push({
+                cache: ecache,
+                msgtype: 91,
+                content: elment
+            });
+
+            size +=1;
+        }
+
+        return size > 0 ? msgs : [];
+    }
+
+    /**
+     * 判断是否发送红包
+     * @param {String} fromroomid
+     * @return Boolean 
+     */
+    checkCardTime( fromroomid ) {
+
+        var self = this;
+        let date = new Date();
+        let hours = date.getHours();
+        let isHours = self.cardTime.indexOf(hours) > -1; // 是否到了发红包点
+        let isFrom = self.cardRooms.indexOf(fromroomid) == -1; // 该源头群是否发过红包
+        let isMinute = hours == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，，或者 17:30 发送
+
+        // 避免源头群重复 发红包
+        if ( isHours && isFrom & isMinute ) {
+            self.cardRooms.push(fromroomid);
+        }
+
+        return isHours && isFrom & isMinute;
+    }
+
+    ////////// 消息发送相关方法 //////////
 
     /**
      * 转发群消息
@@ -944,15 +1040,6 @@ class GroupsSend {
         if (msg.msgtype == 1) {
 
             // 判断个人商城链接
-            // if (detail.indexOf('.kuaizhan.com') > -1) {
-
-            //     if (/uid=(\d*)/ig.test(detail)) {
-            //         detail = detail.replace(/uid=(\d*)/ig, 'uid=' + member.member_id);
-            //     } else {
-            //         detail = detail.replace(/id=(\d*)/g, 'id=' + member.member_id);
-            //     }
-                
-            // }
             detail = act.replaceUid(detail, member.member_id);
 
             // 从 roomidInfo 发群对象中获取 群数组同时发送文本
@@ -966,7 +1053,9 @@ class GroupsSend {
                 msg.exch = true;
             }
 
-            let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source, 1, msg.exch);
+            let  tbcText = msg.exch ? this.tbcTexts : [];
+
+            let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source, 1, msg.exch, tbcText);
 
             fn.then(ret => {
                 log.info('文本成功', [member.member_id, ret.count]);
@@ -1099,33 +1188,13 @@ class GroupsSend {
         log.error(api, [user, err, chat]);
 
         //更新状态
-        this.pushed(this.mysql, user, { api: api, err, chat, inst: this.inst.channel });
+        act.updatePushed(this.mysql, user, { api: api, err, chat, inst: this.inst.channel });
 
         //群已经失效
         if (err == 'MM_ERR_NOTCHATROOMCONTACT' && typeof chat == 'string') {
             this.delGroup(user.member_id, user.weixin_id, chat);
         }
 
-    }
-
-    /**
-     * @desc  更新状态信息
-     * @param object 数据库
-     * @param integer 用户Id
-     * @param object 状态信息
-     */
-	pushed( db, user, body ) {
-        var pushed = null;
-
-		if( body.err && body.err.indexOf('NOTCHATROOMCONTACT') > -1 ){
-			pushed = '请检查您的微信群是否有效?';
-		}
-
-		if( body.err && body.err.indexOf('已经失效') > -1 ){
-			pushed = '请检查您的微信登录状态?';
-		}
-
-		return db.query('UPDATE `pre_weixin_list` SET pushed = ?, status = ?, status_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [ pushed, JSON.stringify( body ), user.member_id, user.weixin_id ] );
     }
 
 }
