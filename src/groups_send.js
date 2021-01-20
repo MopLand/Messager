@@ -4,6 +4,7 @@
  * 微信群控制器
  */
 
+const fs = require('fs');
 const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const req = require('../lib/request');
@@ -88,12 +89,15 @@ class GroupsSend {
         }
 
         //当前 PM2 实例数量
-		this.nodes = process.env.instances ? process.env.instances : 0;
+        let pwd = process.cwd();
+        let jsonData = fs.readFileSync(pwd + '/run/groups_send.json');
+        jsonData = JSON.parse(jsonData);
+		this.nodes = jsonData.instances ? jsonData.instances : 0;
 
 		//实例ID，PM2 分流
         this.insid = process.env.NODE_APP_INSTANCE || 0;
 
-        log.info( 'Process', process.env.env );
+        // log.info( 'Process', process.env.env );
         
         log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid + '用户[auto_id]区间：' + JSON.stringify( this.userScope ) );
 
@@ -181,6 +185,11 @@ class GroupsSend {
             }
 
             log.info( '应用实例', '实例数量 NODES：' + self.nodes + '，当前实例 INST：' + self.insid );
+
+            if ( self.nodes == 0 && self.insid > 0) {
+                log.info('实例错误', '实例数量与实例不匹配');
+                return;
+            }
 
             log.info('原始消息', recv);
 
