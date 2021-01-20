@@ -93,7 +93,7 @@ class GroupsSend {
 		//实例ID，PM2 分流
         this.insid = process.env.NODE_APP_INSTANCE || 0;
 
-        log.info( 'Process', process.env );
+        log.info( 'Process', process.env.env );
         
         log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid + '用户[auto_id]区间：' + JSON.stringify( this.userScope ) );
 
