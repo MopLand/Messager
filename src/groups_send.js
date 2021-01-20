@@ -10,7 +10,6 @@ const com = require('../lib/common');
 const req = require('../lib/request');
 const act = require('../lib/activity');
 const Logger = require('../lib/logger');
-const { sleep } = require('../lib/common');
 const tag = com.fileName(__filename, false);
 const log = new Logger(tag);
 
@@ -1199,7 +1198,7 @@ class GroupsSend {
         log.error(api, [user, err, chat]);
 
         //更新状态
-        act.updatePushed(this.mysql, user, { api: api, err, chat, inst: this.inst.channel });
+        act.updatePushed(this.mysql, user, { api: api, err, chat });
 
         //群已经失效
         if (err == 'MM_ERR_NOTCHATROOMCONTACT' && typeof chat == 'string') {
