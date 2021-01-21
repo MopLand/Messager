@@ -362,7 +362,7 @@ class GroupsSend {
         var useids = [];
 
         // 是否符合发红包要求
-        let isCard = self.checkCardTime( fromroomid );
+        // let isCard = self.checkCardTime( fromroomid );
 
         for (let i = 0; i < res.length; i++) {
 
@@ -395,7 +395,7 @@ class GroupsSend {
 
             if (roomidInfo.length > 0) {
                 useids.push(res[i].member_id);
-                member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, roomidInfo, fromroomid: fromroomid, cardMsg: isCard });
+                member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, roomidInfo, fromroomid: fromroomid });
             }
 
         }
@@ -477,6 +477,8 @@ class GroupsSend {
 
             // 实例
             insid: this.insid,
+
+            cardMsg: this.checkCardTime( roomid ),
 
             //消息列表，{ exch, msgid, msgtype, content, source }
             message: [],
@@ -714,7 +716,7 @@ class GroupsSend {
 
                     // 到点发送红包卡片
                     setTimeout(() => {
-                        self.sendCardMsg(user);
+                        self.sendCardMsg(user, data.cardMsg);
                     }, 2000);
 
                     //更新发群时间
@@ -746,17 +748,19 @@ class GroupsSend {
     /**
      * 发送卡片消息
      * @param object 用户信息
+     * @param bool 是否发送红包
      */
-    async sendCardMsg(user) {
+    async sendCardMsg(user, isCard = false) {
         var self = this;
 
-        let isHours = self.cardTime.indexOf((new Date).getHours()) > -1; // 是否到了发红包点
+        let config_clear = [ 14, 15, 19 ]; // 清空配置时间
+        let isHours = config_clear.indexOf((new Date).getHours()) > -1; // 是否清空配置
 
         // 判断是否符合发红包时间
-        if (!user.cardMsg && !isHours) {
+        if ( isHours ) {
 
             // 不在红包时间 重置全局数据
-            if (!(self.cardCon === null)) {
+            if ( !(self.cardCon === null) ) {
                 self.cardCon = null;
                 self.cardRooms = [];
             }
@@ -765,7 +769,7 @@ class GroupsSend {
         }
 
         // 用户红包属性判断
-        if (!user.cardMsg) {
+        if ( !isCard ) {
             return;
         }
 
