@@ -802,6 +802,10 @@ class GroupsSend {
 
                         log.info('发送红包成功', { '发红包搜索源群': user.fromroomid, '红包用户': user.member_id, '消息': card });
 
+                    }).catch(err => {
+
+                        log.error('红包失败', { user, err });
+        
                     }).finally(() => {
 
                         //红包包未完成
