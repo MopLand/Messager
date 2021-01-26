@@ -688,7 +688,7 @@ class GroupsSend {
                 //本消息含商品
                 if (msg.product && data.roomid) {
 
-                    act.collect(self.mysql, data.roomid, msg.product);
+                    act.collect(self.mysql, data.roomid, msg.product, data.package);
                 }
 
                 //消息包已完成
