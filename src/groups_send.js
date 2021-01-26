@@ -11,7 +11,7 @@ const req = require('../lib/request');
 const act = require('../lib/activity');
 const Logger = require('../lib/logger');
 const tag = com.fileName(__filename, false);
-const log = new Logger(tag);
+const log = new Logger( tag, true, true );
 
 /**
  * 用户 TAG
@@ -47,7 +47,7 @@ class GroupsSend {
         this.cardRooms = []; // 已发送过红包消息的源头群
     }
 
-    async init( scope ) {
+    async init() {
 
         this.item = 'groups_send';
         this.inst = this.conf[this.item];
@@ -72,20 +72,6 @@ class GroupsSend {
         this.cardRooms = this.inst.card_rooms;
 
         ///////////////
-        // 分发消息范围
-        let userScope = scope ? scope.split(',') : [];
-        if (userScope.length == 2) {
-
-            if (userScope[0] > userScope[1]) {
-                let tmp = userScope[0];
-                userScope[0] = Number( userScope[1] );
-                userScope[1] = Number( tmp );
-            }
-
-            this.userScope = userScope;
-        } else {
-            this.userScope = [];
-        }
 
         //当前 PM2 实例数量
         let pwd = process.cwd();
@@ -98,7 +84,7 @@ class GroupsSend {
 
         // log.info( 'Process', process.env.env );
         
-        log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid + '用户[auto_id]区间：' + JSON.stringify( this.userScope ) );
+        log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid );
 
         ///////////////
 
@@ -305,10 +291,6 @@ class GroupsSend {
         var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? AND roomids LIKE ?";
         var req = [ Number( date ), time, '%' + fromroomid + '%'];
 
-        if (self.userScope.length == 2) {
-            sql += " AND auto_id > ? AND auto_id <= ?";
-            req.push( self.userScope[0], self.userScope[1] );
-        }
 
         if (self.nodes && self.nodes > 1) {
             sql += " AND auto_id % ? = ?";
