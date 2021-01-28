@@ -368,10 +368,18 @@ class GroupsSend {
             var roomidInfo = groups.map(ele => {
 
                 if (ele.switch == undefined || ele.switch == 1) {
-                    return {
-                        roomid: ele.userName,
-                        mini: ele.mini == undefined || (ele.mini && ele.mini == 1) ? true : false
-                    };
+
+                    let mini = ele.mini == undefined || (ele.mini && ele.mini == 1) ? true : false;
+                    let url = ele.url == undefined || (ele.url && ele.url == 1) ? true : false;
+
+                    if (mini || url) {
+                        return {
+                            roomid: ele.userName,
+                            mini: mini,
+                            url: url,
+                        };
+                    }
+
                 }
             });
 
@@ -1046,6 +1054,12 @@ class GroupsSend {
             let sendRoomid = [];
             for (var i = 0; i < size; i++) {
                 let roomid = member.roomidInfo[i] && member.roomidInfo[i].roomid ? member.roomidInfo[i].roomid : '';
+                let url = member.roomidInfo[i] && member.roomidInfo[i].url ? member.roomidInfo[i].url : false;
+
+                if ( msg.exch && !url && act.detectUrl(detail) ) {
+                    continue;
+                }
+
                 sendRoomid.push(roomid);
             }
 
