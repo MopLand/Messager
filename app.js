@@ -49,10 +49,16 @@ if (func == 'groups_send') {
 		klas.init();
 }
 
-//朋友圈
+//朋友圈营销商品
 if (func == 'moment') {
 	let klas = new Moment(conf);
 		klas.init();
+}
+
+//朋友圈营销素材
+if (func == 'moment_mtl') {
+	let klas = new Moment(conf);
+		klas.init( func );
 }
 
 //微信群

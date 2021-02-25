@@ -67,7 +67,7 @@ class Moment {
 				let post = ret.objectList[0];
 
 				//必需有评论
-				if( post.commentUserListCount == 0 ){
+				if( post.commentUserListCount == 0 && !inst.noconvert ){
 					log.info( '暂无评论', { 'post.data' : post, 'post.time' : post.createTime } );
 					return;
 				}
@@ -131,7 +131,7 @@ class Moment {
 				com.locked( self.item );
 			}
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, tag FROM `pre_weixin_list` WHERE moment = 1 AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [date, time, auto], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, tag FROM `pre_weixin_list` WHERE ' + self.item + ' = 1 AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [date, time, auto], function (err, res) {
 
 				if( err ){
 					return log.error( '读取错误', err );
@@ -209,7 +209,7 @@ class Moment {
 					log.info( '跳过发圈', comm );
 				}
 
-				if( conf.origin && conf.origin.test( comm ) ){
+				if( ( conf.origin && conf.origin.test( comm ) ) || conf.noconvert ){
 					data.convert = 0;
 					log.info( '不要转链', comm );
 				}else{
@@ -305,15 +305,6 @@ class Moment {
 			let last = i == data.comment.length - 1;
 
 			// 判断个人商城链接
-			// if ( comm.text.indexOf('.kuaizhan.com') > -1 ) {
-
-			// 	// comm.text = comm.text.replace(/id=(\d*)/g, 'id=' + member.member_id);
-			// 	if ( /uid=(\d*)/ig.test(comm.text) ) {
-            //         comm.text = comm.text.replace(/uid=(\d*)/ig, 'uid=' + member.member_id);
-            //     } else {
-            //         comm.text = comm.text.replace(/id=(\d*)/g, 'id=' + member.member_id);
-			// 	}
-			// }
 			comm.text = act.replaceUid(comm.text, member.member_id);
 
 			//转链
