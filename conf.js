@@ -153,7 +153,7 @@ var conf = {
 		card_title: '叮！吃饭时间到了，给你们准备好了外卖紅包，快来领吧',
 
 		// 外卖红包卡片文案配置
-		card_config: 'http://proxy.guo.test/assets/cardConfig',
+		card_config: 'https://proxy.guodongbaohe.com/assets/cardConfig',
 
 		// 生成美团外卖链接接口
 		meituan: 'https://proxy.guodongbaohe.com/meituan/coupon',
