@@ -35,6 +35,8 @@ class Moment {
 		var inst = this.conf[item];
 		var maxid = 0;
 
+		var followApi = 'https://proxy.guodongbaohe.com/assets/wechat/' + item;
+
 		//消息时间戳
 		var stamp = inst.marker || 'mm_moment_id';
 
@@ -45,8 +47,8 @@ class Moment {
 
 		//最近一次朋友圈消息ID
 		this.redis.get( stamp, ( err, ret ) => {
-			maxid = ret || maxid;
-			log.info( 'init', maxid );
+			self.maxid = ret || maxid;
+			log.info( 'init', self.maxid );
 		} );
 
 		//每分钟获取一次朋友圈
@@ -58,50 +60,120 @@ class Moment {
 
 			var work = workHours >= conf.worked || workHours < 2; // 工作时间段 0-2 7-24
 
-			if( !work ) return;
+			if( !work || conf.follow ) return;
 
-			let pm = self.fetchMoment( conf.wechat, inst.follow );
+			// 微信配置
+			let wechatConfig = self.wechatConfig || [];
 
-			pm.then(ret => {
+			// 获取后台配置微信号
+			req.get(followApi, {}, (code, body) => {
 
-				let post = ret.objectList[0];
+				try {
+					if ( typeof body == 'string' ) {
+						body = JSON.parse(body);
+					}
+				} catch ( e ) {
+					body = { 'status': -code, 'body': body, 'error': e.toString() };
+					log.error('微信监控号', [item, body]);
+				}
+				
+				let follows = inst.follow.split(',');
 
-				//必需有评论
-				if( post.commentUserListCount == 0 && !inst.noconvert ){
-					log.info( '暂无评论', { 'post.data' : post, 'post.time' : post.createTime } );
-					return;
+				if( body.status >= 0 ){
+					follows = body.result;
 				}
 
-				//转发朋友圈
-				if( post.id > maxid ){
-					self.send( post );
-					maxid = post.id;
-					//log.info( '最新发圈', post );
+				// 拉取多账号，第一个有数据发送 否则 继续拉取第二个
+				let loopSend = () => {
+
+					let onFollow = follows.shift();
+
+					self.getMoment( conf.wechat, onFollow, self.maxid, stamp, conf, ( firstData ) => {
+
+						if ( follows.length > 0 && !firstData ) {
+							loopSend();
+						}
+					} );
+				}
+
+				loopSend();
+
+			}, ( data ) => {
+				
+				let workMin = date.format('m');
+
+				if( wechatConfig.length == 0 || ( workMin > 0 && workMin < 9 ) || ( workMin > 30 && workMin < 50 ) ){
+					return { 'request' : true };
 				}else{
-					log.info( '暂无发圈', { 'maxid' : maxid, 'post.id' : post.id, 'post.time' : post.createTime } );
+					return { 'request' : false, 'respond' : { 'status' : 1, 'result' : wechatConfig } };
 				}
-
-				act.record( self.mysql, self.item, post, '发圈消息' );
-
-				//临时存储一天
-				self.redis.set( stamp, post.id );
-				self.redis.expire( stamp, 3600 * 14 );
-
-				req.status(conf.report, 'MM_Moment', maxid, ret.baseResponse);
-
-			}).catch(err => {
-
-				log.info( err );
-
-				req.status(conf.report, 'MM_Moment', maxid, err);
-
-			});
+			})
 
 		}, 60 * 1000 * 5 );
 
 		//每分钟补发一次
 		setInterval( this.reissueComment.bind(this), 60 * 1000 );
 
+	}
+
+	/**
+	 * 获取朋友圈信息
+	 * @param {String} wechat
+	 * @param {String} follow
+	 * @param {String} maxid
+	 * @param {String} stamp
+	 * @param {Object} conf
+	 * @param {Function} func
+	 */
+	getMoment(wechat, follow, maxid, stamp, conf, func) {
+		var self = this;
+
+		// 多账号，，如果有新数据，则第二个监听
+		let firstData = false;
+
+		let pm = self.fetchMoment( wechat, follow );
+
+		pm.then(ret => {
+
+			let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : {};
+
+			//必需有评论
+			if( post.commentUserListCount == 0 && !self.inst.nocomment ){
+				log.info( '暂无评论', { 'post.data' : post, 'post.time' : post.createTime } );
+				return;
+			}
+
+			//转发朋友圈
+			if( post.id > maxid ){
+				
+				firstData = true;
+
+				self.send( post );
+				self.maxid = post.id;
+				//log.info( '最新发圈', post );
+
+				//临时存储一天
+				self.redis.set( stamp, post.id );
+				self.redis.expire( stamp, 3600 * 14 );
+
+			}else{
+				log.info( '暂无发圈', { 'maxid' : maxid, 'post.id' : post.id, 'post.time' : post.createTime } );
+			}
+
+			act.record( self.mysql, self.item, post, '发圈消息' );
+
+			req.status(conf.report, 'MM_Moment', maxid, ret.baseResponse);
+
+			func( firstData );
+
+		}).catch(err => {
+
+			log.info( err );
+
+			req.status(conf.report, 'MM_Moment', maxid, err);
+
+			func( firstData );
+		});
 	}
 
 	/**
@@ -209,7 +281,7 @@ class Moment {
 					log.info( '跳过发圈', comm );
 				}
 
-				if( ( conf.origin && conf.origin.test( comm ) ) || conf.noconvert ){
+				if( conf.origin && conf.origin.test( comm ) ){
 					data.convert = 0;
 					log.info( '不要转链', comm );
 				}else{

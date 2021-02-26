@@ -108,8 +108,8 @@ var conf = {
 		//遇错误中断发送
 		//cancel: /MMSNS_RET_SPAM/,
 
-		// 禁止转链
-		noconvert: true,
+		// 无评论一样发圈 
+		nocomment: true,
 	},
 
 	//微信群
