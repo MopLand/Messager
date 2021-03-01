@@ -404,7 +404,9 @@ class Moment {
 
 						log.info( '评论成功', [member.weixin_id, post_id, ret.snsObject.id] );
 
-						body.product && act.collect( self.mysql, 'moment', body.product );
+						if ( self.item == 'moment' ) {
+							body.product && act.collect( self.mysql, 'moment', body.product );
+						}
 
 					}).catch(err => {
 
