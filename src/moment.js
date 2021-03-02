@@ -152,15 +152,21 @@ class Moment {
 				self.maxid = post.id;
 				//log.info( '最新发圈', post );
 
-				//临时存储一天
-				self.redis.set( stamp, post.id );
-				self.redis.expire( stamp, 3600 * 14 );
-
 			}else{
 				log.info( '暂无发圈', { 'maxid' : maxid, 'post.id' : post.id, 'post.time' : post.createTime } );
 			}
 
 			act.record( self.mysql, self.item, post, '发圈消息' );
+
+			// 存储发圈消息ID
+			let saveTime = maxid;
+			if ( post.id > maxid ) {
+				saveTime = post.id;
+			}
+
+			//临时存储一天
+			self.redis.set( stamp, saveTime );
+			self.redis.expire( stamp, 3600 * 14 );
 
 			req.status(conf.report, 'MM_Moment', maxid, ret.baseResponse);
 
