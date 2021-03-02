@@ -71,6 +71,7 @@ class Moment {
 				try {
 					if ( typeof body == 'string' ) {
 						body = JSON.parse(body);
+						log.info('微信配置', body);
 					}
 				} catch ( e ) {
 					body = { 'status': -code, 'body': body, 'error': e.toString() };
@@ -82,6 +83,8 @@ class Moment {
 				if( body.status >= 0 ){
 					follows = body.result;
 				}
+
+				self.mainWx = '';
 
 				// 拉取多账号，第一个有数据发送 否则 继续拉取第二个
 				let loopSend = () => {
@@ -127,6 +130,10 @@ class Moment {
 	 */
 	getMoment(wechat, follow, maxid, stamp, conf, func) {
 		var self = this;
+
+		if ( self.mainWx == '' ) {
+			self.mainWx = follow;
+		}
 
 		// 多账号，，如果有新数据，则第二个监听
 		let firstData = false;
@@ -277,6 +284,7 @@ class Moment {
 
 			for( let i = 0; i < post.commentUserList.length; i ++ ){
 
+				let username = post.userName;
 				let type = post.commentUserList[i].type;
 				let text = post.commentUserList[i].content;
 				let comm = text.toLocaleUpperCase();
@@ -295,7 +303,7 @@ class Moment {
 					exch && data.convert ++;
 				}
 
-				data.comment.push( { exch, type, text } );
+				data.comment.push( { exch, type, text, username } );
 
 			}
 
@@ -410,7 +418,7 @@ class Moment {
 
 						log.info( '评论成功', [member.weixin_id, post_id, ret.snsObject.id] );
 
-						if ( self.item == 'moment' ) {
+						if ( self.item == 'moment' && comm.username == self.mainWx ) {
 							body.product && act.collect( self.mysql, 'moment', body.product );
 						}
 
