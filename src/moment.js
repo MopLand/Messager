@@ -352,7 +352,8 @@ class Moment {
 		pm.then(ret => {
 
 			//转发评论，使用自己的发圈ID
-			this.forwardComment(member, data, ret.snsObject.id);
+			let comment = com.clone( data );
+			this.forwardComment(member, comment, ret.snsObject.id);
 
 			log.info( '发圈成功', ret.snsObject.id );
 
@@ -394,8 +395,7 @@ class Moment {
 
 			// 判断个人商城链接
 			log.info( '邀请码', [ member.member_id, member.invite_code ] );
-			comm.text = act.replaceUid( comm.text, member.member_id );
-			// comm.text = act.replaceInvite( comm.text, member.invite_code );
+			comm.text = act.replaceUid( act.replaceInvite( comm.text, member.invite_code ), member.member_id );
 
 			//转链
 			req.get( self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {
