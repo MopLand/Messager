@@ -393,7 +393,9 @@ class Moment {
 			let last = i == data.comment.length - 1;
 
 			// 判断个人商城链接
-			comm.text = act.replaceUid( act.replaceInvite( comm.text, member.invite_code ), member.member_id);
+			log.info( '邀请码', [ member.member_id, member.invite_code ] );
+			comm.text = act.replaceUid( comm.text, member.member_id );
+			// comm.text = act.replaceInvite( comm.text, member.invite_code );
 
 			//转链
 			req.get( self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {
