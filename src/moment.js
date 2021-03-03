@@ -216,7 +216,9 @@ class Moment {
 				com.locked( self.item );
 			}
 
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, tag FROM `pre_weixin_list` WHERE ' + self.item + ' = 1 AND created_date <= ? AND heartbeat_time >= ? AND auto_id > ? ORDER BY auto_id ASC LIMIT 50', [date, time, auto], function (err, res) {
+			let sql = 'SELECT w.`auto_id`, w.`member_id`, w.`weixin_id`, w.`tag`, m.`invite_code` FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE ' + self.item + ' = 1 AND w.created_date <= ? AND w.heartbeat_time >= ? AND w.auto_id > ? ORDER BY w.auto_id ASC LIMIT 50';
+
+			self.mysql.query(sql, [date, time, auto], function (err, res) {
 
 				if( err ){
 					return log.error( '读取错误', err );
@@ -391,7 +393,7 @@ class Moment {
 			let last = i == data.comment.length - 1;
 
 			// 判断个人商城链接
-			comm.text = act.replaceUid(comm.text, member.member_id);
+			comm.text = act.replaceUid( act.replaceInvite( comm.text, member.invite_code ), member.member_id);
 
 			//转链
 			req.get( self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {
