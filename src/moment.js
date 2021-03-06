@@ -236,7 +236,7 @@ class Moment {
 	
 				for (var i = 0; i < res.length; i++) {
 
-					if ( res[i] && res[i].tag && ( res[i].tag & 8 )) {
+					if ( self.item == 'moment_mtl' && res[i] && res[i].tag && ( res[i].tag & 8 )) {
 						continue;
 					}
 	
