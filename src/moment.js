@@ -207,9 +207,9 @@ class Moment {
 
 		var func = ( auto ) => {
 
-			if( self.abort ){
-				return log.error( '中断发送', self.abort );
-			}
+			// if( self.abort ){
+			// 	return log.error( '中断发送', self.abort );
+			// }
 
 			//锁定 GIT
 			if( auto == 0 ){
@@ -235,6 +235,10 @@ class Moment {
 				}
 	
 				for (var i = 0; i < res.length; i++) {
+
+					if ( res[i] && res[i].tag && ( res[i].tag & 8 )) {
+						continue;
+					}
 	
 					//转发朋友圈
 					self.forwardMoment(res[i], data);
@@ -359,16 +363,22 @@ class Moment {
 
 		}).catch(err => {
 
-			log.error( '发圈出错', [member.member_id, err] );
-			act.updatePushed( self.mysql, member, { api:'SnsPostXml', err } );
-
+			let body = { api:'SnsPostXml', err, isAbort: false };
 			//判定为垃圾消息
 			if( typeof err == 'string' && self.inst.cancel ){
 				var ret = err.match( self.inst.cancel );
 				if( ret ){
 					self.abort = ret[0];
+
+					// 营销素材 判定为垃圾消息则禁发素材
+					if (self.item == 'moment_mtl') {
+						body.isAbort = true;
+					}
 				}
 			}
+
+			log.error( '发圈出错', [member.member_id, err] );
+			act.updatePushed( self.mysql, member,  body);
 
 		});
 
