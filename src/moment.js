@@ -378,7 +378,7 @@ class Moment {
 			}
 
 			log.error( '发圈出错', [member.member_id, err] );
-			act.updatePushed( self.mysql, member,  body);
+			act.updatePushed( self.mysql, member, body);
 
 		});
 
@@ -403,9 +403,11 @@ class Moment {
 			let comm = data.comment[i];
 			let last = i == data.comment.length - 1;
 
-			// 判断个人商城链接
-			log.info( '邀请码', [ member.member_id, member.invite_code ] );
-			comm.text = act.replaceUid( act.replaceInvite( comm.text, member.invite_code ), member.member_id );
+			if ( !comm.noreplace ) {
+				// 判断个人商城链接
+				log.info( '邀请码', [ member.member_id, member.invite_code, comm ] );
+				comm.text = act.replaceUid( act.replaceInvite( comm.text, member.invite_code ), member.member_id );
+			}
 
 			//转链
 			req.get( self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'product' : 'true', 'lazy_time' : lazy_time }, (code, body) => {
