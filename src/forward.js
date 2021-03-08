@@ -77,7 +77,7 @@ class Forward {
             }
 
             let roomids = recv.roomid ? recv.roomid : []
-            let member = self.getMember(recv.member_id, roomids);
+            let member = self.getMember(recv.weixin_id, roomids);
 
             member.then(data => {
                 if (data.member_id == undefined) {
@@ -572,7 +572,7 @@ class Forward {
      * @param int member_id
      * @return array
      */
-    getMember(memberId, roomidList = []) {
+    getMember(weixin_id, roomidList = []) {
 
         var self = this;
 
@@ -584,9 +584,9 @@ class Forward {
             //二十分钟
             var time = com.getTime() - self.conf.active;
 
-            const sql = 'SELECT auto_id, member_id, weixin_id, groups_list, moment, groups, tag FROM `pre_weixin_list` WHERE member_id = ? AND created_date <= ? AND heartbeat_time >= ? LIMIT 1';
+            const sql = 'SELECT auto_id, member_id, weixin_id, groups_list, moment, groups, tag FROM `pre_weixin_list` WHERE weixin_id = ? AND created_date <= ? AND heartbeat_time >= ? LIMIT 1';
 
-            self.mysql.query(sql, [memberId, date, time], function (err, res) {
+            self.mysql.query(sql, [weixin_id, date, time], function (err, res) {
                 if (err) {
                     log.error(err);
                     reject(err);
