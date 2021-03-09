@@ -45,6 +45,9 @@ class Moment {
 		this.item = item;
 		this.inst = inst;
 
+		// 没评论拉取次数
+		this.pullcomment = 0;
+
 		//最近一次朋友圈消息ID
 		this.redis.get( stamp, ( err, ret ) => {
 			self.maxid = ret || maxid;
@@ -144,11 +147,22 @@ class Moment {
 
 			let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : {};
 
-			//必需有评论
-			if( post.commentUserListCount == 0 && !self.inst.nocomment ){
+			// 评论为空时：
+			// 配置项 nocomment 为空或者false 则必需有评论
+			// 配置项 nocomment 为 true 但是 拉取次数(pullcomment)为 0 时， pullcomment=1 等待下一次拉取
+			if( post.commentUserListCount == 0 && ( !self.inst.nocomment || (self.inst.nocomment && self.pullcomment == 0) ) ){
+
+				// 评论不是必须时，评论为空拉取次数 = 1
+				if ( self.inst.nocomment ) {
+					self.pullcomment = 1;
+				}
+
 				log.info( '暂无评论', { 'post.data' : post, 'post.time' : post.createTime } );
 				return;
 			}
+
+			// 拉取次数还原 0；
+			self.pullcomment = 0;
 
 			//转发朋友圈
 			if( post.id > maxid ){
