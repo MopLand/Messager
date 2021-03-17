@@ -85,9 +85,10 @@ class Moment {
 
 				if( body.status >= 0 ){
 					follows = body.result;
+					self.wechatConfig = follows;
 				}
 
-				self.mainWx = '';
+				// self.mainWx = '';
 
 				// 拉取多账号，第一个有数据发送 否则 继续拉取第二个
 				let loopSend = () => {
@@ -108,7 +109,7 @@ class Moment {
 				
 				let workMin = date.format('m');
 
-				if( wechatConfig.length == 0 || ( workMin > 0 && workMin < 9 ) || ( workMin > 30 && workMin < 50 ) ){
+				if( wechatConfig.length == 0 || ( workMin > 0 && workMin < 9 ) || ( workMin > 30 && workMin < 39 ) ){
 					return { 'request' : true };
 				}else{
 					return { 'request' : false, 'respond' : { 'status' : 1, 'result' : wechatConfig } };
@@ -134,9 +135,9 @@ class Moment {
 	getMoment(wechat, follow, maxid, stamp, conf, func) {
 		var self = this;
 
-		if ( self.mainWx == '' ) {
-			self.mainWx = follow;
-		}
+		// if ( self.mainWx == '' ) {
+		// 	self.mainWx = follow;
+		// }
 
 		// 多账号，，如果有新数据，则第二个监听
 		let firstData = false;
@@ -448,7 +449,7 @@ class Moment {
 
 						log.info( '评论成功', [member.weixin_id, post_id, ret.snsObject.id] );
 
-						if ( self.item == 'moment' && comm.username == self.mainWx ) {
+						if ( self.item == 'moment' ) {
 							body.product && act.collect( self.mysql, 'moment', body.product );
 						}
 
