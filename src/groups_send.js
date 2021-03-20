@@ -1053,6 +1053,11 @@ class GroupsSend {
                 sendRoomid.push(roomid);
             }
 
+            if (sendRoomid.length == 0) {
+                log.info('过滤消息', [member, msg]);
+                return com.Promise(true, [member, msg]);
+            }
+
             if (this.inst.origin && this.inst.origin.test(detail)) {
                 msg.exch = true;
             }
