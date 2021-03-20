@@ -352,35 +352,25 @@ class GroupsSend {
 
             //过滤包含消息源群的有效群
             groups = groups.filter(ele => {
-                if ( ele.roomid == fromroomid ) {
+                let on      = ele.switch == undefined || ele.switch == 1 ? true : false;
+                let mini    = ele.mini == undefined || (ele.mini && ele.mini == 1) ? true : false;
+                let url     = ele.url == undefined || (ele.url && ele.url == 1) ? true : false;
+
+                // 过滤 有效群;开关打开;小程序和链接不能同时不发(针对拼多多)
+                if ( ele.roomid == fromroomid && on && ( mini || url) ) {
+                    ele.mini    = mini; // 小程序 (针对拼多多)
+                    ele.url     = url; // 链接 (针对拼多多)
                     return ele;
                 }
             });
 
-            // 群开关
-            // var roomid = groups.map(ele => {
-            //     if (ele.switch == undefined || ele.switch == 1) {
-            //         return ele.userName;
-            //     }
-            // });
-
-            // 群开关
+            // 返回有用信息
             var roomidInfo = groups.map(ele => {
-
-                if (ele.switch == undefined || ele.switch == 1) {
-
-                    let mini = ele.mini == undefined || (ele.mini && ele.mini == 1) ? true : false;
-                    let url = ele.url == undefined || (ele.url && ele.url == 1) ? true : false;
-
-                    if (mini || url) {
-                        return {
-                            roomid: ele.userName,
-                            mini: mini,
-                            url: url,
-                        };
-                    }
-
-                }
+                return {
+                    roomid: ele.userName,
+                    mini: ele.mini,
+                    url: ele.url,
+                };
             });
 
             if (roomidInfo.length > 0) {
