@@ -37,7 +37,7 @@ class Heartbeat {
 		this.pause = '02:30';
 
 		//半小时以内有心跳
-		this.range = com.getTime() - 60 * 50;
+		this.range = com.getTime() - 60 * 30;
 
 		//当前 PM2 实例数量
 		this.nodes = inst;
