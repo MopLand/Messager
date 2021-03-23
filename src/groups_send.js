@@ -286,10 +286,10 @@ class GroupsSend {
         var date = new Date(last * 1000).format('yyyyMMdd');
 
         //二十分钟
-        var time = com.getTime() - self.conf.active;
+        // var time = com.getTime() - self.conf.active;
 
-        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND heartbeat_time >= ? AND roomids LIKE ?";
-        var req = [ Number( date ), time, '%' + fromroomid + '%'];
+        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1 AND roomids LIKE ?";
+        var req = [ Number( date ), '%' + fromroomid + '%'];
 
 
         if (self.nodes && self.nodes > 1) {

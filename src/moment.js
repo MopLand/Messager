@@ -231,9 +231,9 @@ class Moment {
 				com.locked( self.item );
 			}
 
-			let sql = 'SELECT w.`auto_id`, w.`member_id`, w.`weixin_id`, w.`tag`, m.`invite_code` FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE ' + self.item + ' = 1 AND w.created_date <= ? AND w.heartbeat_time >= ? AND w.auto_id > ? ORDER BY w.auto_id ASC LIMIT 50';
+			let sql = 'SELECT w.`auto_id`, w.`member_id`, w.`weixin_id`, w.`tag`, m.`invite_code` FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE w.auto_id > ? AND w.created_date <= ? AND ' + self.item + ' = 1 AND w.online = 1 ORDER BY w.auto_id ASC LIMIT 50';
 
-			self.mysql.query(sql, [date, time, auto], function (err, res) {
+			self.mysql.query(sql, [date, auto], function (err, res) {
 
 				if( err ){
 					return log.error( '读取错误', err );
