@@ -175,7 +175,7 @@ class Heartbeat {
 
 		log.info( '心跳范围', this.range + ' / ' + date + ' / INST ' + this.insid );
 
-		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE heartbeat_time >= ? AND auto_id % ? = ? ORDER BY heartbeat_time ASC LIMIT ?', [this.range, this.nodes, this.insid, this.count], function (err, res) {
+		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 1 AND auto_id % ? = ? ORDER BY heartbeat_time ASC LIMIT ?', [this.nodes, this.insid, this.count], function (err, res) {
 
 			if( err ){
 				log.error( err );
@@ -185,7 +185,7 @@ class Heartbeat {
 			}
 
 			if( res.length == 0 ){
-				return setTimeout( self.heartBeat, 1000 * 60 );
+				return setTimeout( self.heartBeat.bind(self), 1000 * 60 );
 			}else{
 				self.handle( res );
 			}
@@ -230,26 +230,14 @@ class Heartbeat {
 					
 					log.info( '心跳成功', [row.weixin_id, row.member_id] );
 
-					self.update( row.member_id, row.weixin_id );
+					self.update( row.member_id, row.weixin_id ); // 注意
 
 				}).catch( err => {
 
 					log.debug( '心跳失败', [row.weixin_id, err] );
 
-					//autoauth -> pushlogin -> qrcodelogin
-					if( err.indexOf('退出微信') > -1 ){
-						
-						let pa = self.wx.AutoAuth( row.weixin_id );
-
-						pa.then( ret => {
-							self.update( row.member_id, row.weixin_id );
-							log.info( '登录成功', [row.weixin_id, ret] );
-						}).catch( err => {
-							log.debug( '登录失败', [row.weixin_id, err] );
-							self.klas.init( row.weixin_id, row.device_id );
-						});
-						
-					}
+					// 更新为 暂时离线
+					self.update( row.member_id, row.weixin_id, false );
 
 				} ).finally( () =>{
 
@@ -270,8 +258,10 @@ class Heartbeat {
 	/**
 	 * 完成心跳
 	 */
-	update( member_id, weixin_id ) {
-		this.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [ member_id, weixin_id ] );
+	update( member_id, weixin_id, online = true ) {
+		
+		let line = online ? 1 : 0;
+		this.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ? WHERE member_id = ? AND weixin_id = ?', [ line, member_id, weixin_id ] );
 	}
 
 }
