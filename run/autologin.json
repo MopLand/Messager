@@ -1,0 +1,17 @@
+{
+    "name"			    : "MM_AutoLogin",
+    "script"			: "app.js",
+    "args"			    : "autologin",
+    "cwd"				: "/disk/www/Messager",
+    "exec_mode"		    : "cluster",
+    "error_file"		: "./logs/wx_autologin_err.log",
+    "out_file"		    : "./logs/wx_autologin_out.log",
+    "merge_logs"		: true,
+    "autorestart"		: true,
+    "watch"			    : true,
+    "ignore_watch"	    : ["logs",".git","*.gitlock"],
+    "watch_options"	    : {
+      "followSymlinks"  : false
+    },
+    "log_date_format"   : "YYYY-MM-DD"
+  }

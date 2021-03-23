@@ -93,6 +93,13 @@ if (func == 'heartbeat') {
 		klas.init( inst );
 }
 
+// 自动登陆
+if (func == 'autologin') {
+	const AutoLogin = require('./src/autologin');
+	let klas = new AutoLogin(conf);
+		klas.init();
+}
+
 //账号
 if (func == 'account') {
 
