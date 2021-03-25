@@ -28,7 +28,7 @@ class AutoLogin {
 	init() {
 
 		//每分钟预计人数
-		this.count = 100;
+		this.count = 300;
 
 		//每个人预计间隔
 		this.space = 1000 * 60 / this.count;
@@ -60,7 +60,7 @@ class AutoLogin {
 			}
 
 			if (res.length == 0) {
-				return setTimeout(self.autoLogin.bind(self), 60000 * 5);
+				return setTimeout(self.autoLogin.bind(self), 60 * 1000);
 			} else {
 				self.handle(res);
 			}
