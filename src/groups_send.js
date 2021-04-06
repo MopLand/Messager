@@ -354,7 +354,7 @@ class GroupsSend {
             groups = groups.filter(ele => {
                 let on      = ele.switch == undefined || ele.switch == 1 ? true : false;
                 let mini    = ele.mini == undefined || (ele.mini && ele.mini == 1) ? true : false;
-                let url     = ele.url == undefined || (ele.url && ele.url == 1) ? true : false;
+                let url     =  true; // ele.url == undefined || (ele.url && ele.url == 1) ? true : false;
 
                 // 过滤 有效群;开关打开;小程序和链接不能同时不发(针对拼多多)
                 if ( ele.roomid == fromroomid && on && ( mini || url) ) {
