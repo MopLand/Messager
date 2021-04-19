@@ -43,6 +43,13 @@ if (func == 'forward') {
 		klas.init();
 }
 
+//用户自主推送 (新)
+if (func == 'forward_new') {
+	const ForwardNew = require('./src/forward_new');
+	let klas = new ForwardNew(conf);
+		klas.init();
+}
+
 // 多群消息源
 if (func == 'groups_send') {
 	let klas = new GroupsSend(conf);
