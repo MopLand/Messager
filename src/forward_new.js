@@ -117,6 +117,11 @@ class ForwardNew {
 
             if (msg.type == 'groups') {
                 res = self.filterMemberGroups(res, msg.platform, msg.roomids);
+
+                if (res.length == 0) {
+                    return log.info('发送失败', [res, msg.data, msg.rawdata]);
+                }
+
                 self.sendGroupsMessage(msg.msgid, res, msg.data);
                 return log.info('发送发群', [res, msg]);
             }
@@ -173,6 +178,8 @@ class ForwardNew {
                 member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, roomidInfo });
             }
         }
+
+        log.info('筛选用户', '符合用户 ' + member.length);
 
         return member;
     }
