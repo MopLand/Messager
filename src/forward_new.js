@@ -141,6 +141,10 @@ class ForwardNew {
 
         for (let i = 0; i < res.length; i++) {
 
+            if (!res[i].groups_list) {
+                continue;
+            }
+
             let groups = JSON.parse(res[i].groups_list);
 
             groups = groups.filter(ele => {
