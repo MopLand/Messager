@@ -227,7 +227,7 @@ class ForwardNew {
             subject: "", //内容主体
             sending: true, //是否发送
             convert: true, //是否转链
-            comment: msg.comments, //评论列表，{ exch, type, text }
+            comment: this.checkComment(msg.comments), //评论列表，{ exch, type, text }
 
         };
 
@@ -308,6 +308,27 @@ class ForwardNew {
         momentData.subject = data;
 
         func(momentData);
+    }
+
+    /**
+     * 检测评论是否转链
+     * @param {Object}} comment 
+     * @returns 
+     */
+    checkComment(comment) {
+        if (comment.length == 0) {
+            return comment
+        }
+
+        for (let i = 0; i < comment.length; i++) {
+            let item = comment[i];
+
+            item.exch = act.detectTbc( item.text ) || act.detectUrl( item.text );
+
+            comment[i] = item;
+        }
+
+        return comment;
     }
 
     //////////// 发送群消息 ////////////
