@@ -91,7 +91,7 @@ class ForwardNew {
         var last = com.strtotime('-1 day');
         var date = new Date(last * 1000).format('yyyyMMdd');
 
-        let sql = 'SELECT auto_id, member_id, weixin_id, groups_list, moment, groups, tag FROM `pre_weixin_list` WHERE created_date <= ? AND online = 1 AND moment = 1';
+        let sql = 'SELECT auto_id, member_id, weixin_id, groups_list, moment, groups, tag FROM `pre_weixin_list` WHERE created_date <= ? AND online = 1';
         let req = [date];
 
         if (member.member_id) {
