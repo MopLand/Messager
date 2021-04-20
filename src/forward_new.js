@@ -69,8 +69,9 @@ class ForwardNew {
 
             try {
                 msg = JSON.parse(msg);
+                log.info('解析成功', { channel, msg });
             } catch (e) {
-                msg = log.error('消息错误', { channel, msg });
+                return log.error('消息错误', { channel, msg });
             }
 
             self.getMember(msg);
