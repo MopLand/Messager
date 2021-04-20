@@ -91,16 +91,17 @@ class ForwardNew {
         var last = com.strtotime('-1 day');
         var date = new Date(last * 1000).format('yyyyMMdd');
 
-        let sql = 'SELECT auto_id, member_id, weixin_id, groups_list, moment, groups, tag FROM `pre_weixin_list` WHERE created_date <= ? AND online = 1';
+        let field = 'w.auto_id, w.member_id, w.weixin_id, w.groups_list,w. moment, w.groups, w.tag, m.`invite_code`';
+        let sql = 'SELECT ' + field + ' FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE w.created_date <= ? AND w.online = 1';
         let req = [date];
 
         if (member.member_id) {
-            sql += ' AND member_id = ? ';
+            sql += ' AND w.member_id = ? ';
             req.push(member.member_id);
         }
 
         if (member.weixin_id) {
-            sql += ' AND weixin_id IN (?) ';
+            sql += ' AND w.weixin_id IN (?) ';
             req.push(member.weixin_id);
         }
 
