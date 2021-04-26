@@ -616,6 +616,8 @@ class GroupsSend {
                     body.source = 'groups';
                     body.lazy_time = lazy_time;
 
+                    let beian = body.special && 'beian' == body.special;
+
                     if (exch) {
                         log.info('转链失败', { 'member_id': user.member_id, body, lazy_time, 'convert': data.convert });
                     }
@@ -624,7 +626,7 @@ class GroupsSend {
                     act.updatePushed(self.mysql, user, body);
 
                     //写入延迟消息，更新发送状态
-                    if (lazy_time == 0) {
+                    if (!beian && lazy_time == 0) {
                         let time = com.getTime();
                         let span = 60 * 1000 * 3;
                         self.sender = time + span;
