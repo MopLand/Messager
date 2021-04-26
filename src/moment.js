@@ -496,12 +496,14 @@ class Moment {
 					body.source = 'moment';
 					body.lazy_time = lazy_time;
 
+					let beian = body.special && 'beian' == body.special;
+
 					//self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), member.member_id ] );
 
 					act.updatePushed( self.mysql, member, body );
 
 					//是延迟补发的消息，删除这条朋友圈，否则写入延迟消息
-					if( lazy_time ){
+					if( beian || lazy_time ){
 						self.wx.SnsObjectOp( member.weixin_id, post_id, 1 );
 						log.error('删除发圈', [member.weixin_id, post_id, lazy_time]);
 					}else{
