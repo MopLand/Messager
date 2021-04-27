@@ -408,7 +408,7 @@ class Moment {
 	 * @param integer 发圈ID
 	 * @param integer 延迟时间
 	 */
-	forwardComment(member, data, post_id, lazy_time = 0) {
+	async forwardComment(member, data, post_id, lazy_time = 0) {
 
 		var self = this;
 		let rkey = this.item + '_active';
@@ -522,6 +522,10 @@ class Moment {
 				}
 
 			}, self.conf.options );
+
+			if (i < (data.comment.length - 1) && comm.exch) {
+				await com.sleep(2000);
+			}
 
 		}
 
