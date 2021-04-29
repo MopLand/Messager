@@ -124,7 +124,9 @@ class ForwardNew {
                     return log.info('发送失败', [res, msg.data, msg.rawdata]);
                 }
 
-                self.sendGroupsMessage(msg.msgid, res, msg.data);
+                // 发送微信群消息源消息
+                self.sendGroupsMessage(msg.msgid, res, msg.data, msg.rawdata);
+                
                 return log.info('发送发群', [res, msg]);
             }
 
@@ -342,7 +344,7 @@ class ForwardNew {
     /**
      * 发送群消息
      */
-    sendGroupsMessage(msgid, user, data) {
+    sendGroupsMessage(msgid, user, data, rawdata = false) {
 
         var self = this;
         //获取用户副本，限定每分钟发送量，并计算每人所需间隔时间
@@ -354,13 +356,13 @@ class ForwardNew {
 
         var func = (i) => {
 
-            //预处理消息
-            self.groups.parseMessage(user[i], data);
-
-            //开始发消息
-            //if( i > 0 ){
-            //	self.forwardMessage( i == size - 1 );
-            //}
+            if (rawdata) {
+                //预处理消息
+                self.groups.parseMessage(user[i], data);
+            } else {
+                // 本地发送
+                self.parseMessage(user[i], data);
+            }
 
             //下一下用户
             if (i < size - 1) {
@@ -368,9 +370,9 @@ class ForwardNew {
             }
 
             //本地测试，单用户
-            if (size == 1) {
-                setTimeout(self.groups.forwardMessage.bind(self), span);
-            }
+            // if (size == 1) {
+            //     setTimeout(self.groups.forwardMessage.bind(self), span);
+            // }
 
         }
 
@@ -501,6 +503,236 @@ class ForwardNew {
 
     }
 
+    //////////// 本地消息群发 /////////////
+
+    /**
+     * 发送群消息
+     * @param member 云发单用户信息
+     * @param msg 发群消息
+     */
+    //  sendLocalGroups(pkId, member, msg) {
+    //     var self = this;
+
+    //     let data = this.filterMessage(pkId, msg);
+
+    //     self.parseMessage(member, data);
+
+    // }
+
+    /**
+     * 预处理本地数据消息
+     * @param object 用户数据
+     * @param object 发群数据
+     * @param integer 延迟时间
+     */
+    parseMessage(member, data, lazy_time = 0) {
+
+        var user = com.clone(member);
+        var data = com.clone(data);
+        var self = this;
+
+        //无需转链，直接回调
+        if (data.convert == 0) {
+            self.queues.push({ 'member': user, data });
+            self.forwardMessage();
+            return;
+        }
+
+        for (let i = 0; i < data.message.length; i++) {
+
+            let comm = data.message[i];
+            let exch = comm.msgtype == 1 && comm.exch;
+
+            req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': 'true', 'lazy_time': lazy_time }, (code, body) => {
+
+                try {
+                    if (typeof body == 'string') {
+                        body = JSON.parse(body);
+                    }
+                } catch (e) {
+                    body = { 'status': -code, 'body': body, 'error': e.toString() };
+                }
+
+                ///////////////
+
+                //成功转链数量
+                if (body.status > 0) {
+
+                    //文本
+                    comm.content = body.result;
+                    //原始商品信息
+                    comm.product = body.product;
+                    //转链成功，执行回调
+                    comm.exch && data.convert--;
+
+                    if (data.convert == 0) {
+                        self.queues.push({ 'member': user, data });
+                        self.forwardMessage();
+                    }
+
+                } else {
+                    body.err = '转链失败';
+                    body.source = 'groups';
+                    body.lazy_time = lazy_time;
+
+                    if (exch) {
+                        log.info('转链失败', { 'member_id': user.member_id, body, lazy_time, 'convert': data.convert });
+                    }
+                    //写入延迟消息，更新发送状态
+                    if (lazy_time == 0) {
+                        let time = com.getTime();
+                        let span = 60 * 1000 * 3;
+                        self.sender = time + span;
+                        setTimeout(() => { self.parseMessage(user, data, time); }, span);
+                    }
+                }
+            }, (data) => {
+                //是口令，需要转链
+                if (exch && (user.tag & 4) == 0) {
+                    return { 'request': true };
+                } else {
+                    return { 'request': false, 'respond': { 'status': 1, 'result': data.text } };
+                }
+
+            }, self.conf.options);
+        }
+
+    }
+
+    /**
+     * 转发群消息
+     * @param boolean 用户末尾
+     */
+    forwardMessage() {
+
+        //暂无队列
+        if (this.queues.length == 0) {
+            return;
+        }
+
+        /////////
+
+        var self = this;
+        let item = this.queues.shift();
+        let user = item.member;
+        let data = item.data;
+
+        let sendTimes = 0;
+
+        if (typeof user.member_id == 'undefined') {
+            return log.info('异常队列', user);
+        }
+
+        log.info('当前微信', { '用户ID': user.member_id, '微信号': user.weixin_id, '群数量': user.roomidInfo.length, '消息量': data.message.length });
+
+        let msgLen = data.message.length;
+        var func = () => {
+
+            log.info('消息拆包', { '用户ID': user.member_id, '消息包': data.package, '待发送': data.message.length });
+            let msg = data.message.shift();
+            let res = self.sendMsg(user, msg);
+
+            self.sender = com.getTime();
+
+            res.then(ret => {
+
+                sendTimes += 1;
+
+                //消息包已完成
+                if (data.message.length == 0) {
+                    log.info('群发完毕', [user.member_id, data.package]);
+                }
+
+            }).catch(err => {
+                log.error('发群失败', [user.member_id, data.package, err]);
+            }).finally(() => {
+
+                //消息包未完成
+                if (data.message.length > 0) {
+                    setTimeout(() => { func(); }, 2500);
+                }
+            });
+        };
+
+        func();
+
+    }
+
+    /**
+     * 转发群消息
+     * @param object 用户信息
+     * @param object 单条消息
+     */
+    sendMsg(member, msg) {
+
+        var self = this;
+        var detail = msg.content;
+
+        // 用户发群数量
+        let size = member.roomidInfo.length;
+
+        if (size == 0) {
+            log.error('发群用户对象', member);
+            return com.Promise(false, '发群用户对象为空');
+        }
+
+        //文本
+        if (msg.msgtype == 1) {
+
+            // 判断个人商城链接
+            detail = act.replaceUid(detail, member.member_id);
+
+            // 从 roomidInfo 发群对象中获取 群数组同时发送文本
+            let sendRoomid = [];
+            for (var i = 0; i < size; i++) {
+                let roomid = member.roomidInfo[i] && member.roomidInfo[i].roomid ? member.roomidInfo[i].roomid : '';
+                let url = member.roomidInfo[i] && member.roomidInfo[i].url ? member.roomidInfo[i].url : false;
+
+                if ( msg.exch && !url && act.detectUrl(detail) ) {
+                    continue;
+                }
+                sendRoomid.push(roomid);
+            }
+
+            if (sendRoomid.length == 0) {
+                log.info('过滤消息', [member, msg]);
+                return com.Promise(true, [member, msg]);
+            }
+
+            let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source);
+
+            fn.then(ret => {
+                log.info('文本成功', [member.member_id, ret.count]);
+            }).catch(err => {
+                log.error('文本失败', err);
+            });
+            return fn;
+        }
+
+        //媒体
+        for (var i = 0; i < size; i++) {
+
+            let chat = member.roomidInfo[i] && member.roomidInfo[i].roomid ? member.roomidInfo[i].roomid : '';
+
+            if (chat == '') {
+                continue;
+            }
+
+            //图片
+            if (msg.msgtype == 3) {
+
+                var fn = this.wx.SnsUploadMsgPut(member.weixin_id, chat, detail);
+                fn.then(ret => {
+                    log.info('发图成功', [member.member_id, chat, ret.msgId]);
+                }).catch(err => {
+                    log.error('发图失败', [member.member_id, err]);
+                });
+            }
+        }
+
+        return fn;
+    }
+
     //////////// 辅助方法 /////////////
 
     /**
@@ -567,31 +799,6 @@ class ForwardNew {
             textNodeName: "#text"
         };
         return new fxp.j2xParser(options).parse(object);
-    }
-
-    /**
-     * 更新发单效果
-     * @param string res 发送结果
-     */
-    updateForward(forwardId, res, sendTimes = 0, msgLen = 0) {
-        const resMsg = typeof res == 'string' ? res : JSON.stringify(res);
-
-        log.info('发单更新', [forwardId, resMsg, sendTimes, msgLen]);
-
-        if (forwardId > 0) {
-
-            let status = 0;
-
-            if (sendTimes > 0 && sendTimes == msgLen) {
-                status = 2;
-            } else if (sendTimes > 0 && sendTimes < msgLen) {
-                status = 1;
-            } else if (sendTimes == 0) {
-                status = -1;
-            }
-
-            this.mysql.query('UPDATE `pre_weixin_forward` SET send_res = ?, send_time = UNIX_TIMESTAMP(), send_count = ? , status = ? WHERE id = ?', [resMsg, sendTimes, status, forwardId]);
-        }
     }
 
 }
