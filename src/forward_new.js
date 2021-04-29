@@ -203,6 +203,10 @@ class ForwardNew {
 
         this.filterMementMessage(data, user[0].weixin_id, rawdata, (res) => {
 
+            if (!res) {
+                return log.error('发圈错误', { user, data, rawdata });
+            }
+
             for (let i = 0; i < user.length; i++) {
                 this.moment.forwardMoment(user[i], res);
             }
