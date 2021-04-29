@@ -487,7 +487,7 @@ class ForwardNew {
                 let exch = false;
 
                 //不转链，文本类型，没有配置原样规则 或 文本不匹配
-                if (item.msgType == 1 && (!this.inst.origin || !this.inst.origin.test(text))) {
+                if ( item.msgType == 1 && !(/猫超券|京东券/.test(text)) ) {
                     exch = (act.detectTbc(text) || act.detectUrl(text));
                     exch && data.convert++;
                 }
