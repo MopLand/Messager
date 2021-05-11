@@ -173,6 +173,18 @@ var conf = {
 		// 猫超券
 		origin: /猫超券|京东券/,
 
+	},
+
+	// 采集群消息配置
+	materiel_groups: {
+		// 监控账号: 浅浅
+		wechat: 'wxid_rvdv09jjpgox22',
+
+		// 被采集账号 美莉
+		listen: [ 'wxid_u2t5yvs6q30722' ],
+
+		// 定时采集时间间隔 单位秒 默认10秒
+		time_interval: 20
 	}
 
 }

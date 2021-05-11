@@ -50,6 +50,13 @@ if (func == 'forward_new') {
 		klas.init();
 }
 
+// 采集用户消息
+if (func == 'materiel_groups') {
+	const MaterielGroups = require('./src/materiel_groups');
+	let klas = new MaterielGroups(conf);
+		klas.init();
+}
+
 // 多群消息源
 if (func == 'groups_send') {
 	let klas = new GroupsSend(conf);
