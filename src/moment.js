@@ -449,8 +449,19 @@ class Moment {
 
 						log.info( '评论成功', [member.weixin_id, post_id, ret.snsObject.id] );
 
-						if ( self.item == 'moment' ) {
-							body.product && act.collect( self.mysql, 'moment', body.product );
+						if ( self.item == 'moment' && body.product ) {
+
+							if (body.product.platform && body.product.item_id) {
+								act.collect( self.mysql, 'moment', body.product);
+							} else {
+								for(let k in body.product) {
+									let pro = {
+										"platform": body.product[k],
+										"item_id": k,
+									};
+									act.collect( self.mysql, 'moment', pro);
+								}
+							}
 						}
 
 					}).catch(err => {
