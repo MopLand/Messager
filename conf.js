@@ -130,7 +130,7 @@ var conf = {
 		detect: /[\u4e00-\u9fa5]/,
 	
 		//原样标识符
-		origin: /猫超券|京东券/,
+		origin: /猫超券|京东券|淘礼金/,
 
 		//消息子分类
 		source: 'taobao',
@@ -171,7 +171,7 @@ var conf = {
 		card_rooms: [],
 
 		// 猫超券
-		origin: /猫超券|京东券/,
+		origin: /猫超券|京东券|淘礼金/,
 
 	},
 
