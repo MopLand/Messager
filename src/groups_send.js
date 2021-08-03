@@ -802,7 +802,7 @@ class GroupsSend {
 
                         //红包包未完成
                         if (data.length > 0) {
-                            setTimeout(() => { send(); }, 2000);
+                            setTimeout(() => { send(); }, 3000);
                         }
         
                     });
