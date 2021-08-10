@@ -177,8 +177,8 @@ var conf = {
 
 	// 采集群消息配置
 	materiel_groups: {
-		// 监控账号: 浅浅
-		wechat: 'wxid_rvdv09jjpgox22',
+		// 监控账号: 清清
+		wechat: 'wxid_okvkiyguz1yh22',
 
 		// 被采集账号 美莉
 		listen: [ 'wxid_u2t5yvs6q30722' ],
