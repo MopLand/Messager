@@ -102,7 +102,11 @@ class AutoLogin {
 					log.info('登录成功', [row.weixin_id, ret]);
 				}).catch(err => {
 					log.debug('登录失败', [row.weixin_id, err]);
-					self.update(row.member_id, row.weixin_id, false); // 更新本地库
+
+					// 判断登录接口是否正常返回 错误对象，正确则下线微信号，否则下次继续处理自动登录
+					if (typeof err == 'object') {
+						self.update(row.member_id, row.weixin_id, false); // 更新本地库
+					}
 					// self.klas.init(row.weixin_id, row.device_id);
 				}).finally(() => {
 
