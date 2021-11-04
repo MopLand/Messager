@@ -581,7 +581,7 @@ class GroupsSend {
             let comm = data.message[i];
             let exch = comm.msgtype == 1 && comm.exch;
 
-            req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': 'true', 'lazy_time': lazy_time }, (code, body) => {
+            req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': 'true', 'lazy_time': lazy_time, 'source': 'yfd' }, (code, body) => {
 
                 try {
                     if (typeof body == 'string') {

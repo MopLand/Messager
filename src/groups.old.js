@@ -474,7 +474,7 @@ class Groups {
 			//let test = lazy_time ? true : com.weight( 0.3 );
 			let test = true;
 
-			req.get(self.conf.convert, { 'member_id' : test ? member.member_id : 0, 'text' : comm.content, 'lazy_time' : lazy_time }, (code, body) => {
+			req.get(self.conf.convert, { 'member_id' : test ? member.member_id : 0, 'text' : comm.content, 'lazy_time' : lazy_time, 'source': 'yfd' }, (code, body) => {
 				
 				try {
 					if( typeof body == 'string' ){
@@ -612,7 +612,7 @@ class Groups {
 			if (comm.msgtype == 1) {
 
 				//转链
-				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : text }, (code, body) => {
+				req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : text, 'source': 'yfd' }, (code, body) => {
 
 					//解除延迟
 					lazy = false;

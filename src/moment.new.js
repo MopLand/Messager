@@ -215,7 +215,7 @@ class Moment {
 			let last = i == post.comment.length - 1;
 
 			//转链
-			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text }, (code, body) => {
+			req.get(self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'source': 'yfd' }, (code, body) => {
 				
 				if( typeof body == 'string' ){
 					body = JSON.parse( body );
