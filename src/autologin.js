@@ -104,7 +104,8 @@ class AutoLogin {
 					log.debug('登录失败', [row.weixin_id, err]);
 
 					// 判断登录接口是否正常返回 错误对象，正确则下线微信号，否则下次继续处理自动登录
-					if (typeof err == 'object') {
+					// 微信账号未登陆成功，请重新获取二维码登陆
+					if (typeof err == 'object' || (typeof err == 'string' && err.indexOf('重新获取二维码登陆'))) {
 						self.update(row.member_id, row.weixin_id, false); // 更新本地库
 					}
 					// self.klas.init(row.weixin_id, row.device_id);
