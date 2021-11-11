@@ -68,7 +68,7 @@ var conf = {
 		ignore: 'SKIP',
 	
 		//原样标识符
-		origin: /KEEP|猫超券/,
+		origin: /KEEP|猫超券|淘礼金|淘密令|京东券/,
 
 		//遇错误中断发送
 		cancel: /MMSNS_RET_SPAM/,
@@ -171,7 +171,7 @@ var conf = {
 		card_rooms: [],
 
 		// 猫超券
-		origin: /猫超券|淘礼金/,
+		origin: /猫超券|淘礼金|淘密令|京东券/,
 
 	},
 
