@@ -424,8 +424,10 @@ class Moment {
 				comm.text = act.replaceUid( act.replaceInvite( comm.text, member.invite_code ), member.member_id );
 			}
 
+			let extstr = comm.exch ? act.getExternal( comm.text ) : '';
+
 			//转链
-			req.get( self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'product' : 'true', 'lazy_time' : lazy_time, 'source': 'yfd' }, (code, body) => {
+			req.get( self.conf.convert, { 'member_id' : member.member_id, 'text' : comm.text, 'product' : 'true', 'lazy_time' : lazy_time, 'source': 'yfd', 'external': extstr }, (code, body) => {
 
 				try {
 					if( typeof body == 'string' ){
