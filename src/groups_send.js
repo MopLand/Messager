@@ -581,8 +581,7 @@ class GroupsSend {
             let comm = data.message[i];
             let exch = comm.msgtype == 1 && comm.exch;
 
-            //let extstr = exch ? act.getExternal( comm.content ) : '';
-			let extstr = '';
+            let extstr = exch ? act.getExternal( comm.content ) : '';
 
             req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': 'true', 'lazy_time': lazy_time, 'source': 'yfd', 'external': extstr }, (code, body) => {
 
