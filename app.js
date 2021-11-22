@@ -16,7 +16,7 @@ let func = Common.getFunc();
 const tag = Common.fileName( __filename, false );
 const log = new Logger(tag);
 
-// 清理日志
+// 清理日志;
 log.clean();
 
 process.env.UV_THREADPOOL_SIZE = 128;
