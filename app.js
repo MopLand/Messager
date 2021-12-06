@@ -63,6 +63,13 @@ if (func == 'groups_send') {
 		klas.init();
 }
 
+// 朋友圈发送（新，先转链后发送）
+if (func == 'moment_send') {
+	const MomentSend = require('./src/moment_send');
+	let klas = new MomentSend(conf);
+		klas.init(func);
+}
+
 //朋友圈营销商品
 if (func == 'moment') {
 	let klas = new Moment(conf);
