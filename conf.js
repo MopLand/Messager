@@ -185,6 +185,22 @@ var conf = {
 
 		// 定时采集时间间隔 单位秒 默认10秒
 		time_interval: 20
+	},
+
+	// 朋友圈（新，先转链后发圈）
+	moment_send: {
+
+		//忽略标识符
+		ignore: 'SKIP',
+	
+		//原样标识符
+		origin: /KEEP|猫超券|淘礼金|淘密令|京东券/,
+
+		//遇错误中断发送
+		cancel: /MMSNS_RET_SPAM/,
+
+		//消息时间戳
+		marker: 'mm_moment_send_id'
 	}
 
 }

@@ -1,0 +1,16 @@
+{
+    "name"			    : "MM_Moment_Send",
+    "script"			: "app.js",
+    "args"			    : "moment_send",
+    "cwd"				: "/disk/www/Messager",
+    "error_file"		: "./logs/wx_moment_send_err.log",
+    "out_file"		    : "./logs/wx_moment_send_out.log",
+    "merge_logs"		: true,
+    "autorestart"		: true,
+    "watch"			    : true,
+    "ignore_watch"	    : ["logs",".git","*.gitlock"],
+    "watch_options"	    : {
+        "followSymlinks"  : false
+    },
+    "log_date_format"   : "YYYY-MM-DD"
+  }
