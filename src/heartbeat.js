@@ -34,7 +34,7 @@ class Heartbeat {
 		this.space = 1000 * 60 / this.count;
 
 		//远程服务重启时段
-		this.pause = '02:30';
+		this.pause = '04:40';
 
 		//半小时以内有心跳
 		this.range = com.getTime() - 60 * 30;

@@ -44,7 +44,7 @@ var conf = {
 	},
 
 	//工作时间段
-	worked: 7,
+	worked: 6,
 
 	//有效心跳秒
 	active : 60 * 30,
