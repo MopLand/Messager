@@ -62,9 +62,9 @@ class MomentSend {
             var date = new Date();
             var workHours = date.format('h');
 
-            var work = workHours >= conf.worked || workHours < 2; // 工作时间段 0-2 7-24
+            var work = workHours >= conf.worked || workHours < 3; // 工作时间段 0-3 6-24
 
-            if (!work || conf.follow) return;
+            if ( !work ) return;
 
             // 微信配置
             let wechatConfig = self.wechatConfig || [];
