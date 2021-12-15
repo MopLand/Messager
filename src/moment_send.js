@@ -410,7 +410,7 @@ class MomentSend {
                     comm.text = body.result;
                     comm.product = body.product;
 
-                    if (i == 0 || i == (size - 1)) {
+                    if ( i >= (size - 1) ) {
 
                         // 最后一个评论转链成功
                         if (testing) {
