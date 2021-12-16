@@ -519,7 +519,7 @@ class MomentSend {
 
                 log.info('评论成功', [member.weixin_id, post_id, ret.snsObject.id]);
 
-                if (self.item == 'moment' && comm.product) {
+                if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product ) {
 
                     if (comm.product.platform && comm.product.item_id) {
                         act.collect(self.mysql, 'moment', comm.product);
