@@ -39,7 +39,7 @@ class MomentSend {
         // var followApi = 'http://proxy.guo.test/assets/wechat'; // 测试用
 
         //消息时间戳
-        var stamp = inst.marker || 'mm_moment_send_id';
+        var stamp = inst.marker || 'mm_moment_id';
 
         ///////////////
 
