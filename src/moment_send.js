@@ -372,9 +372,10 @@ class MomentSend {
      * @param object 发圈数据
      * @param integer 延迟时间
      */
-    parseComment(member, data, testing = false, lazy_time = 0) {
+    parseComment(member, params, testing = false, lazy_time = 0) {
 
         var self = this;
+        var data = com.clone(params);
         var size = data.comment.length;
 
         var parse = (i) => {
