@@ -680,7 +680,7 @@ class Groups {
 					log.info('群发完毕', [user.member_id, data.package]);
 					
 					//更新发群时间
-					self.mysql.query('UPDATE `pre_weixin_list` SET groups_time = UNIX_TIMESTAMP(), groups_send = groups_send + 1 WHERE member_id = ?', [ user.member_id ] );
+					self.mysql.query('UPDATE `pre_weixin_list` SET groups_send = IF( DATEDIFF(NOW(), FROM_UNIXTIME(groups_time) ) > 0, 0, groups_send ) + 1, groups_time = UNIX_TIMESTAMP() WHERE member_id = ?', [ user.member_id ] );
 
 					//最后发群时间
 					self.sider.set( rkey, com.getTime() );

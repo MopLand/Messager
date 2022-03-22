@@ -290,7 +290,7 @@ class MomentSend {
 
                     // 不为测试消息时更新发圈时间
                     if (!testing) {
-                        self.mysql.query('UPDATE `pre_weixin_list` SET moment_time = UNIX_TIMESTAMP(), moment_send = moment_send + 1 WHERE member_id = ? AND weixin_id = ?', [res[i].member_id, res[i].weixin_id]);
+                        self.mysql.query('UPDATE `pre_weixin_list` SET moment_send = IF( DATEDIFF(NOW(), FROM_UNIXTIME(moment_time) ) > 0, 0, moment_send ) + 1, moment_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [res[i].member_id, res[i].weixin_id]);
                     }
 
                 }
