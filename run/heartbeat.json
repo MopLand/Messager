@@ -3,7 +3,7 @@
   "script"			: "app.js",
   "args"			: "heartbeat -inst 4",
   "cwd"				: "/disk/www/Messager",
-  "instances"		: "3",
+  "instances"		: "4",
   "exec_mode"		: "cluster",
   "error_file"		: "./logs/wx_heartbeat_err.log",
   "out_file"		: "./logs/wx_heartbeat_out.log",
