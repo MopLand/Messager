@@ -159,7 +159,7 @@ var conf = {
 		meituan: 'https://proxy.guodongbaohe.com/meituan/coupon',
 
 		// 生成饿了么外卖链接接口
-		element: 'https://app.guodongbaohe.com/event/go/d1PCDE',
+		element: 'http://gw.guodongbaohe.com/activity/go/d1PCDE',
 
 		// 卡片时间
 		card_time: [11, 17],
