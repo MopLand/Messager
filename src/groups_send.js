@@ -111,6 +111,7 @@ class GroupsSend {
     setLocked(roomid, item, last, pakId) {
 
         var self = this;
+		var lock = item + '.' + roomid;
         var clok = setInterval(() => {
 
             //队列中还有消息
@@ -127,7 +128,7 @@ class GroupsSend {
             self.sender = 0;
 
             //删除锁文件
-            com.unlock(item);
+            com.unlock(lock);
             act.record(self.mysql, self.item, { 'quantity': self.members[roomid].length, 'package': pakId, 'last_man': last }, '发送完成');
 
             //清除定时器
@@ -138,7 +139,7 @@ class GroupsSend {
         ///////////////
 
         //创建锁文件
-        com.locked(item);
+        com.locked(lock);
 
         //开始发送状态
         self.sender = com.getTime();

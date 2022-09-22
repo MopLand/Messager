@@ -132,3 +132,15 @@ if (func == 'account') {
 		klas.init( weixin, device );
 
 }
+
+//口令提取
+if (func == 'password') {	
+	const Activity = require('./lib/activity');
+
+	let text = Common.getArgv('text');
+	let size = Common.getArgv('size');
+	let word = Activity.extractTbc( text, size );
+
+	console.log( word );
+
+}
