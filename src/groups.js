@@ -671,7 +671,7 @@ class Groups {
 
 				//本消息含商品
 				if( msg.product ){
-					act.collect( self.mysql, 'groups', msg.product );
+					act.collect( self.mysql, 'groups', msg.product, data.package, msg );
 				}
 
 				//消息包已完成

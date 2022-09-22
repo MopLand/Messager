@@ -454,14 +454,13 @@ class Moment {
 						if ( self.item == 'moment' && body.product ) {
 
 							if (body.product.platform && body.product.item_id) {
-								act.collect( self.mysql, 'moment', body.product);
+								act.collect( self.mysql, 'moment', body.product, '', comm );
 							} else {
 								for(let k in body.product) {
-									let pro = {
+									act.collect( self.mysql, 'moment', {
 										"platform": body.product[k],
 										"item_id": k,
-									};
-									act.collect( self.mysql, 'moment', pro);
+									}, '', comm);
 								}
 							}
 						}

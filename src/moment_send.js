@@ -522,14 +522,13 @@ class MomentSend {
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product ) {
 
                     if (comm.product.platform && comm.product.item_id) {
-                        act.collect(self.mysql, 'moment', comm.product);
+                        act.collect(self.mysql, 'moment', comm.product, '', comm);
                     } else {
                         for (let k in comm.product) {
-                            let pro = {
+                            act.collect(self.mysql, 'moment', {
                                 "platform": comm.product[k],
                                 "item_id": k,
-                            };
-                            act.collect(self.mysql, 'moment', pro);
+                            }, '', comm);
                         }
                     }
                 }
