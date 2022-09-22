@@ -111,7 +111,8 @@ class GroupsSend {
     setLocked(roomid, item, last, pakId) {
 
         var self = this;
-		var lock = item + '.' + roomid;
+		//var lock = item + '.' + roomid;
+		var lock = roomid;
         var clok = setInterval(() => {
 
             //队列中还有消息
