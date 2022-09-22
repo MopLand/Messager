@@ -698,7 +698,7 @@ class GroupsSend {
 
                     } else {
                         for(let k in msg.product) {
-                            act.collect(self.mysql, 'groups', data.roomid, {
+                            act.collect(self.mysql, 'groups', {
                                 "platform": msg.product[k],
                                 "item_id": k,
                             }, data.package, { [data.roomid] : self.sender });
