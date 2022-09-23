@@ -460,10 +460,14 @@ class GroupsSend {
             // 实例
             insid: this.insid,
 
+			//是否发送红包
             cardMsg: this.checkCardTime( roomid ),
 
             //消息列表，{ exch, msgid, msgtype, content, source }
             message: [],
+
+			//创建时间
+			created: com.getTime(),
         };
 
         for (let i = 0; i < msgs.length; i++) {
@@ -692,18 +696,16 @@ class GroupsSend {
                 //本消息含商品
                 if (msg.product && data.roomid) {
 
-                    if (msg.product.platform && msg.product.item_id) {
-
-                        act.collect(self.mysql, 'groups', msg.product, data.package, { [data.roomid] : self.sender } );
-
-                    } else {
+                    //if (msg.product.platform && msg.product.item_id) {
+                    //    act.collect(self.mysql, 'groups', msg.product, data, { [data.roomid] : self.sender } );
+                    //} else {
                         for(let k in msg.product) {
                             act.collect(self.mysql, 'groups', {
                                 "platform": msg.product[k],
                                 "item_id": k,
-                            }, data.package, { [data.roomid] : self.sender });
+                            }, data, { [data.roomid] : self.sender });
                         }
-                    }
+                    //}
                 }
 
                 //消息包已完成

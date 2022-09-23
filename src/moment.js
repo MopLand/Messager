@@ -298,6 +298,12 @@ class Moment {
 			//评论列表，{ exch, type, text }
 			comment: [],
 
+			//朋友圈消息id
+			package: post.id,
+
+			//创建时间
+			created: com.getTime(),
+
 		}
 
 		//需要忽略的发圈
@@ -453,16 +459,16 @@ class Moment {
 
 						if ( self.item == 'moment' && body.product ) {
 
-							if (body.product.platform && body.product.item_id) {
-								act.collect( self.mysql, 'moment', body.product, '', comm );
-							} else {
+							//if (body.product.platform && body.product.item_id) {
+							//	act.collect( self.mysql, 'moment', body.product, data, comm );
+							//} else {
 								for(let k in body.product) {
 									act.collect( self.mysql, 'moment', {
 										"platform": body.product[k],
 										"item_id": k,
-									}, '', comm);
+									}, data, comm);
 								}
-							}
+							//}
 						}
 
 					}).catch(err => {

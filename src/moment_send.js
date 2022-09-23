@@ -332,6 +332,12 @@ class MomentSend {
 
             //评论列表，{ exch, type, text }
             comment: [],
+
+			//朋友圈消息包id
+			package: post.id,
+
+			//创建时间
+			created: com.getTime(),
         }
 
         //需要忽略的发圈
@@ -521,16 +527,16 @@ class MomentSend {
 
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product ) {
 
-                    if (comm.product.platform && comm.product.item_id) {
-                        act.collect(self.mysql, 'moment', comm.product, '', comm);
-                    } else {
+                    //if (comm.product.platform && comm.product.item_id) {
+                    //    act.collect(self.mysql, 'moment', comm.product, data, comm);
+                    //} else {
                         for (let k in comm.product) {
                             act.collect(self.mysql, 'moment', {
                                 "platform": comm.product[k],
                                 "item_id": k,
-                            }, '', comm);
+                            }, data, comm);
                         }
-                    }
+                    //}
                 }
 
             }).catch(err => {
