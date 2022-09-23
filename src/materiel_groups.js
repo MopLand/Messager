@@ -65,6 +65,7 @@ class MaterielGroups {
 
 				//记录消息标记
 				keybuf = ret.keyBuf.buffer;
+				
 				//临时存储一天
 				self.redis.set(marker, keybuf);
 				self.redis.expire(marker, 3600 * 14);

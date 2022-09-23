@@ -674,9 +674,9 @@ class Groups {
 
 				//本消息含商品
 				if( msg.product ){
-					//act.collect( self.mysql, 'groups', msg.product, data, msg );
+					//act.collect( self, 'groups', msg.product, data, msg );
 					for(let k in msg.product) {
-						act.collect(self.mysql, 'groups', {
+						act.collect(self, 'groups', {
 							"platform": msg.product[k],
 							"item_id": k,
 						}, data, { [data.roomid] : self.sender });

@@ -528,10 +528,10 @@ class MomentSend {
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product ) {
 
                     //if (comm.product.platform && comm.product.item_id) {
-                    //    act.collect(self.mysql, 'moment', comm.product, data, comm);
+                    //    act.collect(self, 'moment', comm.product, data, comm);
                     //} else {
                         for (let k in comm.product) {
-                            act.collect(self.mysql, 'moment', {
+                            act.collect(self, 'moment', {
                                 "platform": comm.product[k],
                                 "item_id": k,
                             }, data, comm);

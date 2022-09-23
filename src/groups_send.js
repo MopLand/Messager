@@ -697,10 +697,10 @@ class GroupsSend {
                 if (msg.product && data.roomid) {
 
                     //if (msg.product.platform && msg.product.item_id) {
-                    //    act.collect(self.mysql, 'groups', msg.product, data, { [data.roomid] : self.sender } );
+                    //    act.collect(self, 'groups', msg.product, data, { [data.roomid] : self.sender } );
                     //} else {
                         for(let k in msg.product) {
-                            act.collect(self.mysql, 'groups', {
+                            act.collect(self, 'groups', {
                                 "platform": msg.product[k],
                                 "item_id": k,
                             }, data, { [data.roomid] : self.sender });
