@@ -180,8 +180,8 @@ class GroupsSend {
 
             log.info('原始消息', recv);
 
-            //获取最新消息
-            var roomid = recv.roomid;// 消息源群ID
+            //获取最新消息，消息源群ID
+            var roomid = recv.roomid;
             var data = self.filterMessage(roomid, recv.msgid, recv.data, where);
             var size = data.message.length;
 
