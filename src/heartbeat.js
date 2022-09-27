@@ -97,7 +97,7 @@ class Heartbeat {
 
 		var send = () => {
 
-			self.mysql.query('SELECT member_id, weixin_id, device_id FROM `pre_weixin_list` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
+			self.mysql.query('SELECT auto_id, member_id, weixin_id, device_id FROM `pre_weixin_list` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
 
 				if( err ){
 					log.error( err );
@@ -175,7 +175,7 @@ class Heartbeat {
 
 		log.info( '心跳范围', this.range + ' / ' + date + ' / INST ' + this.insid );
 
-		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 1 AND auto_id % ? = ? ORDER BY heartbeat_time ASC LIMIT ?', [this.nodes, this.insid, this.count], function (err, res) {
+		self.mysql.query('SELECT auto_id, member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 1 AND auto_id % ? = ? ORDER BY heartbeat_time ASC LIMIT ?', [this.nodes, this.insid, this.count], function (err, res) {
 
 			if( err ){
 				log.error( err );
@@ -230,14 +230,14 @@ class Heartbeat {
 					
 					log.info( '心跳成功', [row.weixin_id, row.member_id] );
 
-					self.update( row.member_id, row.weixin_id ); // 注意
+					self.update( row.auto_id );
 
 				}).catch( err => {
 
 					log.debug( '心跳失败', [row.weixin_id, err] );
 
 					// 更新为 暂时离线
-					self.update( row.member_id, row.weixin_id, false );
+					self.update( row.auto_id, false );
 
 				} ).finally( () =>{
 
@@ -258,10 +258,17 @@ class Heartbeat {
 	/**
 	 * 完成心跳
 	 */
-	update( member_id, weixin_id, online = true ) {
+	update( auto_id, online = true ) {
 		
-		let line = online ? 1 : 0;
-		this.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ? WHERE member_id = ? AND weixin_id = ?', [ line, member_id, weixin_id ] );
+		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ? WHERE auto_id = ?';
+		let req = [ ( online ? 1 : 0 ), auto_id ];
+
+		this.mysql.query(sql, req, function( err, ret ){
+			if( err ){
+				return console.error( err );
+			}
+		});
+
 	}
 
 }
