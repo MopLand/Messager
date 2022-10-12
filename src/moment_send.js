@@ -25,6 +25,7 @@ class MomentSend {
         this.sider = com.redis(conf.redis);
         this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
         this.delay = [];
+        this.twice = {};
         this.abort = false;
     }
 
@@ -45,9 +46,6 @@ class MomentSend {
 
         this.item = item;
         this.inst = inst;
-
-        // 没评论拉取次数
-        this.pullcomment = 0;
 
         //最近一次朋友圈消息ID
         this.redis.get(stamp, (err, ret) => {
@@ -147,6 +145,7 @@ class MomentSend {
      * @param {Function} func
      */
     getMoment(wechat, follow, maxid, stamp, conf, testing = false, func) {
+
         var self = this;
 
         // 多账号，，如果有新数据，则第二个监听
@@ -157,11 +156,13 @@ class MomentSend {
         pm.then(ret => {
 
             let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : {};
+			let size = post.commentUserListCount;
 
             // 评论为空时：
             // 配置项 nocomment 为空或者false 则必需有评论
             // 配置项 nocomment 为 true 但是 拉取次数(pullcomment)为 0 时， pullcomment=1 等待下一次拉取
-            if (post.commentUserListCount == 0 && (!self.inst.nocomment || (self.inst.nocomment && self.pullcomment == 0))) {
+			/*
+            if (size == 0 && (!self.inst.nocomment || (self.inst.nocomment && self.pullcomment == 0))) {
 
                 // 评论不是必须时，评论为空拉取次数 = 1
                 if (self.inst.nocomment) {
@@ -171,9 +172,44 @@ class MomentSend {
                 log.info('暂无评论', { 'post.data': post, 'post.time': post.createTime });
                 return;
             }
+			*/
 
-            // 拉取次数还原 0；
-            self.pullcomment = 0;
+			//允许发无评论，仅尝试拉取一次
+			if( self.inst.nocomment && size == 0 && !self.twice[follow] ){
+				self.twice[follow] = 1;
+				log.info('再拉评论', { 'post.data': post, 'post.time': post.createTime });
+				return;
+			}
+
+			//不许发无评论，继续等待下一次
+			if( !self.inst.nocomment && size == 0 ){
+				log.info('暂无评论', { 'post.data': post, 'post.time': post.createTime });
+				return;
+			}
+
+            //还原成未二次拉取状态
+            self.twice[follow] = 0;
+
+			/////////
+
+			//查找完成标记
+			if ( self.inst.complete ) {
+
+				//没找到完成标记
+				if( size == 0 || post.commentUserList[size - 1].content.compare( self.inst.complete ) == false ){
+					log.info('等待评论', { 'post.data': post, 'post.time': post.createTime });
+					return;
+				}
+
+				//已找到完成标记，删除标记并重新计数
+				if( size ){
+					post.commentUserList.pop();
+					post.commentUserListCount--;
+				}               
+                
+            }
+
+			/////////
 
             //转发朋友圈
             if (post.id > maxid) {
@@ -388,8 +424,8 @@ class MomentSend {
 
             let comm = data.comment[i];
 
+            // 判断个人商城链接
             if (!comm.noreplace) {
-                // 判断个人商城链接
                 log.info('邀请码', [member.member_id, member.invite_code, comm]);
                 comm.text = act.replaceUid(act.replaceInvite(comm.text, member.invite_code), member.member_id);
             }
