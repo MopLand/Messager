@@ -674,7 +674,6 @@ class Groups {
 
 				//本消息含商品
 				if( msg.product ){
-					//act.collect( self, 'groups', msg.product, data, msg );
 					for(let k in msg.product) {
 						act.collect(self, 'groups', {
 							"platform": msg.product[k],

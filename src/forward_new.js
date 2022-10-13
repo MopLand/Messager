@@ -50,8 +50,8 @@ class ForwardNew {
         let self = this;
         let wait = 1; // 等待时间
 
+        //订阅消息
         this.publish.on("ready", function () {
-            //订阅消息
             self.publish.subscribe(channel);
         });
 
@@ -84,8 +84,8 @@ class ForwardNew {
      * 获取用户信息
      */
     getMember(msg) {
-        var self = this;
 
+        var self = this;
         let member = msg.member;
 
         //昨天时间
@@ -118,10 +118,11 @@ class ForwardNew {
             }
 
             if (msg.type == 'groups') {
+
                 res = self.filterMemberGroups(res, msg.platform, msg.roomids);
 
                 if (res.length == 0) {
-                    return log.info('发送失败', [res, msg.data, msg.rawdata]);
+                    return log.info('未找到群', [res, msg.data, msg.rawdata]);
                 }
 
                 // 发送微信群消息源消息

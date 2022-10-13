@@ -200,7 +200,10 @@ var conf = {
 		cancel: /MMSNS_RET_SPAM/,
 
 		//消息时间戳
-		marker: 'mm_moment_id'
+		marker: 'mm_moment_id',
+
+		//发圈完成指令
+		complete: 'OK'
 	}
 
 }

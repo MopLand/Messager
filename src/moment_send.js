@@ -387,11 +387,13 @@ class MomentSend {
                 let comm = text.toLocaleUpperCase();
                 let exch = false;
 
+				//忽略标识符
                 if (comm == conf.ignore) {
                     data.sending = false;
                     log.info('跳过发圈', comm);
                 }
 
+				//原样标识符
                 if (conf.origin && conf.origin.test(comm)) {
                     data.convert = 0;
                     log.info('不要转链', comm);
@@ -517,6 +519,7 @@ class MomentSend {
         }).catch(err => {
 
             let body = { api: 'SnsPostXml', err, isAbort: false };
+
             //判定为垃圾消息
             if (typeof err == 'string' && self.inst.cancel) {
                 var ret = err.match(self.inst.cancel);
@@ -561,18 +564,14 @@ class MomentSend {
 
                 log.info('评论成功', [member.weixin_id, post_id, ret.snsObject.id]);
 
+				//写入发单效果
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product ) {
-
-                    //if (comm.product.platform && comm.product.item_id) {
-                    //    act.collect(self, 'moment', comm.product, data, comm);
-                    //} else {
-                        for (let k in comm.product) {
-                            act.collect(self, 'moment', {
-                                "platform": comm.product[k],
-                                "item_id": k,
-                            }, data, comm);
-                        }
-                    //}
+					for (let k in comm.product) {
+						act.collect(self, 'moment', {
+							"platform": comm.product[k],
+							"item_id": k,
+						}, data, comm);
+					}
                 }
 
             }).catch(err => {

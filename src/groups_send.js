@@ -695,17 +695,12 @@ class GroupsSend {
 
                 //本消息含商品
                 if (msg.product && data.roomid) {
-
-                    //if (msg.product.platform && msg.product.item_id) {
-                    //    act.collect(self, 'groups', msg.product, data, { [data.roomid] : self.sender } );
-                    //} else {
-                        for(let k in msg.product) {
-                            act.collect(self, 'groups', {
-                                "platform": msg.product[k],
-                                "item_id": k,
-                            }, data, { [data.roomid] : self.sender });
-                        }
-                    //}
+					for(let k in msg.product) {
+						act.collect(self, 'groups', {
+							"platform": msg.product[k],
+							"item_id": k,
+						}, data, { [data.roomid] : self.sender });
+					}
                 }
 
                 //消息包已完成
