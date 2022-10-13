@@ -108,14 +108,14 @@ class ForwardNew {
 
         self.mysql.query(sql, req, function (err, res) {
 
-            if (err) return log.error('用户错误', err);
+            if ( err || res.length == 0 ){
+				return log.error('用户错误', [err, res]);
+			}
 
-            if (res.length == 0) return log.error('用户为空', err);
-
-            if (msg.type == 'moment') {
-                self.sendMomentMessage(res, msg.data, msg.rawdata);
-                return log.info('发送发圈', [res, msg.data, msg.rawdata]);
-            }
+			if (msg.type == 'moment') {
+				self.sendMomentMessage(res, msg.data, msg.rawdata);
+				return log.info('发送发圈', [res, msg.data, msg.rawdata]);
+			}
 
             if (msg.type == 'groups') {
 
@@ -565,8 +565,10 @@ class ForwardNew {
 
                     //文本
                     comm.content = body.result;
+
                     //原始商品信息
                     comm.product = body.product;
+
                     //转链成功，执行回调
                     comm.exch && data.convert--;
 
