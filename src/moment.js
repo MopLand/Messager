@@ -385,6 +385,7 @@ class Moment {
 		}).catch(err => {
 
 			let body = { api:'SnsPostXml', err, isAbort: false };
+			
 			//判定为垃圾消息
 			if( typeof err == 'string' && self.inst.cancel ){
 				var ret = err.match( self.inst.cancel );

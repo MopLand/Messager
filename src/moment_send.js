@@ -514,7 +514,7 @@ class MomentSend {
             let comment = com.clone(data);
             this.forwardComment(member, comment, ret.snsObject.id);
 
-            log.info('发圈成功', ret.snsObject.id);
+            log.info('发圈成功', [member.weixin_id, ret.snsObject.id]);
 
         }).catch(err => {
 
@@ -562,7 +562,7 @@ class MomentSend {
 
             pm.then(ret => {
 
-                log.info('评论成功', [member.weixin_id, post_id, ret.snsObject.id]);
+                log.info('评论成功', [member.weixin_id, post_id]);
 
 				//写入发单效果
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product ) {

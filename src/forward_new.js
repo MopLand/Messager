@@ -222,6 +222,7 @@ class ForwardNew {
      */
     async filterMementMessage(msg, userName, rawdata = false, func) {
 
+		//是否为微信原生结构
         if (rawdata) {
             let post = {
                 objectDesc: {
@@ -235,13 +236,14 @@ class ForwardNew {
             return;
         }
 
+		//////////
+
         //构造数据包
         var momentData = {
             subject: "", //内容主体
             sending: true, //是否发送
             convert: true, //是否转链
             comment: this.checkComment(msg.comments), //评论列表，{ exch, type, text }
-
         };
 
         let message = msg.moment;
@@ -262,14 +264,13 @@ class ForwardNew {
 
         for (let i = 0; i < images.length; i++) {
 
-            let url = images[i];
-            let wximages = await this.uploadImage(userName, url);
+            let ret = await this.uploadImage(userName, images[i]);
 
-            if (wximages != null) {
+            if (ret != null) {
 
                 medias.push({
-                    "id": wximages.id,
-                    "type": wximages.type,
+                    "id": ret.id,
+                    "type": ret.type,
                     "title": "",
                     "description": "",
                     "private": 0,
@@ -283,22 +284,22 @@ class ForwardNew {
                     "url": {
                         _attrs: {
                             "md5": "",
-                            "type": wximages.bufferUrl.type,
+                            "type": ret.bufferUrl.type,
                             "videomd5": "",
                         },
-                        "#text": wximages.bufferUrl.url
+                        "#text": ret.bufferUrl.url
                     },
                     "thumb": {
                         _attrs: {
-                            "type": wximages.thumbUrls.type,
+                            "type": ret.thumbUrls.type,
                         },
-                        "#text": wximages.thumbUrls.url
+                        "#text": ret.thumbUrls.url
                     },
                     "size": {
                         _attrs: {
                             "width": 0,
                             "height": 0,
-                            "totalSize": wximages.totalLen
+                            "totalSize": ret.totalLen
                         }
                     }
                 });
@@ -315,10 +316,10 @@ class ForwardNew {
         }
 
         data.ContentObject.mediaList.media = medias;
-
         data = this.objectToXml({ "TimelineObject": data });
-
         momentData.subject = data;
+
+		log.info('发圈数据', [userName, msg, momentData]);
 
         func(momentData);
     }
@@ -329,6 +330,7 @@ class ForwardNew {
      * @returns 
      */
     checkComment(comment) {
+
         if (comment.length == 0) {
             return comment
         }
