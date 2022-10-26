@@ -173,6 +173,9 @@ var conf = {
 		// 猫超券
 		origin: /猫超券|淘礼金|淘密令|京东券/,
 
+		// 链接白名单
+		whited: /(https?):\/\/(.+).(f3url|f4url|bhrax|kuaizhan).(com|net)\/(.+)uid=(\d*)/i,
+
 	},
 
 	// 采集群消息配置

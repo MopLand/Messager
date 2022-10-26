@@ -134,7 +134,7 @@ if (func == 'account') {
 }
 
 //口令提取
-if (func == 'password') {	
+if (func == 'password') {
 	const Activity = require('./lib/activity');
 
 	let text = Common.getArgv('text');
@@ -142,5 +142,17 @@ if (func == 'password') {
 	let word = Activity.extractTbc( text, size );
 
 	console.log( word );
+
+}
+
+//链接提取
+if (func == 'links') {
+
+	let text = Common.getArgv('text');
+	let link = text.match( /(https?):\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~_|]/gm );
+
+	console.dir( text );
+	console.dir( link );
+	console.dir( false == false );
 
 }

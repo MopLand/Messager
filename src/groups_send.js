@@ -470,6 +470,9 @@ class GroupsSend {
 			created: com.getTime(),
         };
 
+		//是否丢掉包
+		var drop = false;
+
         for (let i = 0; i < msgs.length; i++) {
 
             var size = 0;
@@ -537,8 +540,21 @@ class GroupsSend {
             //     }
             // }
 
+			//文本消息，检查是否有非白名单链接
+			if( item.msgType == 1 && this.inst.whited ){
+
+				urls = text.match( /(https?):\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~_|]/gm );
+
+				//只有两边都为 false 时，才相等，这时为未知链接
+				for(let w in urls ){
+					if( act.detectUrl( urls[w] ) == act.detectUrl( urls[w], this.inst.whited ) ){
+						drop = true;
+					}
+				}
+			}
+
             //满足所有条件
-            if (size == Object.keys(where).length) {
+            if ( !drop && size == Object.keys(where).length) {
 
                 let exch = false;
 
@@ -558,6 +574,11 @@ class GroupsSend {
         if (limit == 1) {
             data = data.message.length ? data.message[0] : null;
         }
+
+		//发现未知链接
+		if( drop ){
+			log.info('未知链接', { roomid, pakId, msgs });
+		}
 
         return data;
 
