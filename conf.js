@@ -174,7 +174,8 @@ var conf = {
 		origin: /猫超券|淘礼金|淘密令|京东券/,
 
 		// 链接白名单
-		whited: /(https?):\/\/(.+).(f3url|f4url|bhrax|kuaizhan).(com|net)\/(.+)uid=(\d*)/i,
+		//whited: /(https?):\/\/(.+).(f3url|f4url|bhrax|kuaizhan).(com|net)\/(.+)uid=(\d*)/i,
+		whited: '',
 
 	},
 
