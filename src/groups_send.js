@@ -554,7 +554,7 @@ class GroupsSend {
 			}
 
             //满足所有条件
-            if ( !drop && size == Object.keys(where).length) {
+            if ( size == Object.keys(where).length ) {
 
                 let exch = false;
 
@@ -575,8 +575,10 @@ class GroupsSend {
             data = data.message.length ? data.message[0] : null;
         }
 
-		//发现未知链接
+		//发现未知链接，所有消息丢掉
 		if( drop ){
+			data.convert = 0;
+			data.message = [];
 			log.info('未知链接', { roomid, pakId, msgs });
 		}
 
