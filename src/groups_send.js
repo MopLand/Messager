@@ -543,7 +543,7 @@ class GroupsSend {
 			//文本消息，检查是否有非白名单链接
 			if( item.msgType == 1 && this.inst.whited ){
 
-				urls = text.match( /(https?):\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~_|]/gm );
+				let urls = text.match( /(https?):\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~_|]/gm );
 
 				//只有两边都为 false 时，才相等，这时为未知链接
 				for(let w in urls ){
