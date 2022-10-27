@@ -83,6 +83,7 @@ class MomentSend {
                 let follows = '';
                 let testAccount = ''; // 测试账号
                 if (body.status >= 0 && body.result) {
+
                     // 线上配置账号
                     follows = body.result[ item ] || '';
                     self.wechatConfig = body.result;
@@ -106,13 +107,12 @@ class MomentSend {
                     return
                 }
 
-                // 拉取多账号，第一个有数据发送 否则 继续拉取第二个
+                // 拉取多账号，第一个有数据发送，否则继续拉取第二个
                 let loopSend = () => {
 
                     let onFollow = follows.shift();
 
                     self.getMoment(conf.wechat, onFollow, self.maxid, stamp, conf, (testAccount.indexOf(onFollow) > -1), (firstData) => {
-
                         if (follows.length > 0 && !firstData) {
                             loopSend();
                         }
@@ -148,7 +148,7 @@ class MomentSend {
 
         var self = this;
 
-        // 多账号，，如果有新数据，则第二个监听
+        // 多账号，如果有新数据，则第二个监听
         let firstData = false;
 
         let pm = self.fetchMoment(wechat, follow);
@@ -157,6 +157,7 @@ class MomentSend {
 
             let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : {};
 			let size = post.commentUserListCount;
+			let send = true;
 
             // 评论为空时：
             // 配置项 nocomment 为空或者false 则必需有评论
@@ -187,53 +188,52 @@ class MomentSend {
 				return;
 			}
 
+			/////////
+
+			//查找完成标记，未找到时不发送
+			if( self.inst.complete ){
+
+				//是否从评论中找到完成标记
+				let done = size > 0 ? post.commentUserList[size - 1].content.compare( self.inst.complete ) : false;
+
+				//未找到完成标记，仅尝试再拉一次
+				if( !done && !self.twice[follow] ){
+					self.twice[follow] = 1;
+					log.info('等待评论', { 'post.data': post, 'post.time': post.createTime });
+					return;
+				}
+
+				//已找到完成标记
+				if( done ){
+					post.commentUserList.pop();
+					post.commentUserListCount--;
+				}else{
+					send = false;
+				}				
+			}
+
             //还原成未二次拉取状态
             self.twice[follow] = 0;
 
 			/////////
 
-			//查找完成标记
-			if ( self.inst.complete ) {
-
-				//没找到完成标记
-				if( size == 0 || post.commentUserList[size - 1].content.compare( self.inst.complete ) == false ){
-					log.info('等待评论', { 'post.data': post, 'post.time': post.createTime });
-					return;
-				}
-
-				//已找到完成标记，删除标记并重新计数
-				if( size ){
-					post.commentUserList.pop();
-					post.commentUserListCount--;
-				}               
-                
-            }
-
-			/////////
-
             //转发朋友圈
-            if (post.id > maxid) {
+            if (post.id > maxid && send) {
 
                 firstData = true;
 
                 self.send(post, testing);
-                self.maxid = post.id;
+                self.maxid = maxid = post.id;
 
                 act.record(self.mysql, self.item + ( testing ? '_test' : '' ), post, '发圈消息');
 
             } else {
-                log.info('暂无发圈', { 'maxid': maxid, 'post.id': post.id, 'post.time': post.createTime, follow });
+                log.info('暂无发圈', { follow, 'maxid': maxid, 'twice': self.twice[follow], 'post.id': post.id, 'post.time': post.createTime });
             }
 
-            // 存储发圈消息ID
-            let saveTime = maxid;
-            if (post.id > maxid) {
-                saveTime = post.id;
-            }
-
-            //临时存储一天
-            self.redis.set(stamp, saveTime);
-            self.redis.expire(stamp, 3600 * 14);
+            //存储发圈消息ID，存储一天
+            self.redis.set( stamp, maxid );			
+            self.redis.expire( stamp, 3600 * 14 );
 
             req.status(conf.report, 'MM_Moment', maxid, ret.baseResponse);
 

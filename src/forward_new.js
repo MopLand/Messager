@@ -92,8 +92,8 @@ class ForwardNew {
         var last = com.strtotime('-1 day');
         var date = new Date(last * 1000).format('yyyyMMdd');
 
-        let field = 'w.auto_id, w.member_id, w.weixin_id, w.groups_list,w. moment, w.groups, w.tag, m.`invite_code`';
-        let sql = 'SELECT ' + field + ' FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE w.created_date <= ? AND w.online = 1';
+		let sql = 'SELECT w.auto_id, w.member_id, w.weixin_id, w.groups_list,w. moment, w.groups, w.tag, m.`invite_code` \
+					FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE w.created_date <= ? AND w.online = 1';
         let req = [date];
 
         if (member.member_id) {
@@ -155,8 +155,12 @@ class ForwardNew {
                 let mini = true;
                 let url = true;
 
-                let isroom = roomids ? (roomids.indexOf(ele.userName) > -1) : true; // 是否在选中的群里面
-                let isstatus = platform ? (ele.status.indexOf(platform) > -1) : true; // 是否符合发群类型
+				//是否在选中的群里面，pre_weixin_list.roomids
+                let isroom = roomids ? (roomids.indexOf(ele.userName) > -1) : true;
+
+				//是否符合发群类型，pre_weixin_room.status
+                //let isstatus = platform ? (ele.status.indexOf(platform) > -1) : true;
+                let isstatus = true;
 
                 if (isroom && isstatus && on && (mini || url)) {
                     ele.mini = mini; // 小程序 (针对拼多多)
