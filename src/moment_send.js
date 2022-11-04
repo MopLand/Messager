@@ -176,7 +176,7 @@ class MomentSend {
 			*/
 
 			//过滤评论数据，仅获取本人评论
-			post.commentUserList.filter( (ele) =>{
+			post.commentUserList = post.commentUserList.filter( (ele) =>{
 				return ele.userName != post.userName;
 			} );
 
