@@ -434,12 +434,14 @@ class MomentSend {
 
         var parse = (i) => {
 
-            let comm = data.comment[i];
+			//可能存在无评论情况
+            let comm = data.comment[i] || {};
 
             // 判断个人商城链接
-            if (!comm.noreplace) {
+            if ( !comm.noreplace ) {
                 log.info('邀请码', [member.member_id, member.invite_code, comm]);
-                comm.text = act.replaceUid(act.replaceInvite(comm.text, member.invite_code), member.member_id);
+                comm.text = act.replaceUid(comm.text, member.member_id);
+                comm.text = act.replaceInvite(comm.text, member.invite_code);
             }
 
             let extstr = comm.exch ? act.getExternal(comm.text) : '';
@@ -466,7 +468,6 @@ class MomentSend {
                     comm.product = body.product;
 
                     if ( i >= (size - 1) ) {
-
                         // 最后一个评论转链成功
                         if (testing) {
                             act.record(self.mysql, self.item + '_test', { 'member': member, 'data': data.comment }, '测试发送');

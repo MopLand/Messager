@@ -108,7 +108,7 @@ var conf = {
 		//遇错误中断发送
 		//cancel: /MMSNS_RET_SPAM/,
 
-		// 无评论一样发圈 
+		//无评论一样发圈 
 		nocomment: true,
 	},
 
