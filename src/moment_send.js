@@ -176,11 +176,9 @@ class MomentSend {
 			*/
 
 			//过滤评论数据，仅获取本人评论
-			for( let i = 0; i < size; i ++ ){
-				if( post.commentUserList[i].userName != post.userName ){
-					post.commentUserList.splice(i, 1);
-				}
-			}
+			post.commentUserList.filter( (ele) =>{
+				return ele.userName != post.userName;
+			} );
 
 			//评论重新计数
 			size = post.commentUserListCount = post.commentUserList.length;
