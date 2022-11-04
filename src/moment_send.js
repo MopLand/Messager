@@ -177,7 +177,7 @@ class MomentSend {
 
 			//过滤评论数据，仅获取本人评论
 			post.commentUserList = post.commentUserList.filter( (ele) =>{
-				return ele.userName != post.userName;
+				return ele.userName == post.userName;
 			} );
 
 			//评论重新计数
@@ -198,7 +198,7 @@ class MomentSend {
 					self.twice[follow] = 1;
 					log.info('暂无评论', { 'post.data': post, 'post.time': post.createTime });
 					return;
-				}				
+				}
 			}
 
 			/////////
