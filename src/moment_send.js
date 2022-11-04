@@ -192,8 +192,13 @@ class MomentSend {
 
 			//不许发无评论，继续等待下一次
 			if( !self.inst.nocomment && size == 0 ){
-				log.info('暂无评论', { 'post.data': post, 'post.time': post.createTime });
-				return;
+				if( self.twice[follow] ){
+					send = false;
+				}else{
+					self.twice[follow] = 1;
+					log.info('暂无评论', { 'post.data': post, 'post.time': post.createTime });
+					return;
+				}				
 			}
 
 			/////////
