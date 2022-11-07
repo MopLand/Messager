@@ -170,8 +170,8 @@ var conf = {
 		// 禁发红包消息源头群
 		card_rooms: [],
 
-		// 猫超券
-		origin: /猫超券|淘礼金|淘密令|京东券/,
+		// 原样转出，不转链
+		origin: /淘礼金|淘密令|京东券/,
 
 		// 链接白名单
 		//whited: /(https?):\/\/(.+).(f3url|f4url|bhrax|kuaizhan).(com|net)\/(.+)uid=(\d*)/i,
