@@ -6,7 +6,7 @@ const com = require('../lib/common');
 const req = require('../lib/request');
 const act = require('../lib/activity');
 const Logger = require('../lib/logger');
-const MomentSend = require('./moment_send');
+const Moment = require('./moment');
 const GroupsSend = require('./groups_send');
 
 const tag = com.fileName(__filename, false);
@@ -34,7 +34,7 @@ class ForwardNew {
     }
 
     init() {
-        this.moment = new MomentSend(this.conf);
+        this.moment = new Moment(this.conf);
         this.groups = new GroupsSend(this.conf);
 
         //订阅消息发送
@@ -203,9 +203,8 @@ class ForwardNew {
                 return log.error('发圈错误', { user, data, rawdata });
             }
 
-			//预处理评论，再转发朋友圈
             for (let i = 0; i < user.length; i++) {
-                this.moment.parseComment(user[i], res);
+                this.moment.forwardMoment(user[i], res);
             }
 
         })
@@ -220,20 +219,19 @@ class ForwardNew {
 
 		//是否为微信原生结构
         if (rawdata) {
-
             let post = {
-				id: 'forward_' + userName,
-                objectDesc: { string: msg.moment },
+                objectDesc: {
+                    string: msg.moment
+                },
                 commentUserList: msg.comments,
                 commentUserListCount: msg.comments.length,
             }
 
             func(this.moment.parseMoment(post));
-
             return;
         }
 
-		///// 以下为 cdn 上传 /////
+		//////////
 
         //构造数据包
         var momentData = {

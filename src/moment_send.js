@@ -334,7 +334,7 @@ class MomentSend {
                         break;
                     }
 
-                    //转发朋友圈
+                    //预处理评论，再转发朋友圈
                     self.parseComment(res[i], data, testing);
 
                     // 不为测试消息时更新发圈时间
@@ -447,10 +447,10 @@ class MomentSend {
                 comm.text = act.replaceInvite(comm.text, member.invite_code);
             }
 
-            let extstr = comm.exch ? act.getExternal(comm.text) : '';
+            let misc = comm.exch ? act.getExternal(comm.text) : '';
 
             //转链
-            req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': 'true', 'lazy_time': lazy_time, 'source': 'yfd', 'external': extstr }, (code, body) => {
+            req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': 'true', 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
 
                 try {
                     if (typeof body == 'string') {
@@ -482,6 +482,7 @@ class MomentSend {
                     }
 
                 } else {
+
                     body.err = '转链失败';
                     body.source = 'moment';
 

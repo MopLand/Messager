@@ -8,6 +8,7 @@ const Account = require('./src/account');
 const Messager = require('./src/messager');
 const Heartbeat = require('./src/heartbeat');
 const Forward = require('./src/forward');
+const MomentSend = require('./src/moment_send');
 const GroupsSend = require('./src/groups_send');
 
 let conf = Common.getConf(__dirname);
@@ -65,7 +66,6 @@ if (func == 'groups_send') {
 
 // 朋友圈发送（新，先转链后发送）
 if (func == 'moment_send') {
-	const MomentSend = require('./src/moment_send');
 	let klas = new MomentSend(conf);
 		klas.init(func);
 }

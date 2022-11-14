@@ -182,7 +182,7 @@ class GroupsSend {
 
             //获取最新消息，消息源群ID
             var roomid = recv.roomid;
-            var data = self.filterMessage(roomid, recv.msgid, recv.data, where);
+            var data = self.filterMessage(roomid, recv.lastid, recv.message, where);
             var size = data.message.length;
 
             //发送最新消息
@@ -190,7 +190,7 @@ class GroupsSend {
                 self.send(roomid, data);
             }
 
-            log.info('消息数量', { '通知ID': recv.msgid, '原消息': recv.data.length, '筛选后': size });
+            log.info('消息数量', { '通知ID': recv.lastid, '原消息': recv.message.length, '筛选后': size });
             log.info('有效消息', data);
 
             act.record(self.mysql, self.item, data, '发群消息');
@@ -478,7 +478,6 @@ class GroupsSend {
             var size = 0;
             var item = msgs[i];
             let text = item.content;
-            let exch = false;
 
             item.msgType = Number(item.msgType);
 
@@ -564,7 +563,16 @@ class GroupsSend {
                     exch && data.convert++;
                 }
 
-                data.message.push({ msgid: item.msgId, rowid: item.newMsgId, msgtype: item.msgType, content: text, source: item.msgSource, product: null, exch });
+				//生成消息队结构
+                data.message.push({ 
+					msgid: item.msgId, 
+					rowid: item.newMsgId, 
+					msgtype: item.msgType, 
+					content: text, 
+					source: item.msgSource, 
+					product: null, 
+					exch 
+				});
 
             }
 
@@ -609,10 +617,9 @@ class GroupsSend {
 
             let comm = data.message[i];
             let exch = comm.msgtype == 1 && comm.exch;
+            let misc = exch ? act.getExternal( comm.content ) : '';
 
-            let extstr = exch ? act.getExternal( comm.content ) : '';
-
-            req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': 'true', 'lazy_time': lazy_time, 'source': 'yfd', 'external': extstr }, (code, body) => {
+            req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': 'true', 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
 
                 try {
                     if (typeof body == 'string') {
@@ -1042,6 +1049,7 @@ class GroupsSend {
     checkCardTime( fromroomid ) {
 
         var self = this;
+		let send = false;
         let date = new Date();
         let hours = date.getHours();
         let isHours = self.cardTime.indexOf(hours) > -1; // 是否到了发红包点
@@ -1050,10 +1058,10 @@ class GroupsSend {
 
         // 避免源头群重复 发红包
         if ( isHours && isFrom & isMinute ) {
-            self.cardRooms.push(fromroomid);
+            send = self.cardRooms.push(fromroomid);
         }
 
-        return isHours && isFrom & isMinute;
+        return send;
     }
 
     ////////// 消息发送相关方法 //////////
