@@ -454,10 +454,10 @@ class GroupsSend {
             //消息包ID
             package: pakId,
 
-            // 群ID
+            //源头群ID
             roomid: roomid,
 
-            // 实例
+            //实例ID
             insid: this.insid,
 
 			//是否发送红包
@@ -1057,7 +1057,7 @@ class GroupsSend {
         let isMinute = hours == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，，或者 17:30 发送
 
         // 避免源头群重复 发红包
-        if ( isHours && isFrom & isMinute ) {
+        if ( fromroomid && isHours && isFrom & isMinute ) {
             send = self.cardRooms.push(fromroomid);
         }
 

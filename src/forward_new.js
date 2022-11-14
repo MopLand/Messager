@@ -356,7 +356,7 @@ class ForwardNew {
         var mins = size / 500;
         var span = (mins * 60 * 1000) / size;
 
-        data = self.filterMessage(msgid, data);
+        data = self.groups.filterMessage(null, msgid, data);
 
         var func = (i) => {
 
@@ -381,7 +381,7 @@ class ForwardNew {
     }
 
     /**
-     * 消息过滤器
+     * 消息过滤器（作废）
      * @param string 消息包ID
      * @param object 消息数据
      * @param object 过滤条件
