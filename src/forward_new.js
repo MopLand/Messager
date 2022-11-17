@@ -119,7 +119,7 @@ class ForwardNew {
             if (msg.type == 'groups') {
 
 				//过滤用户打开的群
-                user = self.filterMemberGroups(res, msg.platform, msg.roomids);
+                let user = self.filterMemberGroups(res, msg.platform, msg.roomids);
 
                 if (user.length == 0) {
                     return log.info('未找到群', [res, msg]);
@@ -224,8 +224,8 @@ class ForwardNew {
             let post = {
 				id: 'forward_' + userName,
                 objectDesc: { string: msg.moment },
-                commentUserList: msg.comments,
-                commentUserListCount: msg.comments.length,
+                commentUserList: msg.comment,
+                commentUserListCount: msg.comment.length,
             }
 
             func(this.moment.parseMoment(post));
