@@ -38,12 +38,6 @@ if (func == 'loader') {
 		klas.init( html, dist );
 }
 
-//用户自主推送
-if (func == 'forward') {
-	let klas = new Forward(conf);
-		klas.init();
-}
-
 //用户自主推送 (新)
 if (func == 'forward_new') {
 	const ForwardNew = require('./src/forward_new');
@@ -51,34 +45,28 @@ if (func == 'forward_new') {
 		klas.init();
 }
 
-// 采集用户消息
+//采集用户消息
 if (func == 'materiel_groups') {
 	const MaterielGroups = require('./src/materiel_groups');
 	let klas = new MaterielGroups(conf);
 		klas.init();
 }
 
-// 多群消息源
+//多群消息源
 if (func == 'groups_send') {
 	let klas = new GroupsSend(conf);
 		klas.init();
 }
 
-// 朋友圈发送（新，先转链后发送）
+//朋友圈发送（新，先转链后发送）
 if (func == 'moment_send') {
 	let klas = new MomentSend(conf);
 		klas.init(func);
 }
 
-//朋友圈营销商品
-if (func == 'moment') {
-	let klas = new Moment(conf);
-		klas.init();
-}
-
-//朋友圈营销素材
+//营销素材发圈
 if (func == 'moment_mtl') {
-	let klas = new Moment(conf);
+	let klas = new MomentSend(conf);
 		klas.init( func );
 }
 

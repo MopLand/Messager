@@ -83,10 +83,9 @@ class ForwardNew {
     /**
      * 获取用户信息
      */
-    getMember(msg) {
+    getMember( msg ) {
 
         var self = this;
-        let member = msg.member;
 
         //昨天时间
         var last = com.strtotime('-1 day');
@@ -96,14 +95,14 @@ class ForwardNew {
 					FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE w.created_date <= ? AND w.online = 1';
         let req = [date];
 
-        if (member.member_id) {
+        if ( msg.member ) {
             sql += ' AND w.member_id = ? ';
-            req.push(member.member_id);
+            req.push( msg.member );
         }
 
-        if (member.weixin_id) {
+        if ( msg.weixin ) {
             sql += ' AND w.weixin_id IN (?) ';
-            req.push(member.weixin_id);
+            req.push( msg.weixin );
         }
 
         self.mysql.query(sql, req, function (err, res) {
@@ -113,22 +112,23 @@ class ForwardNew {
 			}
 
 			if (msg.type == 'moment') {
-				self.sendMomentMessage(res, msg.data, msg.rawdata);
-				return log.info('发送发圈', [res, msg.data, msg.rawdata]);
+				self.sendMomentMessage(res, msg.object, msg.rawdata);
+				return log.info('发送发圈', [res, msg.object, msg.rawdata]);
 			}
 
             if (msg.type == 'groups') {
 
-                res = self.filterMemberGroups(res, msg.platform, msg.roomids);
+				//过滤用户打开的群
+                user = self.filterMemberGroups(res, msg.platform, msg.roomids);
 
-                if (res.length == 0) {
-                    return log.info('未找到群', [res, msg.data, msg.rawdata]);
+                if (user.length == 0) {
+                    return log.info('未找到群', [res, msg]);
                 }
 
-                // 发送微信群消息源消息
-                self.sendGroupsMessage(msg.msgid, res, msg.data, msg.rawdata);
+                //发送微信群消息源消息
+                self.sendGroupsMessage(msg.msgid, user, msg.object, msg.rawdata);
                 
-                return log.info('发送发群', [res, msg]);
+                return log.info('发送发群', [user, msg]);
             }
 
         })
@@ -136,7 +136,7 @@ class ForwardNew {
     }
 
     /**
-     * 处理用户
+     * 过滤用户打开的群
      */
     filterMemberGroups(res, platform, roomids) {
 

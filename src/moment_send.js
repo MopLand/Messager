@@ -96,8 +96,8 @@ class MomentSend {
                     }
                 }
 
-                follows = follows.split(',');
                 // 去空值
+                follows = follows.split(',');
                 follows = follows.filter(function (s) {
                     return s && s.trim();
                 })
@@ -300,11 +300,10 @@ class MomentSend {
                 com.locked(self.item);
             }
 
-            let item_field = [ 'moment', 'moment_send' ].indexOf(self.item) > -1 ? 'moment' : 'moment_mtl';
-
+            let fld = [ 'moment', 'moment_send' ].indexOf(self.item) > -1 ? 'moment' : 'moment_mtl';
             let sql = 'SELECT w.`auto_id`, w.`member_id`, w.`weixin_id`, w.`tag`, m.`invite_code`'
                 + ' FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id`'
-                + ' WHERE w.auto_id > ? AND w.created_date <= ? AND ' + item_field + ' = 1 AND w.online = 1'
+                + ' WHERE w.auto_id > ? AND w.created_date <= ? AND ' + fld + ' = 1 AND w.online = 1'
                 + ' ORDER BY w.auto_id ASC LIMIT 50';
 
             self.mysql.query(sql, [auto, date], function (err, res) {

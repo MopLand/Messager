@@ -643,6 +643,7 @@ class GroupsSend {
                     //转链成功，执行回调
                     comm.exch && data.convert--;
 
+					//全部转链完成，开始发送
                     if (data.convert == 0) {
                         self.queues.push({ 'member': user, data });
                         self.forwardMessage();
