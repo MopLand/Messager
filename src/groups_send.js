@@ -1149,7 +1149,7 @@ class GroupsSend {
                 fn.then(ret => {
                     log.info('发图成功', [member.member_id, chat, ret.msgId]);
                 }).catch(err => {
-                    self.sendErr(member, 'UploadMsgImgXml', err, chat);
+                    self.sendErr(member, 'UploadMsgImgXml', err, chat, detail);
                 });
             }
 
@@ -1161,7 +1161,7 @@ class GroupsSend {
                 fn.then(ret => {
                     log.info('视频成功', [member.member_id, chat, ret.msgId]);
                 }).catch(err => {
-                    self.sendErr(member.member_id, 'UploadVideoXml', err, chat);
+                    self.sendErr(member.member_id, 'UploadVideoXml', err, chat, detail);
                 });
             }
 
@@ -1173,7 +1173,7 @@ class GroupsSend {
                 fn.then(ret => {
                     log.info('表情成功', [member.member_id, chat, ret]);
                 }).catch(err => {
-                    self.sendErr(member, 'SendEmojiXml', err, chat);
+                    self.sendErr(member, 'SendEmojiXml', err, chat, detail);
                 });
 
                 //多个微信群，适当延迟
@@ -1194,7 +1194,7 @@ class GroupsSend {
                     fn.then(ret => {
                         log.info('小程序成功', [member.member_id, chat, ret.msgId]);
                     }).catch(err => {
-                        self.sendErr(member, 'SendAppMsgXml', err, chat);
+                        self.sendErr(member, 'SendAppMsgXml', err, chat, detail);
                     });
 
                 } else {
@@ -1224,7 +1224,7 @@ class GroupsSend {
 
                     }).catch(err => {
 
-                        self.sendErr(member, 'SendAppMsg', err);
+                        self.sendErr(member, 'SendAppMsg', err, detail);
                     });
                 }
             }
@@ -1241,11 +1241,12 @@ class GroupsSend {
      * @param string API名称
      * @param string 错误消息
      * @param string 微信群ID
+     * @param string 内容
      */
-    sendErr(user, api, err, chat) {
+    sendErr(user, api, err, chat, text) {
 
         //写入日志
-        log.error(api, [user, err, chat]);
+        log.error(api, [user, err, chat, text]);
 
         //更新状态
         act.updatePushed(this.mysql, user, { api: api, err, chat });

@@ -240,7 +240,7 @@ class ForwardNew {
             subject: "", //内容主体
             sending: true, //是否发送
             convert: true, //是否转链
-            comment: this.checkComment(msg.comments), //评论列表，{ exch, type, text }
+            comment: this.checkComment(msg.comment), //评论列表，{ exch, type, text }
         };
 
         let message = msg.moment;
