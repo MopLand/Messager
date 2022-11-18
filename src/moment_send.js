@@ -174,14 +174,17 @@ class MomentSend {
                 return;
             }
 			*/
+			
+			if( size > 0 ){
 
-			//过滤评论数据，仅获取本人评论
-			post.commentUserList = post.commentUserList.filter( (ele) =>{
-				return ele.userName == post.userName;
-			} );
+				//过滤评论数据，仅获取本人评论
+				post.commentUserList = post.commentUserList.filter( (ele) =>{
+					return ele.userName == post.userName;
+				} );
 
-			//评论重新计数
-			size = post.commentUserListCount = post.commentUserList.length;
+				//评论重新计数
+				size = post.commentUserListCount = post.commentUserList.length;
+			}
 
 			//允许发无评论，仅尝试拉取一次
 			if( self.inst.nocomment && size == 0 && !self.twice[follow] ){

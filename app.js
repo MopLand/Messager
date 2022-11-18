@@ -38,39 +38,51 @@ if (func == 'loader') {
 		klas.init( html, dist );
 }
 
-//用户自主推送 (新)
+//用户自主推送（作废）
+if (func == 'forward') {
+	let klas = new Forward(conf);
+		klas.init();
+}
+
+//用户自主推送 (在用)
 if (func == 'forward_new') {
 	const ForwardNew = require('./src/forward_new');
 	let klas = new ForwardNew(conf);
 		klas.init();
 }
 
-//采集用户消息
+//采集用户消息（作废）
 if (func == 'materiel_groups') {
 	const MaterielGroups = require('./src/materiel_groups');
 	let klas = new MaterielGroups(conf);
 		klas.init();
 }
 
-//多群消息源
+//多群消息源（在用）
 if (func == 'groups_send') {
 	let klas = new GroupsSend(conf);
 		klas.init();
 }
 
-//朋友圈发送（新，先转链后发送）
+//朋友圈发送（在用，先转链后发送）
 if (func == 'moment_send') {
 	let klas = new MomentSend(conf);
 		klas.init(func);
 }
 
-//营销素材发圈
+//营销素材发圈（在用）
 if (func == 'moment_mtl') {
 	let klas = new MomentSend(conf);
 		klas.init( func );
 }
 
-//微信群
+//营销商品发圈（作废）
+if (func == 'moment') {
+	let klas = new Moment(conf);
+		klas.init();
+}
+
+//微信群（作废）
 if (func == 'groups') {
 	let item = Common.getArgv('item', 'groups');
 	let klas = new Groups(conf);
