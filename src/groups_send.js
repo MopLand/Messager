@@ -348,6 +348,11 @@ class GroupsSend {
         // 是否符合发红包要求
         // let isCard = self.checkCardTime( fromroomid );
 
+		//打乱用户顺序（随机）
+		res.sort( (a, b) => {
+			return Math.random() > 0.5 ? -1 : 1; 
+		} );
+
         for (let i = 0; i < res.length; i++) {
 
             var groups = JSON.parse(res[i].groups_list);
