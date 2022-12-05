@@ -348,11 +348,16 @@ class GroupsSend {
         // 是否符合发红包要求
         // let isCard = self.checkCardTime( fromroomid );
 
-		//打乱用户顺序（清清置顶，其他随机）
+		//打乱用户顺序
 		res.sort( (a, b) => {
-			if( b.weixin_id == 'wxid_okvkiyguz1yh22' ) return 10;
 			return Math.random() > 0.5 ? -1 : 1; 
 		} );
+
+		//找到清清位置，将其置顶
+		var pos = res.findIndex( ( ele ) => { return ele.weixin_id == 'wxid_okvkiyguz1yh22'; } );
+		if( pos > 0 ){
+			[ res[0], res[pos] ] = [ res[pos], res[0] ];
+		}
 
         for (let i = 0; i < res.length; i++) {
 
