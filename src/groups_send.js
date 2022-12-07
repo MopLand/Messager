@@ -366,13 +366,13 @@ class GroupsSend {
             //过滤包含消息源群的有效群
             groups = groups.filter(ele => {
                 let on      = ele.switch == undefined || ele.switch == 1 ? true : false;
-                let mini    = ele.mini == undefined || (ele.mini && ele.mini == 1) ? true : false;
-                let url     =  true; // ele.url == undefined || (ele.url && ele.url == 1) ? true : false;
+                let minapp	= ele.minapp == undefined || (ele.minapp && ele.minapp == 1) ? true : false;
+                let anchor	=  true; // ele.anchor == undefined || (ele.anchor && ele.anchor == 1) ? true : false;
 
                 // 过滤 有效群;开关打开;小程序和链接不能同时不发(针对拼多多)
-                if ( ele.roomid == fromroomid && on && ( mini || url) ) {
-                    ele.mini    = mini; // 小程序 (针对拼多多)
-                    ele.url     = url; // 链接 (针对拼多多)
+                if ( ele.roomid == fromroomid && on && ( minapp || anchor) ) {
+                    ele.minapp	= minapp; // 小程序 (针对拼多多)
+                    ele.anchor	= anchor; // 链接 (针对拼多多)
                     return ele;
                 }
             });
@@ -381,8 +381,8 @@ class GroupsSend {
             var roomidInfo = groups.map(ele => {
                 return {
                     roomid: ele.userName,
-                    mini: ele.mini,
-                    url: ele.url,
+                    minapp: ele.minapp,
+                    anchor: ele.anchor,
                 };
             });
 
@@ -1105,10 +1105,11 @@ class GroupsSend {
             // 从 roomidInfo 发群对象中获取 群数组同时发送文本
             let sendRoomid = [];
             for (var i = 0; i < size; i++) {
-                let roomid = member.roomidInfo[i] && member.roomidInfo[i].roomid ? member.roomidInfo[i].roomid : '';
-                let url = member.roomidInfo[i] && member.roomidInfo[i].url ? member.roomidInfo[i].url : false;
 
-                if ( msg.exch && !url && act.detectUrl(detail) ) {
+                let roomid = member.roomidInfo[i] && member.roomidInfo[i].roomid ? member.roomidInfo[i].roomid : '';
+                let anchor = member.roomidInfo[i] && member.roomidInfo[i].anchor ? member.roomidInfo[i].anchor : false;
+
+                if ( msg.exch && !anchor && act.detectUrl(detail) ) {
                     continue;
                 }
 
@@ -1146,7 +1147,7 @@ class GroupsSend {
         for (var i = 0; i < size; i++) {
 
             let chat = member.roomidInfo[i] && member.roomidInfo[i].roomid ? member.roomidInfo[i].roomid : '';
-            let mini = member.roomidInfo[i] && member.roomidInfo[i].mini ? true : false;
+            let mini = member.roomidInfo[i] && member.roomidInfo[i].minapp ? true : false;
 
             if (chat == '') {
                 continue;
