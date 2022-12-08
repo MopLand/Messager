@@ -748,7 +748,7 @@ class GroupsSend {
                 //消息包已完成
                 if (data.message.length == 0) {
 
-                    log.info('群发完毕', [user.member_id, data.package, com.getTime() - data.created + '秒']);
+                    log.info('用户发完', [user.member_id, data.package]);
 
                     // 到点发送红包卡片
                     setTimeout(() => {
@@ -770,6 +770,11 @@ class GroupsSend {
                 if (data.message.length > 0) {
                     setTimeout(() => { func(); }, 2500);
                 }
+
+				//队列全部完成
+				if( self.queues.length == 0 ){
+					log.info('群发完毕', [data.package, com.getTime() - data.created + '秒']);
+				}
 
             });
 
