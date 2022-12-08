@@ -396,7 +396,6 @@ class MomentSend {
 
             for (let i = 0; i < post.commentUserList.length; i++) {
 
-                let username = post.userName;
                 let type = post.commentUserList[i].type;
                 let text = post.commentUserList[i].content;
                 let comm = text.toLocaleUpperCase();
@@ -417,7 +416,7 @@ class MomentSend {
                     exch && data.convert++;
                 }
 
-                data.comment.push({ exch, type, text, username });
+                data.comment.push({ exch, type, text });
             }
         }
 
