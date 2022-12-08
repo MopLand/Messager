@@ -152,8 +152,8 @@ class ForwardNew {
 
             groups = groups.filter(ele => {
                 let on = true; //ele.switch == undefined || ele.switch == 1 ? true : false;
-                let mini = true;
-                let url = true;
+                let minapp = true;
+                let anchor = true;
 
 				//是否在选中的群里面，pre_weixin_list.roomids
                 let isroom = roomids ? (roomids.indexOf(ele.userName) > -1) : true;
@@ -162,9 +162,9 @@ class ForwardNew {
                 //let isstatus = platform ? (ele.status.indexOf(platform) > -1) : true;
                 let isstatus = true;
 
-                if (isroom && isstatus && on && (mini || url)) {
-                    ele.mini = mini; // 小程序 (针对拼多多)
-                    ele.url = url; // 链接 (针对拼多多)
+                if (isroom && isstatus && on && (minapp || anchor)) {
+                    ele.minapp = minapp; // 小程序 (针对拼多多)
+                    ele.anchor = anchor; // 链接 (针对拼多多)
                     return ele;
                 }
             });
@@ -173,8 +173,8 @@ class ForwardNew {
             var roomidInfo = groups.map(ele => {
                 return {
                     roomid: ele.userName,
-                    mini: ele.mini,
-                    url: ele.url,
+                    minapp: ele.minapp,
+                    anchor: ele.anchor,
                 };
             });
 
