@@ -748,7 +748,7 @@ class GroupsSend {
                 //消息包已完成
                 if (data.message.length == 0) {
 
-                    log.info('群发完毕', [user.member_id, data.package]);
+                    log.info('群发完毕', [user.member_id, data.package, com.getTime() - data.created + '秒']);
 
                     // 到点发送红包卡片
                     setTimeout(() => {
