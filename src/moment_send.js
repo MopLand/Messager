@@ -357,8 +357,8 @@ class MomentSend {
 			let req = [auto, date];
 
 			if ( self.item == 'moment_send' ) {
-				sql += ' AND lookids LIKE ?';
-				req.push('%' + post.userName + '%');
+				//sql += ' AND lookids LIKE ?';
+				//req.push('%' + post.userName + '%');
 			}
 
 			if ( self.item == 'moment_send' ) {
