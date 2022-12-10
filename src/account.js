@@ -40,6 +40,8 @@ class Account {
 		}).catch( err => {
 			log.error('登录出错', err);
 		});
+
+        log.info( 'Process', process.env );     
 		
 		////////////
 

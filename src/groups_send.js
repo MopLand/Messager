@@ -75,15 +75,14 @@ class GroupsSend {
 
         //当前 PM2 实例数量
         let pwd = process.cwd();
-        let jsonData = fs.readFileSync(pwd + '/run/groups_send.json');
-        jsonData = JSON.parse(jsonData);
-		this.nodes = jsonData.instances ? jsonData.instances : 0;
+        let txt = fs.readFileSync(pwd + '/run/groups_send.json');
+        let set = JSON.parse(txt);
 
 		//实例ID，PM2 分流
+		this.nodes = set.instances ? set.instances : 0;
         this.insid = process.env.NODE_APP_INSTANCE || 0;
 
-        // log.info( 'Process', process.env.env );
-        
+        //log.info( 'Process', process.env );        
         log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid );
 
         ///////////////
