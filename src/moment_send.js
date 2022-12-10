@@ -362,11 +362,11 @@ class MomentSend {
 			}
 
 			if ( self.item == 'moment_send' ) {
-				sql += ' AND moment = 1';
+				sql += ' AND w.moment = 1';
 			}
 
 			if ( self.item == 'moment_mtl' ) {
-				sql += ' AND moment_mtl = 1';
+				sql += ' AND w.moment_mtl = 1';
 			}
 
 			sql += ' ORDER BY w.auto_id ASC LIMIT 100';
