@@ -47,6 +47,17 @@ class MomentSend {
 
         ///////////////
 
+        //当前 PM2 实例数量
+		this.nodes = process.env.instances || 1;
+
+		//实例ID，PM2 分流
+        this.insid = process.env.NODE_APP_INSTANCE || 0;
+
+        //log.info( 'Process', process.env );
+        log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid );
+
+        ///////////////
+
         this.item = item;
         this.inst = inst;
 
@@ -160,6 +171,11 @@ class MomentSend {
         this.redis.on('message', function (channel, message) {
 
             let recv = JSON.parse(message);
+
+            if ( self.nodes == 1 && self.insid > 0 ) {
+                log.info('实例错误', '实例数量与实例不匹配');
+                return;
+            }
 
             log.info('原始消息', recv);
 
@@ -367,6 +383,11 @@ class MomentSend {
 
 			if ( self.item == 'moment_mtl' ) {
 				sql += ' AND w.moment_mtl = 1';
+			}
+
+			if ( self.nodes > 1 ) {
+				sql += " AND auto_id % ? = ?";
+				req.push(self.nodes, self.insid);
 			}
 
 			sql += ' ORDER BY w.auto_id ASC LIMIT 100';

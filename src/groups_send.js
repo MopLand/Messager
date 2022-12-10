@@ -74,12 +74,9 @@ class GroupsSend {
         ///////////////
 
         //当前 PM2 实例数量
-        let pwd = process.cwd();
-        let txt = fs.readFileSync(pwd + '/run/groups_send.json');
-        let set = JSON.parse(txt);
+		this.nodes = process.env.instances || 1;
 
 		//实例ID，PM2 分流
-		this.nodes = set.instances ? set.instances : 0;
         this.insid = process.env.NODE_APP_INSTANCE || 0;
 
         //log.info( 'Process', process.env );
@@ -172,7 +169,7 @@ class GroupsSend {
 
 			/////////////
 
-            if ( self.nodes == 0 && self.insid > 0) {
+            if ( self.nodes == 1 && self.insid > 0 ) {
                 log.info('实例错误', '实例数量与实例不匹配');
                 return;
             }
@@ -292,7 +289,7 @@ class GroupsSend {
         var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1 AND roomids LIKE ?";
         var req = [ Number( date ), '%' + fromroomid + '%'];
 
-        if (self.nodes && self.nodes > 1) {
+        if ( self.nodes > 1 ) {
             sql += " AND auto_id % ? = ?";
             req.push(self.nodes, self.insid);
         }
