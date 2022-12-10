@@ -110,7 +110,7 @@ if (func == 'contact') {
 //心跳
 if (func == 'heartbeat') {
 	let klas = new Heartbeat(conf);
-		klas.init( inst );
+		klas.init();
 }
 
 // 自动登陆

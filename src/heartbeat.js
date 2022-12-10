@@ -25,7 +25,7 @@ class Heartbeat {
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 	}
 
-	init( inst ){
+	init( ){
 
 		//每分钟预计人数
 		this.count = 300;
