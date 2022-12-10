@@ -91,7 +91,7 @@ class ForwardNew {
         var last = com.strtotime('-1 day');
         var date = new Date(last * 1000).format('yyyyMMdd');
 
-		let sql = 'SELECT w.auto_id, w.member_id, w.weixin_id, w.groups_list,w. moment, w.groups, w.tag, m.`invite_code` \
+		let sql = 'SELECT w.auto_id, w.member_id, w.weixin_id, w.groups_list, w.moment, w.groups, w.tag, m.`invite_code` \
 					FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE w.created_date <= ? AND w.online = 1';
         let req = [date];
 
@@ -111,12 +111,12 @@ class ForwardNew {
 				return log.error('用户错误', [err, res]);
 			}
 
-			if (msg.type == 'moment') {
+			if ( msg.type == 'moment' ) {
 				self.sendMomentMessage(res, msg.object, msg.rawdata);
 				return log.info('发送发圈', [res, msg.object, msg.rawdata]);
 			}
 
-            if (msg.type == 'groups') {
+            if ( msg.type == 'groups' ) {
 
 				//过滤用户打开的群
                 let user = self.filterMemberGroups(res, msg.platform, msg.roomids);
