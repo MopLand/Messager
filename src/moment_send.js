@@ -217,12 +217,11 @@ class MomentSend {
 
         pm.then(ret => {
 
-            let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : {};
-
-			log.info('发圈数据', post);
-
+            let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : { commentUserList : [] };
 			let size = post.commentUserList.length || 0;
 			let send = true;
+			
+			log.info('发圈数据', post);
 
             // 评论为空时：
             // 配置项 nocomment 为空或者false 则必需有评论
