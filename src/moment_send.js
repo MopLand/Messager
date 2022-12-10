@@ -218,7 +218,7 @@ class MomentSend {
         pm.then(ret => {
 
             let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : {};
-			let size = post.commentUserList.length;
+			let size = post.commentUserList.length || 0;
 			let send = true;
 
             // 评论为空时：
@@ -245,7 +245,7 @@ class MomentSend {
 				} );
 
 				//评论重新计数
-				size = post.commentUserList.length;
+				size = post.commentUserList.length || 0;
 			}
 
 			//允许发无评论，仅尝试拉取一次
@@ -495,7 +495,7 @@ class MomentSend {
                     data.convert = 0;
                     log.info('不要转链', comm);
                 } else {
-                    exch = act.detectTbc(text) || act.detectUrl(text);
+                    exch = act.extractTbc(text) || act.detectUrl(text);
                     exch && data.convert++;
                 }
 
