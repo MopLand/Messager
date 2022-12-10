@@ -224,8 +224,7 @@ class ForwardNew {
             let post = {
 				id: 'forward_' + userName,
                 objectDesc: { string: msg.moment },
-                commentUserList: msg.comment,
-                commentUserListCount: msg.comment.length,
+                commentUserList: msg.comment
             }
 
             func(this.moment.parseMoment(post));

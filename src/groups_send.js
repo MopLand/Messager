@@ -96,8 +96,6 @@ class GroupsSend {
         //消息筛选条件
         var where = {};
 
-        ///////////////
-
         //订阅消息发送
         this.subscribe(channel, where);
     }
@@ -172,6 +170,8 @@ class GroupsSend {
             }
 
             log.info( '应用实例', '实例数量 NODES：' + self.nodes + '，当前实例 INST：' + self.insid );
+
+			/////////////
 
             if ( self.nodes == 0 && self.insid > 0) {
                 log.info('实例错误', '实例数量与实例不匹配');
@@ -292,7 +292,6 @@ class GroupsSend {
 
         var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1 AND roomids LIKE ?";
         var req = [ Number( date ), '%' + fromroomid + '%'];
-
 
         if (self.nodes && self.nodes > 1) {
             sql += " AND auto_id % ? = ?";

@@ -42,6 +42,9 @@ class MomentSend {
         //消息时间戳
         var stamp = inst.marker || 'mm_moment_id';
 
+        //Redis消息频道
+        var channel = 'mm_moment_send';
+
         ///////////////
 
         this.item = item;
@@ -133,6 +136,49 @@ class MomentSend {
             })
 
         }, 60 * 1000 * 5);
+
+        ///////////////
+
+        //消息筛选条件
+        var where = {};
+
+        //订阅消息发送
+        //this.subscribe(channel, where);
+
+    }
+
+    /**
+     * 订阅消息
+     * @param string 消息频道
+     * @param object 消息过滤
+     */
+    subscribe(channel, where) {
+
+        let self = this;
+
+        //处理 Redis 消息
+        this.redis.on('message', function (channel, message) {
+
+            let recv = JSON.parse(message);
+
+            log.info('原始消息', recv);
+
+			let post = {
+				id: recv.postid,
+				userName: recv.weixin,
+                objectDesc: { string: recv.subject },
+                commentUserList: recv.comment
+            }
+
+			self.send(post, recv.testing);
+
+			act.record(self.mysql, self.item, post, '发圈消息');
+
+        });
+
+        //订阅 Redis 频道消息
+        this.redis.subscribe(channel);
+
     }
 
     /**
@@ -156,7 +202,7 @@ class MomentSend {
         pm.then(ret => {
 
             let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : {};
-			let size = post.commentUserListCount;
+			let size = post.commentUserList.length;
 			let send = true;
 
             // 评论为空时：
@@ -183,7 +229,7 @@ class MomentSend {
 				} );
 
 				//评论重新计数
-				size = post.commentUserListCount = post.commentUserList.length;
+				size = post.commentUserList.length;
 			}
 
 			//允许发无评论，仅尝试拉取一次
@@ -222,7 +268,6 @@ class MomentSend {
 				//已找到完成标记
 				if( done ){
 					post.commentUserList.pop();
-					post.commentUserListCount--;
 				}else{
 					send = false;
 				}				
@@ -265,7 +310,6 @@ class MomentSend {
         });
     }
 
-
     /**
      * 获取最新发圈
      * @param string 微信ID
@@ -292,6 +336,9 @@ class MomentSend {
         // 72 小时前时间
         var last = com.strtotime('-3 day');
         var date = new Date(last * 1000).format('yyyyMMdd');
+		
+		// 文件锁名称
+		var lock = self.item + ( post.userName ? '_' + post.userName : '' );
 
         //取消中断
         self.abort = false;
@@ -300,16 +347,31 @@ class MomentSend {
 
             //锁定 GIT
             if (auto == 0) {
-                com.locked(self.item);
+                com.locked( lock );
             }
 
-            let fld = [ 'moment', 'moment_send' ].indexOf(self.item) > -1 ? 'moment' : 'moment_mtl';
-            let sql = 'SELECT w.`auto_id`, w.`member_id`, w.`weixin_id`, w.`tag`, m.`invite_code`'
-                + ' FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id`'
-                + ' WHERE w.auto_id > ? AND w.created_date <= ? AND ' + fld + ' = 1 AND w.online = 1'
-                + ' ORDER BY w.auto_id ASC LIMIT 50';
+            //let fld = [ 'moment', 'moment_send' ].indexOf(self.item) > -1 ? 'moment' : 'moment_mtl';
+            let sql = 'SELECT w.`auto_id`, w.`member_id`, w.`weixin_id`, w.`tag`, m.`invite_code` '
+					+ 'FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` '
+					+ 'WHERE w.online = 1 AND w.auto_id > ? AND w.created_date <= ? ';			
+			let req = [auto, date];
 
-            self.mysql.query(sql, [auto, date], function (err, res) {
+			if ( self.item == 'moment_send' ) {
+				sql += ' AND lookids LIKE ?';
+				req.push('%' + post.userName + '%');
+			}
+
+			if ( self.item == 'moment_send' ) {
+				sql += ' AND moment = 1';
+			}
+
+			if ( self.item == 'moment_mtl' ) {
+				sql += ' AND moment_mtl = 1';
+			}
+
+			sql += ' ORDER BY w.auto_id ASC LIMIT 100';
+
+            self.mysql.query(sql, req, function (err, res) {
 
                 if (err) {
                     return log.error('读取错误', err);
@@ -317,11 +379,11 @@ class MomentSend {
 
                 //发送完成，解锁 GIT
                 if (res.length == 0) {
-                    com.unlock(self.item);
-                    act.record(self.mysql, self.item + ( testing ? '_test' : '' ), { 'heartbeat_time': time, 'auto_id': auto }, '发送完成');
+                    com.unlock( lock );
+                    act.record(self.mysql, lock, { 'heartbeat_time': time, 'auto_id': auto }, '发送完成');
                     return log.info('处理完毕', time);
                 } else {
-                    act.record(self.mysql, self.item + ( testing ? '_test' : '' ), { 'quantity': res.length, 'members': res }, '批次用户');
+                    act.record(self.mysql, lock, { 'quantity': res.length, 'members': res }, '批次用户');
                     log.info('本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto);
                 }
 
@@ -347,7 +409,7 @@ class MomentSend {
                 }
 
                 if (testing) {
-                    com.unlock(self.item);
+                    com.unlock( lock );
                     return log.info('测试完毕', time);
                 } else {
                     //再次执行，传入最后ID
@@ -392,7 +454,7 @@ class MomentSend {
         }
 
         //需要忽略的发圈
-        if (post.commentUserListCount) {
+        if (post.commentUserList) {
 
             for (let i = 0; i < post.commentUserList.length; i++) {
 
