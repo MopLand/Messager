@@ -82,7 +82,7 @@ class GroupsSend {
 		this.nodes = set.instances ? set.instances : 0;
         this.insid = process.env.NODE_APP_INSTANCE || 0;
 
-        //log.info( 'Process', process.env );        
+        //log.info( 'Process', process.env );
         log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid );
 
         ///////////////

@@ -3,5 +3,7 @@
   "script"			: "app.js",
   "args"			: "groups -save /disk/www/url.baohe.com/public/",
   "cwd"				: "/disk/www/Messager",
+  "error_file"		: "./logs/wx_account_err.log",
+  "out_file"		: "./logs/wx_account_out.log",
   "log_date_format" : "YYYY-MM-DD HH:mm Z"
 }
