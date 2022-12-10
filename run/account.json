@@ -1,7 +1,8 @@
 {
   "name"			: "WeixinAccount",
   "script"			: "app.js",
-  "args"			: "groups -save /disk/www/url.baohe.com/public/",
+  "test"			: "groups -save /disk/www/url.baohe.com/public/",
+  "args"			: "account -save /disk/www/url.baohe.com/public/",
   "cwd"				: "/disk/www/Messager",
   "error_file"		: "./logs/wx_account_err.log",
   "out_file"		: "./logs/wx_account_out.log",
