@@ -109,7 +109,6 @@ if (func == 'contact') {
 
 //心跳
 if (func == 'heartbeat') {
-	let inst = Common.getArgv('inst', 1);
 	let klas = new Heartbeat(conf);
 		klas.init( inst );
 }

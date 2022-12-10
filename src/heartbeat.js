@@ -39,8 +39,8 @@ class Heartbeat {
 		//半小时以内有心跳
 		this.range = com.getTime() - 60 * 30;
 
-		//当前 PM2 实例数量
-		this.nodes = inst;
+        //当前 PM2 实例数量
+		this.nodes = process.env.instances || 1;
 
 		//实例ID，PM2 分流
 		this.insid = process.env.NODE_APP_INSTANCE || 0;
