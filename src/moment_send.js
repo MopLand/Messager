@@ -213,11 +213,14 @@ class MomentSend {
         // 多账号，如果有新数据，则第二个监听
         let firstData = false;
 
-        let pm = self.fetchMoment(wechat, follow);
+        let pm = self.wx.SnsUserPage(wechat, follow);
 
         pm.then(ret => {
 
             let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : {};
+
+			log.info('发圈数据', post);
+
 			let size = post.commentUserList.length || 0;
 			let send = true;
 
@@ -324,18 +327,6 @@ class MomentSend {
 
             func(firstData);
         });
-    }
-
-    /**
-     * 获取最新发圈
-     * @param string 微信ID
-     * @param integer 好友ID
-     * @param integer 上一次消息ID
-     * @param integer 来源ID
-     */
-    fetchMoment(wxid, toWxId, maxid = 0, source = 0) {
-        var pm = this.wx.SnsUserPage(wxid, toWxId, maxid, source);
-        return pm;
     }
 
     /**
