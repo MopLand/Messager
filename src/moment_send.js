@@ -665,7 +665,7 @@ class MomentSend {
 
             }).catch(err => {
 
-                log.error('评论失败', [member.weixin_id, err]);
+                log.error('评论失败', [member.weixin_id, post_id, err]);
                 act.updatePushed(self.mysql, member, { api: 'SnsComment', act: 'text', err });
 
                 ////////
@@ -674,6 +674,7 @@ class MomentSend {
                     self.wx.SnsObjectOp(member.weixin_id, post_id, 1);
                     log.error('删除发圈', [member.weixin_id, post_id, lazy_time]);
                 }, 15000);
+				
             });
 
             if (!last && comm.exch) {
