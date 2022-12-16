@@ -220,8 +220,6 @@ class MomentSend {
             let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : { id : 0, createTime : 0, commentUserList : [] };
 			let size = post.commentUserList.length || 0;
 			let send = true;
-			
-			log.info('发圈数据', post);
 
             // 评论为空时：
             // 配置项 nocomment 为空或者false 则必需有评论
@@ -253,7 +251,7 @@ class MomentSend {
 			//允许发无评论，仅尝试拉取一次
 			if( self.inst.nocomment && size == 0 && !self.twice[follow] ){
 				self.twice[follow] = 1;
-				log.info('再拉评论', { 'post.data': post, 'post.time': post.createTime });
+				log.info('再拉评论', post);
 				return;
 			}
 
@@ -263,7 +261,7 @@ class MomentSend {
 					send = false;
 				}else{
 					self.twice[follow] = 1;
-					log.info('暂无评论', { 'post.data': post, 'post.time': post.createTime });
+					log.info('暂无评论', post);
 					return;
 				}
 			}
@@ -279,7 +277,7 @@ class MomentSend {
 				//未找到完成标记，仅尝试再拉一次
 				if( !done && !self.twice[follow] ){
 					self.twice[follow] = 1;
-					log.info('等待评论', { 'post.data': post, 'post.time': post.createTime });
+					log.info('等待评论', post);
 					return;
 				}
 
@@ -298,6 +296,8 @@ class MomentSend {
 
             //转发朋友圈
             if (post.id > maxid && send) {
+			
+				log.info('发圈数据', post);
 
                 firstData = true;
 
