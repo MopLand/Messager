@@ -658,7 +658,7 @@ class ForwardNew {
         if (msg.msgtype == 1) {
 
             // 判断个人商城链接
-            detail = act.replaceUid(detail, member.member_id);
+            detail = act.replaceUserid(detail, member.member_id);
 
             // 从 roomidInfo 发群对象中获取 群数组同时发送文本
             let sendRoomid = [];

@@ -428,7 +428,7 @@ class Moment {
 			if ( !comm.noreplace ) {
 				// 判断个人商城链接
 				log.info( '邀请码', [ member.member_id, member.invite_code, comm ] );
-				comm.text = act.replaceUid( act.replaceInvite( comm.text, member.invite_code ), member.member_id );
+				comm.text = act.replaceUserid( act.replaceInvite( comm.text, member.invite_code ), member.member_id );
 			}
 
 			let extstr = comm.exch ? act.getExternal( comm.text ) : '';

@@ -217,7 +217,7 @@ class MomentSend {
 
         pm.then(ret => {
 
-            let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : { commentUserList : [] };
+            let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : { id : 0, createTime : 0, commentUserList : [] };
 			let size = post.commentUserList.length || 0;
 			let send = true;
 			
@@ -288,7 +288,7 @@ class MomentSend {
 					post.commentUserList.pop();
 				}else{
 					send = false;
-				}				
+				}
 			}
 
             //还原成未二次拉取状态
@@ -517,7 +517,7 @@ class MomentSend {
             // 判断个人商城链接
             if ( !comm.noreplace ) {
                 log.info('邀请码', [member.member_id, member.invite_code, comm]);
-                comm.text = act.replaceUid(comm.text, member.member_id);
+                comm.text = act.replaceUserid(comm.text, member.member_id);
                 comm.text = act.replaceInvite(comm.text, member.invite_code);
             }
 
@@ -677,8 +677,10 @@ class MomentSend {
 				
             });
 
-            if (!last && comm.exch) {
-                await com.sleep(2000);
+			//适当延迟，保证评论顺序
+            //if (!last && comm.exch) {
+			if ( !last ) {
+                await com.sleep(1000);
             }
         }
     }
