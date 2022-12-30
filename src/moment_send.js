@@ -181,6 +181,7 @@ class MomentSend {
 
 			let post = {
 				id: recv.postid,
+				forced: recv.forced,
 				userName: recv.weixin,
                 objectDesc: { string: recv.subject },
                 commentUserList: recv.comment
@@ -362,7 +363,7 @@ class MomentSend {
 					+ 'WHERE w.online = 1 AND w.auto_id > ? AND w.created_date <= ? ';			
 			let req = [auto, date];
 
-			if ( self.item == 'moment_send' ) {
+			if ( self.item == 'moment_send' && !post.forced ) {
 				//sql += ' AND lookids LIKE ?';
 				//req.push('%' + post.userName + '%');
 			}
