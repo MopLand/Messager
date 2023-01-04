@@ -648,6 +648,12 @@ class MomentSend {
             let comm = data.comment[i];
             let last = i == data.comment.length - 1;
 
+			//适当延迟，保证评论顺序
+            //if (!last && comm.exch) {
+			if ( !last ) {
+				await com.sleep(1000);
+			}
+
             //评论
             let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, comm.text);
 
@@ -679,11 +685,6 @@ class MomentSend {
 				
             });
 
-			//适当延迟，保证评论顺序
-            //if (!last && comm.exch) {
-			if ( !last ) {
-                await com.sleep(1000);
-            }
         }
     }
 }

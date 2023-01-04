@@ -124,7 +124,7 @@ class GroupsSend {
 
             //删除锁文件
             com.unlock(lock);
-            act.record(self.mysql, self.item, { 'quantity': self.members[roomid].length, 'package': pakId, 'last_man': last }, '发送完成');
+            //act.record(self.mysql, self.item, { 'quantity': self.members[roomid].length, 'package': pakId, 'last_man': last }, '发送完成');
 
             //清除定时器
             clearInterval(clok);
@@ -189,7 +189,7 @@ class GroupsSend {
             log.info('消息数量', { '通知ID': recv.lastid, '原消息': recv.message.length, '筛选后': size });
             log.info('有效消息', data);
 
-            act.record(self.mysql, self.item, data, '发群消息');
+            //act.record(self.mysql, self.item, data, '发群消息');
 
             //解除读消息锁
             self.locked = 0;
@@ -319,7 +319,7 @@ class GroupsSend {
             // fromroomid 该消息源群用户缓存时间
             self.updated[fromroomid] = com.getTime();
 
-            act.record(self.mysql, self.item, { 'quantity': useids.length, 'member_ids': useids, fromroomid: fromroomid }, '筛选用户');
+            //act.record(self.mysql, self.item, { 'quantity': useids.length, 'member_ids': useids, fromroomid: fromroomid }, '筛选用户');
 
             log.info('筛选用户', '在线用户 ' + res.length + ' 人，群发用户（' + fromroomid + '）' + member.length + ' 人，发送状态 ' + self.sender);
 
