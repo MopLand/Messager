@@ -85,7 +85,7 @@ class GroupsSend {
         ///////////////
 
         // 淘口令分享随机文案组
-        this.tbcTexts = await this.getConfig( 'tbc' );
+        //this.tbcTexts = await this.getConfig( 'tbc' );
 
         ///////////////
 
@@ -1125,9 +1125,9 @@ class GroupsSend {
                 msg.exch = true;
             }
 
-            let  tbcText = msg.exch ? this.tbcTexts : [];
+            //let tbcText = msg.exch ? this.tbcTexts : [];
 
-            let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source, 1, msg.exch, tbcText);
+            let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source, 1, msg.exch);
 
             fn.then(ret => {
                 log.info('文本成功', [member.member_id, ret.count]);
