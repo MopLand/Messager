@@ -10,7 +10,7 @@
     "watch"			    : true,
     "ignore_watch"	    : ["logs",".git","*.gitlock"],
     "watch_options"	    : {
-      "followSymlinks": false
+		"followSymlinks": false
     },
     "log_date_format"   : "YYYY-MM-DD"
   }

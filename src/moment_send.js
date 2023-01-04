@@ -37,13 +37,12 @@ class MomentSend {
         var maxid = 0;
 
         var followApi = 'https://proxy.guodongbaohe.com/assets/wechat';
-        // var followApi = 'http://proxy.guo.test/assets/wechat'; // 测试用
 
         //消息时间戳
-        var stamp = inst.marker || 'mm_moment_id';
+        //var stamp = inst.marker || 'mm_moment_id';
 
-        //Redis消息频道
-        var channel = 'mm_moment_send';
+        //Redis消息频道（mm_moment_send || mm_moment_mtl）
+        var channel = 'mm_' + item;
 
         ///////////////
 
@@ -62,6 +61,7 @@ class MomentSend {
         this.inst = inst;
 
         //最近一次朋友圈消息ID
+		/*
         this.redis.get(stamp, (err, ret) => {
             self.maxid = ret || maxid;
             log.info('init', self.maxid);
@@ -147,6 +147,7 @@ class MomentSend {
             })
 
         }, 60 * 1000 * 5);
+		*/
 
         ///////////////
 
@@ -154,7 +155,7 @@ class MomentSend {
         var where = {};
 
         //订阅消息发送
-        //this.subscribe(channel, where);
+        this.subscribe(channel, where);
 
     }
 
@@ -364,8 +365,8 @@ class MomentSend {
 			let req = [auto, date];
 
 			if ( self.item == 'moment_send' && !post.forced ) {
-				//sql += ' AND lookids LIKE ?';
-				//req.push('%' + post.userName + '%');
+				sql += ' AND lookids LIKE ?';
+				req.push('%' + post.userName + '%');
 			}
 
 			if ( self.item == 'moment_send' ) {
