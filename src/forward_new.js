@@ -27,7 +27,7 @@ class ForwardNew {
         this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 
         // 订阅锁
-        this.locked = 0;
+        //this.locked = 0;
     }
 
     init() {
@@ -47,15 +47,11 @@ class ForwardNew {
         let self = this;
         let wait = 1; // 等待时间
 
-        //订阅消息
-        this.publish.on("ready", function () {
-            self.publish.subscribe(channel);
-        });
-
         //处理 Redis 消息
         this.publish.on('message', function (channel, msg) {
 
             // 正在读取消息，锁还未失效
+			/*
             if (self.locked && self.locked >= com.getTime() - wait) {
                 log.info('读消息锁', self.locked);
                 return;
@@ -63,16 +59,25 @@ class ForwardNew {
                 self.locked = com.getTime();
                 log.info('拉取方式', { channel, msg });
             }
+			*/
 
             try {
-                msg = JSON.parse(msg);
-                log.info('解析成功', { channel, msg });
+
+                let message = JSON.parse(msg);
+
+                log.info('解析成功', { channel, message });
+
+				self.getMember( message );
+
             } catch (e) {
                 return log.error('消息错误', { channel, msg });
             }
-
-            self.getMember(msg);
+            
         });
+
+        //订阅消息
+        this.publish.subscribe(channel);
+
     }
 
     ////////////// 处理消息 ////////////
