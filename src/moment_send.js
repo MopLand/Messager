@@ -668,7 +668,7 @@ class MomentSend {
 
             pm.then(ret => {
 
-                log.info('评论成功', [member.weixin_id, data.package, i]);
+                log.info('评论成功', [member.weixin_id, data.package, i, comm.text]);
 
 				//写入发单效果
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product ) {
