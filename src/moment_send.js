@@ -47,9 +47,12 @@ class MomentSend {
         ///////////////
 
         //当前 PM2 实例数量
-		this.nodes = process.env.instances || 1;
+		let pwd = process.cwd();
+        let txt = fs.readFileSync(pwd + '/run/'+ item +'.json');
+        let set = JSON.parse(txt);
 
 		//实例ID，PM2 分流
+		this.nodes = set.instances || 1;
         this.insid = process.env.NODE_APP_INSTANCE || 0;
 
         //log.info( 'Process', process.env );
@@ -652,7 +655,7 @@ class MomentSend {
 			//适当延迟，保证评论顺序
             //if (!last && comm.exch) {
 			if ( !last ) {
-				await com.sleep(1000);
+				await com.sleep(1500);
 			}
 
             //评论
@@ -660,7 +663,7 @@ class MomentSend {
 
             pm.then(ret => {
 
-                log.info('评论成功', [member.weixin_id, post_id]);
+                log.info('评论成功', [member.weixin_id, post_id, i]);
 
 				//写入发单效果
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product ) {
@@ -674,8 +677,8 @@ class MomentSend {
 
             }).catch(err => {
 
-                log.error('评论失败', [member.weixin_id, post_id, err]);
-                act.updatePushed(self.mysql, member, { api: 'SnsComment', act: 'text', err });
+                log.error('评论失败', [member.weixin_id, post_id, i, err]);
+                act.updatePushed(self.mysql, member, { api: 'SnsComment', act: 'text', txt: comm.text, err });
 
                 ////////
 

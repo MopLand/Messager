@@ -40,9 +40,12 @@ class Heartbeat {
 		this.range = com.getTime() - 60 * 30;
 
         //当前 PM2 实例数量
-		this.nodes = process.env.instances || 1;
+		let pwd = process.cwd();
+        let txt = fs.readFileSync(pwd + '/run/heartbeat.json');
+        let set = JSON.parse(txt);
 
 		//实例ID，PM2 分流
+		this.nodes = set.instances || 1;
 		this.insid = process.env.NODE_APP_INSTANCE || 0;
 
 		log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid );
