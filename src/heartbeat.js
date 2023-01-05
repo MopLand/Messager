@@ -4,6 +4,7 @@
  * 微信群控制器
  */
 
+const fs = require('fs');
 const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const Logger = require('../lib/logger');

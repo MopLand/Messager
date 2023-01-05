@@ -4,6 +4,7 @@
  * 朋友圈控制器
  */
 
+const fs = require('fs');
 const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const req = require('../lib/request');
