@@ -607,10 +607,11 @@ class MomentSend {
         pm.then(ret => {
 
             //转发评论，使用自己的发圈ID
-            let comment = com.clone(data);
-            this.forwardComment(member, comment, ret.snsObject.id);
+            let post = com.clone(data);
 
-            log.info('发圈成功', [member.weixin_id, ret.snsObject.id]);
+            this.forwardComment(member, post, ret.snsObject.id);
+
+            log.info('发圈成功', [member.weixin_id, post.package]);
 
         }).catch(err => {
 
@@ -618,8 +619,11 @@ class MomentSend {
 
             //判定为垃圾消息
             if (typeof err == 'string' && self.inst.cancel) {
+
                 var ret = err.match(self.inst.cancel);
+
                 if (ret) {
+
                     self.abort = ret[0];
 
                     // 营销素材 判定为垃圾消息则禁发素材
@@ -664,7 +668,7 @@ class MomentSend {
 
             pm.then(ret => {
 
-                log.info('评论成功', [member.weixin_id, post_id, i]);
+                log.info('评论成功', [member.weixin_id, data.package, i]);
 
 				//写入发单效果
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product ) {
@@ -678,7 +682,7 @@ class MomentSend {
 
             }).catch(err => {
 
-                log.error('评论失败', [member.weixin_id, post_id, i, err]);
+                log.error('评论失败', [member.weixin_id, data.package, i, err]);
                 act.updatePushed(self.mysql, member, { api: 'SnsComment', act: 'text', txt: comm.text, err });
 
                 ////////
