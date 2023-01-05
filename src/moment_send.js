@@ -200,13 +200,13 @@ class MomentSend {
     }
 
     /**
-     * 获取朋友圈信息
-     * @param {String} wechat
-     * @param {String} follow
-     * @param {String} maxid
-     * @param {String} stamp
-     * @param {Object} conf
-     * @param {Function} func
+     * 获取朋友圈信息（作废）
+     * @param String wechat
+     * @param String follow
+     * @param String maxid
+     * @param String stamp
+     * @param Object conf
+     * @param Function func
      */
     getMoment(wechat, follow, maxid, stamp, conf, testing = false, func) {
 
@@ -333,7 +333,7 @@ class MomentSend {
     /**
      * 循环发送朋友圈
      * @param object post 朋友圈消息
-     * @param Boolean testing 是否为测试消息
+     * @param boolean testing 是否为测试消息
      */
     send(post, testing = false) {
 
@@ -473,6 +473,7 @@ class MomentSend {
 
                 let type = post.commentUserList[i].type;
                 let text = post.commentUserList[i].content;
+                let keep = post.commentUserList[i].fixedly;
                 let comm = text.toLocaleUpperCase();
                 let exch = false;
 
@@ -486,7 +487,7 @@ class MomentSend {
                 if (conf.origin && conf.origin.test(comm)) {
                     data.convert = 0;
                     log.info('不要转链', comm);
-                } else {
+                } else if( !keep ) {
                     exch = act.extractTbc(text) || act.detectUrl(text);
                     exch && data.convert++;
                 }
