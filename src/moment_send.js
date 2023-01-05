@@ -303,7 +303,7 @@ class MomentSend {
             //转发朋友圈
             if (post.id > maxid && send) {
 			
-				log.info('发圈数据', post);
+				log.info('发圈结构', post);
 
                 firstData = true;
 
