@@ -523,7 +523,7 @@ class MomentSend {
 
             // 判断个人商城链接
             if ( !comm.noreplace ) {
-                log.info('邀请码', [member.member_id, member.invite_code, comm]);
+                //log.info('邀请码', [member.member_id, member.invite_code, comm]);
                 comm.text = act.replaceUserid(comm.text, member.member_id);
                 comm.text = act.replaceInvite(comm.text, member.invite_code);
             }
