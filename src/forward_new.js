@@ -250,7 +250,7 @@ class ForwardNew {
             });
 
             // 返回有用信息
-            var roomidInfo = groups.map(ele => {
+            var rooms = groups.map(ele => {
                 return {
                     roomid: ele.userName,
                     minapp: ele.minapp,
@@ -258,8 +258,8 @@ class ForwardNew {
                 };
             });
 
-            if (roomidInfo.length > 0) {
-                member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, roomidInfo });
+            if (rooms.length > 0) {
+                member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, rooms });
             }
         }
 
