@@ -454,6 +454,9 @@ class MomentSend {
             //内容主体
             subject: post.objectDesc.string,
 
+			//源头圈ID
+			sourced: post.userName,
+
             //是否发送
             sending: true,
 
@@ -671,12 +674,12 @@ class MomentSend {
                 log.info('评论成功', [member.weixin_id, data.package, i, comm.text]);
 
 				//写入发单效果
-                if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product ) {
+                if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product && data.sourced ) {
 					for (let k in comm.product) {
 						act.collect(self, 'moment', {
 							"platform": comm.product[k],
 							"item_id": k,
-						}, data, comm);
+						}, data, { [data.sourced] : ret.snsObject.createTime });
 					}
                 }
 

@@ -207,10 +207,7 @@ class GroupsSend {
     /**
      * 循环发送微信群
      * @param string roomid 消息源群ID
-     * @param object 消息数据
-     * @param string 预处理方式类型【groups, card】
-     * @param object 筛选用户条件
-     * @param object 筛选用户条件值
+     * @param object data 消息数据
      */
     send(roomid, data) {
 
@@ -265,18 +262,17 @@ class GroupsSend {
 
     /**
      * 拉取有效用户
-     * @param string fromroomid 消息源群ID
-     * @param object where      消息源群ID
-     * @param object val        消息源群ID
-     * @param function          回调方法
+     * @param string sourced 消息源群ID
+     * @param function func 回调方法
      */
-    getMember(fromroomid, func) {
+    getMember( sourced, func ) {
 
         var self = this;
 
-        // fromroomid 该消息源群用户列表最近 5 分钟内更新过
-        let updateTime = self.updated[fromroomid] ? self.updated[fromroomid] : 0;
-        if (self.members[fromroomid] != undefined && self.members[fromroomid].length && com.getTime() - updateTime <= 60 * 5) {
+        // sourced 该消息源群用户列表最近 5 分钟内更新过
+        let updateTime = self.updated[sourced] ? self.updated[sourced] : 0;
+
+        if ( self.members[sourced] != undefined && self.members[sourced].length && com.getTime() - updateTime <= 60 * 5 ) {
             return func();
         }
 
@@ -290,7 +286,7 @@ class GroupsSend {
         // var time = com.getTime() - self.conf.active;
 
         var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1 AND roomids LIKE ?";
-        var req = [ Number( date ), '%' + fromroomid + '%'];
+        var req = [ Number( date ), '%' + sourced + '%'];
 
         if ( self.nodes > 1 ) {
             sql += " AND auto_id % ? = ?";
@@ -306,7 +302,7 @@ class GroupsSend {
                 return;
             }
 
-            let userGroupsInfo = self.filterMemberGroups( res, fromroomid );
+            let userGroupsInfo = self.filterMemberGroups( res, sourced );
 
             let member = userGroupsInfo.member;
             let useids = userGroupsInfo.useids;
@@ -316,15 +312,15 @@ class GroupsSend {
                 member[useids.length - 1].end = true;
             }
 
-            // fromroomid 该消息源群用户缓存
-            self.members[fromroomid] = member;
+            // sourced 该消息源群用户缓存
+            self.members[sourced] = member;
 
-            // fromroomid 该消息源群用户缓存时间
-            self.updated[fromroomid] = com.getTime();
+            // sourced 该消息源群用户缓存时间
+            self.updated[sourced] = com.getTime();
 
-            //act.record(self.mysql, self.item, { 'quantity': useids.length, 'member_ids': useids, fromroomid: fromroomid }, '筛选用户');
+            //act.record(self.mysql, self.item, { 'quantity': useids.length, 'member_ids': useids, sourced: sourced }, '筛选用户');
 
-            log.info('筛选用户', '在线用户 ' + res.length + ' 人，群发用户（' + fromroomid + '）' + member.length + ' 人，发送状态 ' + self.sender);
+            log.info('筛选用户', '在线用户 ' + res.length + ' 人，群发用户（' + sourced + '）' + member.length + ' 人，发送状态 ' + self.sender);
 
             func();
 
@@ -335,16 +331,16 @@ class GroupsSend {
     /**
      * 过滤每个用户发群信息
      * @param {Object} res 
-     * @param {String} fromroomid
+     * @param {String} sourced
      */
-    filterMemberGroups( res, fromroomid ) {
+    filterMemberGroups( res, sourced ) {
 
         var self = this;
         var member = [];
         var useids = [];
 
         // 是否符合发红包要求
-        // let isCard = self.checkCardTime( fromroomid );
+        // let isCard = self.checkCardTime( sourced );
 
 		//打乱用户顺序
 		res.sort( (a, b) => {
@@ -363,20 +359,22 @@ class GroupsSend {
 
             //过滤包含消息源群的有效群
             groups = groups.filter(ele => {
+
                 let on      = ele.switch == undefined || ele.switch == 1 ? true : false;
                 let minapp	= ele.minapp == undefined || (ele.minapp && ele.minapp == 1) ? true : false;
                 let anchor	=  true; // ele.anchor == undefined || (ele.anchor && ele.anchor == 1) ? true : false;
 
                 // 过滤 有效群;开关打开;小程序和链接不能同时不发(针对拼多多)
-                if ( ele.roomid == fromroomid && on && ( minapp || anchor) ) {
+                if ( ele.roomid == sourced && on && ( minapp || anchor) ) {
                     ele.minapp	= minapp; // 小程序 (针对拼多多)
                     ele.anchor	= anchor; // 链接 (针对拼多多)
                     return ele;
                 }
+
             });
 
             // 返回有用信息
-            var roomidInfo = groups.map(ele => {
+            var rooms = groups.map(ele => {
                 return {
                     roomid: ele.userName,
                     minapp: ele.minapp,
@@ -384,9 +382,9 @@ class GroupsSend {
                 };
             });
 
-            if (roomidInfo.length > 0) {
+            if (rooms.length > 0) {
                 useids.push(res[i].member_id);
-                member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, roomidInfo, fromroomid: fromroomid });
+                member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, rooms, sourced: sourced });
             }
 
         }
@@ -426,6 +424,7 @@ class GroupsSend {
 
             var roomids = [];
             for (let i = 0; i < newgrp.length; i++) {
+
                 let item = newgrp[i].roomid;
 
                 if (item && roomids.indexOf(item) == -1) {
@@ -446,7 +445,7 @@ class GroupsSend {
 
     /**
      * 消息过滤器
-     * @param string 群ID
+     * @param string 源头群ID
      * @param string 消息包ID
      * @param object 消息数据
      * @param object 过滤条件
@@ -464,7 +463,7 @@ class GroupsSend {
             package: pakId,
 
             //源头群ID
-            roomid: roomid,
+            sourced: roomid,
 
             //实例ID
             insid: this.insid,
@@ -721,7 +720,7 @@ class GroupsSend {
             return log.info('异常队列', user);
         }
 
-        log.info('当前微信', { '用户ID': user.member_id, '微信号': user.weixin_id, '群数量': user.roomidInfo.length, '消息量': data.message.length });
+        log.info('当前微信', { '用户ID': user.member_id, '微信号': user.weixin_id, '群数量': user.rooms.length, '消息量': data.message.length });
 
         var func = () => {
 
@@ -735,12 +734,12 @@ class GroupsSend {
             res.then(ret => {
 
                 //本消息含商品
-                if (msg.product && data.roomid) {
+                if (msg.product && data.sourced) {
 					for(let k in msg.product) {
 						act.collect(self, 'groups', {
 							"platform": msg.product[k],
 							"item_id": k,
-						}, data, { [data.roomid] : self.sender });
+						}, data, { [data.sourced] : self.sender });
 					}
                 }
 
@@ -824,11 +823,12 @@ class GroupsSend {
         }
 
         // 保存已发送过红包的源群
-        // self.cardRooms.push(user.fromroomid);
+        // self.cardRooms.push(user.sourced);
 
         let data = com.clone(self.cardCon);
 
         let send = () => {
+
             let item = data.shift();
 
             self.parseCardMsg(user, item, (card) => {
@@ -840,7 +840,7 @@ class GroupsSend {
 
                     cardRet.then(_res => {
 
-                        log.info('发送红包成功', { '发红包搜索源群': user.fromroomid, '红包用户': user.member_id, '消息': card });
+                        log.info('发送红包成功', { '发红包搜索源群': user.sourced, '红包用户': user.member_id, '消息': card });
 
                     }).catch(err => {
 
@@ -877,6 +877,7 @@ class GroupsSend {
      * @param function 拦截方法
      */
     parseCardMsg(user, data, func, blocker = null) {
+		
         var self = this;
         var msgtype = data.msgtype;
 
@@ -1059,22 +1060,22 @@ class GroupsSend {
 
     /**
      * 判断是否发送红包
-     * @param {String} fromroomid
+     * @param {String} sourced
      * @return Boolean 
      */
-    checkCardTime( fromroomid ) {
+    checkCardTime( sourced ) {
 
         var self = this;
 		let send = false;
         let date = new Date();
         let hours = date.getHours();
         let isHours = self.cardTime.indexOf(hours) > -1; // 是否到了发红包点
-        let isFrom = self.cardRooms.indexOf(fromroomid) == -1; // 该源头群是否发过红包
+        let isFrom = self.cardRooms.indexOf(sourced) == -1; // 该源头群是否发过红包
         let isMinute = hours == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，，或者 17:30 发送
 
         // 避免源头群重复 发红包
-        if ( fromroomid && isHours && isFrom & isMinute ) {
-            send = self.cardRooms.push(fromroomid);
+        if ( sourced && isHours && isFrom & isMinute ) {
+            send = self.cardRooms.push(sourced);
         }
 
         return send;
@@ -1093,7 +1094,7 @@ class GroupsSend {
         var detail = msg.content;
 
         // 用户发群数量
-        let size = member.roomidInfo.length;
+        let size = member.rooms.length;
 
         if (size == 0) {
             log.error('发群用户对象', member);
@@ -1106,12 +1107,12 @@ class GroupsSend {
             // 判断个人商城链接
             detail = act.replaceUserid(detail, member.member_id);
 
-            // 从 roomidInfo 发群对象中获取 群数组同时发送文本
+            // 从 rooms 发群对象中获取 群数组同时发送文本
             let sendRoomid = [];
             for (var i = 0; i < size; i++) {
 
-                let roomid = member.roomidInfo[i] && member.roomidInfo[i].roomid ? member.roomidInfo[i].roomid : '';
-                let anchor = member.roomidInfo[i] && member.roomidInfo[i].anchor ? member.roomidInfo[i].anchor : false;
+                let roomid = member.rooms[i] && member.rooms[i].roomid ? member.rooms[i].roomid : '';
+                let anchor = member.rooms[i] && member.rooms[i].anchor ? member.rooms[i].anchor : false;
 
                 if ( msg.exch && !anchor && act.detectUrl(detail) ) {
                     continue;
@@ -1150,8 +1151,8 @@ class GroupsSend {
 
         for (var i = 0; i < size; i++) {
 
-            let chat = member.roomidInfo[i] && member.roomidInfo[i].roomid ? member.roomidInfo[i].roomid : '';
-            let mini = member.roomidInfo[i] && member.roomidInfo[i].minapp ? true : false;
+            let chat = member.rooms[i] && member.rooms[i].roomid ? member.rooms[i].roomid : '';
+            let mini = member.rooms[i] && member.rooms[i].minapp ? true : false;
 
             if (chat == '') {
                 continue;
