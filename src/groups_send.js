@@ -285,8 +285,8 @@ class GroupsSend {
         //二十分钟
         // var time = com.getTime() - self.conf.active;
 
-        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1 AND roomids LIKE ?";
-        var req = [ Number( date ), '%' + sourced + '%'];
+        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1 AND FIND_IN_SET( ?, roomids )";
+        var req = [ Number( date ), sourced ];
 
         if ( self.nodes > 1 ) {
             sql += " AND auto_id % ? = ?";
