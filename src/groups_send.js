@@ -285,15 +285,15 @@ class GroupsSend {
         //二十分钟
         // var time = com.getTime() - self.conf.active;
 
-        var sql = "SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1 AND FIND_IN_SET( ?, roomids )";
+        var sql = 'SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1 AND FIND_IN_SET( ?, roomids )';
         var req = [ Number( date ), sourced ];
 
         if ( self.nodes > 1 ) {
-            sql += " AND auto_id % ? = ?";
+            sql += ' AND auto_id % ? = ?';
             req.push(self.nodes, self.insid);
         }
 
-        sql += " ORDER BY auto_id ASC";
+        sql += ' ORDER BY auto_id ASC';
 
         self.mysql.query(sql, req, function (err, res) {
 

@@ -40,7 +40,8 @@ var conf = {
 		host     : '127.0.0.1',
 		user     : 'root',
 		password : 'root',
-		database : 'project_jellybox'
+		database : 'project_jellybox',
+		charset  : 'utf8mb4',
 	},
 
 	//工作时间段
