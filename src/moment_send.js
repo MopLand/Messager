@@ -365,7 +365,7 @@ class MomentSend {
             //let fld = [ 'moment', 'moment_send' ].indexOf(self.item) > -1 ? 'moment' : 'moment_mtl';
             let sql = 'SELECT w.`auto_id`, w.`member_id`, w.`weixin_id`, w.`tag`, m.`invite_code` '
 					+ 'FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` '
-					+ 'WHERE w.online = 1 AND w.auto_id > ? AND w.created_date <= ? ';			
+					+ 'WHERE w.online = 1 AND w.auto_id > ? AND w.created_date <= ? ';
 			let req = [auto, date];
 
 			if ( self.item == 'moment_send' && !post.forced ) {
