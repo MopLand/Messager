@@ -3,7 +3,7 @@
     "script": "app.js",
     "args": "groups_send",
     "cwd": "/disk/www/Messager",
-    "instances": "4",
+    "instances": "5",
     "error_file": "./logs/wx_groups_send_err.log",
     "out_file": "./logs/wx_groups_send_out.log",
     "merge_logs": true,
