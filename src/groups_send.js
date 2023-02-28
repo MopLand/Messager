@@ -568,7 +568,7 @@ class GroupsSend {
 
                 //不转链，文本类型，没有配置原样规则 或 文本不匹配
                 if ( !keep && item.msgType == 1 && (!this.inst.origin || !this.inst.origin.test(text)) ) {
-                    exch = (act.extractTbc(text) || act.detectUrl(text));
+                    exch = (act.extractTbc(text) || act.detectUrl(text) || act.detectApp(text));
                     exch && data.convert++;
                 }
 

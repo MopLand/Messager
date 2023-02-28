@@ -495,7 +495,7 @@ class MomentSend {
                     data.convert = 0;
                     log.info('不要转链', comm);
                 } else if( !keep ) {
-                    exch = act.extractTbc(text) || act.detectUrl(text);
+                    exch = act.extractTbc(text) || act.detectUrl(text) || act.detectApp(text);
                     exch && data.convert++;
                 }
 
