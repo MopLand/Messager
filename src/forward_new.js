@@ -90,11 +90,11 @@ class ForwardNew {
         var self = this;
 
         //昨天时间
-        var last = com.strtotime('-1 day');
-        var date = new Date(last * 1000).format('yyyyMMdd');
+        //var last = com.strtotime('-1 day');
+        //var date = new Date(last * 1000).format('yyyyMMdd');
 
 		let sql = 'SELECT w.auto_id, w.member_id, w.weixin_id, w.groups_list, w.moment, w.groups, w.tag, m.`invite_code` \
-					FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE w.created_date <= ? AND w.online = 1';
+					FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE w.online = 1';
         let req = [date];
 
         if ( msg.member ) {
