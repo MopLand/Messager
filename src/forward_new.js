@@ -70,7 +70,7 @@ class ForwardNew {
 				self.getMember( message );
 
             } catch (e) {
-                return log.error('消息错误', { channel, msg });
+                return log.error('消息错误', { channel, msg, err : e.toString() });
             }
             
         });
