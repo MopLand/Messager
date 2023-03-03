@@ -95,7 +95,7 @@ class ForwardNew {
 
 		let sql = 'SELECT w.auto_id, w.member_id, w.weixin_id, w.groups_list, w.moment, w.groups, w.tag, m.`invite_code` \
 					FROM `pre_weixin_list` AS w LEFT JOIN `pre_member_list` AS m ON w.`member_id` = m.`member_id` WHERE w.online = 1';
-        let req = [date];
+        let req = [];
 
         if ( msg.member ) {
             sql += ' AND w.member_id = ? ';
