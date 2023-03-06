@@ -83,7 +83,12 @@ class GroupsSend {
         this.insid = process.env.NODE_APP_INSTANCE || 0;
 
         //log.info( 'Process', process.env );
-        log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid );
+        log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid );		
+
+		if ( this.nodes == 1 && this.insid > 0 ) {
+			log.info('实例错误', '实例数量与实例不匹配');
+			return;
+		}
 
         ///////////////
 
@@ -165,17 +170,12 @@ class GroupsSend {
                 return;
             } else {
                 self.locked = com.getTime();
-                log.info('拉取方式', { channel, message });
+                log.info('拉取方式', { 'instance' : self.insid, channel, message });
             }
 
-            log.info( '运行实例', '实例数量 NODES：' + self.nodes + '，当前实例 INST：' + self.insid );
+            //log.info( '运行实例', '实例数量 NODES：' + self.nodes + '，当前实例 INST：' + self.insid );
 
 			/////////////
-
-            if ( self.nodes == 1 && self.insid > 0 ) {
-                log.info('实例错误', '实例数量与实例不匹配');
-                return;
-            }
 
             log.info('原始消息', recv);
 
@@ -272,6 +272,7 @@ class GroupsSend {
         // sourced 该消息源群用户列表最近 5 分钟内更新过
         let updateTime = self.updated[sourced] ? self.updated[sourced] : 0;
 
+		//优先使用 Member 缓存 
         if ( self.members[sourced] != undefined && self.members[sourced].length && com.getTime() - updateTime <= 60 * 5 ) {
             return func();
         }
@@ -302,10 +303,9 @@ class GroupsSend {
                 return;
             }
 
-            let userGroupsInfo = self.filterMemberGroups( res, sourced );
-
-            let member = userGroupsInfo.member;
-            let useids = userGroupsInfo.useids;
+            let usable = self.filterMemberGroups( res, sourced );
+            let member = usable.member;
+            let useids = usable.useids;
 
             //最后一个用户加个标记
             if (useids.length) {
@@ -320,7 +320,7 @@ class GroupsSend {
 
             //act.record(self.mysql, self.item, { 'quantity': useids.length, 'member_ids': useids, sourced: sourced }, '筛选用户');
 
-            log.info('筛选用户', '在线用户 ' + res.length + ' 人，群发用户（' + sourced + '）' + member.length + ' 人，发送状态 ' + self.sender);
+            log.info('筛选用户', '当前实例 ' + self.insid + '，在线用户 ' + res.length + ' 人，群发用户（' + sourced + '）' + member.length + ' 人，发送状态 ' + self.sender);
 
             func();
 
@@ -456,6 +456,9 @@ class GroupsSend {
         //构造数据包
         var data = {
 
+            //实例ID
+            insid: this.insid,
+
             //需要转链
             convert: 0,
 
@@ -464,9 +467,6 @@ class GroupsSend {
 
             //源头群ID
             sourced: roomid,
-
-            //实例ID
-            insid: this.insid,
 
 			//是否发送红包
             cardMsg: this.checkCardTime( roomid ),
@@ -790,8 +790,8 @@ class GroupsSend {
      * @param bool 是否发送红包
      */
     async sendCardMsg(user, isCard = false) {
-        var self = this;
 
+        var self = this;
         let config_clear = [ 14, 15, 19 ]; // 清空配置时间
         let isHours = config_clear.indexOf((new Date).getHours()) > -1; // 是否清空配置
 
@@ -827,7 +827,7 @@ class GroupsSend {
 
         let data = com.clone(self.cardCon);
 
-        let send = () => {
+        let push = () => {
 
             let item = data.shift();
 
@@ -850,7 +850,7 @@ class GroupsSend {
 
                         //红包包未完成
                         if (data.length > 0) {
-                            setTimeout(() => { send(); }, 3000);
+                            setTimeout(() => { push(); }, 3000);
                         }
         
                     });
@@ -866,7 +866,7 @@ class GroupsSend {
             });
         }
 
-        send();
+        push();
     }
 
     /**
@@ -1135,7 +1135,7 @@ class GroupsSend {
             let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source, 1, msg.exch);
 
             fn.then(ret => {
-                log.info('文本成功', [member.member_id, ret.count]);
+                log.info('文本成功', { 'member' : member.member_id, 'count' : ret.count, 'instance' : self.insid });
             }).catch(err => {
                 self.sendErr(member, 'NewSendMsg', err);
             });
@@ -1164,7 +1164,7 @@ class GroupsSend {
                 var fn = this.wx.UploadMsgImgXml(member.weixin_id, chat, detail);
 
                 fn.then(ret => {
-                    log.info('发图成功', [member.member_id, chat, ret.msgId]);
+                    log.info('发图成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
                 }).catch(err => {
                     self.sendErr(member, 'UploadMsgImgXml', err, chat, detail);
                 });
@@ -1176,7 +1176,7 @@ class GroupsSend {
                 var fn = this.wx.UploadVideoXml(member.weixin_id, chat, detail);
 
                 fn.then(ret => {
-                    log.info('视频成功', [member.member_id, chat, ret.msgId]);
+                    log.info('视频成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
                 }).catch(err => {
                     self.sendErr(member.member_id, 'UploadVideoXml', err, chat, detail);
                 });
@@ -1188,7 +1188,7 @@ class GroupsSend {
                 var fn = this.wx.SendEmojiXml(member.weixin_id, chat, detail);
 
                 fn.then(ret => {
-                    log.info('表情成功', [member.member_id, chat, ret]);
+                    log.info('表情成功', { 'member' : member.member_id, chat, ret, 'instance' : self.insid });
                 }).catch(err => {
                     self.sendErr(member, 'SendEmojiXml', err, chat, detail);
                 });
@@ -1209,7 +1209,7 @@ class GroupsSend {
                     var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, detail);
 
                     fn.then(ret => {
-                        log.info('小程序成功', [member.member_id, chat, ret.msgId]);
+                        log.info('小程序成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
                     }).catch(err => {
                         self.sendErr(member, 'SendAppMsgXml', err, chat, detail);
                     });
@@ -1237,7 +1237,7 @@ class GroupsSend {
 
                     fn.then(ret => {
 
-                        log.info('卡片消息', [member.member_id, ret.msgId]);
+                        log.info('卡片消息', { 'member' : member.member_id, 'msgid' : ret.msgId, 'instance' : self.insid });
 
                     }).catch(err => {
 
