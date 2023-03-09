@@ -92,11 +92,6 @@ class GroupsSend {
 
         ///////////////
 
-        // 淘口令分享随机文案组
-        //this.tbcTexts = await this.getConfig( 'tbc' );
-
-        ///////////////
-
         //消息筛选条件
         var where = {};
 
@@ -1109,6 +1104,7 @@ class GroupsSend {
 
             // 从 rooms 发群对象中获取 群数组同时发送文本
             let sendRoomid = [];
+
             for (var i = 0; i < size; i++) {
 
                 let roomid = member.rooms[i] && member.rooms[i].roomid ? member.rooms[i].roomid : '';
@@ -1121,18 +1117,18 @@ class GroupsSend {
                 sendRoomid.push(roomid);
             }
 
-            if (sendRoomid.length == 0) {
+            if ( sendRoomid.length == 0 ) {
                 log.info('过滤消息', [member, msg]);
                 return com.Promise(true, [member, msg]);
             }
 
+			/*
             if (this.inst.origin && this.inst.origin.test(detail)) {
                 msg.exch = true;
             }
+			*/
 
-            //let tbcText = msg.exch ? this.tbcTexts : [];
-
-            let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source, 1, msg.exch);
+            let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source, 1);
 
             fn.then(ret => {
                 log.info('文本成功', { 'member' : member.member_id, 'count' : ret.count, 'instance' : self.insid });

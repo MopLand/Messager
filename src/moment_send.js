@@ -35,12 +35,6 @@ class MomentSend {
         var self = this;
         var conf = this.conf;
         var inst = this.conf[item];
-        var maxid = 0;
-
-        //var followApi = 'https://proxy.guodongbaohe.com/assets/wechat';
-
-        //消息时间戳
-        //var stamp = inst.marker || 'mm_moment_id';
 
         //Redis消息频道（mm_moment_send || mm_moment_mtl）
         var channel = 'mm_' + item;
@@ -63,97 +57,6 @@ class MomentSend {
 
         this.item = item;
         this.inst = inst;
-
-        //最近一次朋友圈消息ID
-		/*
-        this.redis.get(stamp, (err, ret) => {
-            self.maxid = ret || maxid;
-            log.info('init', self.maxid);
-        });
-
-        //每分钟获取一次朋友圈
-        setInterval(function () {
-
-            //工作时段
-            var date = new Date();
-            var workHours = date.format('h');
-
-            var work = workHours >= conf.worked || workHours < 3; // 工作时间段 0-3 6-24
-
-            if ( !work ) return;
-
-            // 微信配置
-            let wechatConfig = self.wechatConfig || [];
-
-            // 获取后台配置微信号
-            req.get(followApi, {}, (code, body) => {
-
-                try {
-                    if (typeof body == 'string') {
-                        body = JSON.parse(body);
-                        log.info('微信配置', body);
-                    }
-                } catch (e) {
-                    body = { 'status': -code, 'body': body, 'error': e.toString() };
-                    log.error('微信监控号', [ item, body ]);
-                }
-
-                let follows = '';
-                let testAccount = ''; // 测试账号
-                if (body.status >= 0 && body.result) {
-
-                    // 线上配置账号
-                    follows = body.result[ item ] || '';
-                    self.wechatConfig = body.result;
-
-                    // 测试监控群微信号
-                    testAccount = body.result.test || '';
-
-                    if (testAccount) {
-                        follows = ( follows ? follows + ',' : '' ) + testAccount;
-                    }
-                }
-
-                // 去空值
-                follows = follows.split(',');
-                follows = follows.filter(function (s) {
-                    return s && s.trim();
-                })
-
-                if ( follows.length == 0 ) {
-                    act.record(self.mysql, self.item, { 'item': item, 'wechat': conf.wechat, 'follows': follows, 'res': body }, '监听配置');
-                    return
-                }
-
-                // 拉取多账号，第一个有数据发送，否则继续拉取第二个
-                let loopSend = () => {
-
-                    let onFollow = follows.shift();
-
-                    self.getMoment(conf.wechat, onFollow, self.maxid, stamp, conf, (testAccount.indexOf(onFollow) > -1), (firstData) => {
-                        if (follows.length > 0 && !firstData) {
-                            loopSend();
-                        }
-                    });
-                }
-
-                loopSend();
-
-            }, (data) => {
-
-                let workMin = date.format('m');
-
-                if (wechatConfig.length == 0 || (workMin > 0 && workMin < 9) || (workMin > 30 && workMin < 39)) {
-                    return { 'request': true };
-                } else {
-                    return { 'request': false, 'respond': { 'status': 1, 'result': wechatConfig } };
-                }
-            })
-
-        }, 60 * 1000 * 5);
-		*/
-
-        ///////////////
 
         //消息筛选条件
         var where = {};
@@ -194,144 +97,13 @@ class MomentSend {
 
 			self.send(post, recv.testing);
 
-			act.record(self.mysql, self.item, post, '发圈消息');
+			//act.record(self.mysql, self.item, post, '发圈消息');
 
         });
 
         //订阅 Redis 频道消息
         this.redis.subscribe(channel);
 
-    }
-
-    /**
-     * 获取朋友圈信息（作废）
-     * @param String wechat
-     * @param String follow
-     * @param String maxid
-     * @param String stamp
-     * @param Object conf
-     * @param Function func
-     */
-    getMoment(wechat, follow, maxid, stamp, conf, testing = false, func) {
-
-        var self = this;
-
-        // 多账号，如果有新数据，则第二个监听
-        let firstData = false;
-
-        let pm = self.wx.SnsUserPage(wechat, follow);
-
-        pm.then(ret => {
-
-            let post = ret.objectList && ret.objectList[0] ? ret.objectList[0] : { id : 0, createTime : 0, commentUserList : [] };
-			let size = post.commentUserList.length || 0;
-			let send = true;
-
-            // 评论为空时：
-            // 配置项 nocomment 为空或者false 则必需有评论
-            // 配置项 nocomment 为 true 但是 拉取次数(pullcomment)为 0 时， pullcomment=1 等待下一次拉取
-			/*
-            if (size == 0 && (!self.inst.nocomment || (self.inst.nocomment && self.pullcomment == 0))) {
-
-                // 评论不是必须时，评论为空拉取次数 = 1
-                if (self.inst.nocomment) {
-                    self.pullcomment = 1;
-                }
-
-                log.info('暂无评论', { 'post.data': post, 'post.time': post.createTime });
-                return;
-            }
-			*/
-			
-			if( size > 0 ){
-
-				//过滤评论数据，仅获取本人评论
-				post.commentUserList = post.commentUserList.filter( (ele) =>{
-					return ele.userName == post.userName;
-				} );
-
-				//评论重新计数
-				size = post.commentUserList.length || 0;
-			}
-
-			//允许发无评论，仅尝试拉取一次
-			if( self.inst.nocomment && size == 0 && !self.twice[follow] ){
-				self.twice[follow] = 1;
-				log.info('再拉评论', post);
-				return;
-			}
-
-			//不许发无评论，继续等待下一次
-			if( !self.inst.nocomment && size == 0 ){
-				if( self.twice[follow] ){
-					send = false;
-				}else{
-					self.twice[follow] = 1;
-					log.info('暂无评论', post);
-					return;
-				}
-			}
-
-			/////////
-
-			//查找完成标记，未找到时不发送
-			if( self.inst.complete ){
-
-				//是否从评论中找到完成标记
-				let done = size > 0 ? post.commentUserList[size - 1].content.compare( self.inst.complete ) : false;
-
-				//未找到完成标记，仅尝试再拉一次
-				if( !done && !self.twice[follow] ){
-					self.twice[follow] = 1;
-					log.info('等待评论', post);
-					return;
-				}
-
-				//已找到完成标记
-				if( done ){
-					post.commentUserList.pop();
-				}else{
-					send = false;
-				}
-			}
-
-            //还原成未二次拉取状态
-            self.twice[follow] = 0;
-
-			/////////
-
-            //转发朋友圈
-            if (post.id > maxid && send) {
-			
-				log.info('发圈结构', post);
-
-                firstData = true;
-
-                self.send(post, testing);
-                self.maxid = maxid = post.id;
-
-                act.record(self.mysql, self.item + ( testing ? '_test' : '' ), post, '发圈消息');
-
-            } else {
-                log.info('暂无发圈', { follow, 'maxid': maxid, 'twice': self.twice[follow], 'post.id': post.id, 'post.time': post.createTime });
-            }
-
-            //存储发圈消息ID，存储一天
-            self.redis.set( stamp, maxid );			
-            self.redis.expire( stamp, 3600 * 14 );
-
-            req.status(conf.report, 'MM_Moment', maxid, ret.baseResponse);
-
-            func(firstData);
-
-        }).catch(err => {
-
-            log.info(err);
-
-            req.status(conf.report, 'MM_Moment', maxid, err);
-
-            func(firstData);
-        });
     }
 
     /**
@@ -397,10 +169,10 @@ class MomentSend {
                 //发送完成，解锁 GIT
                 if (res.length == 0) {
                     com.unlock( lock );
-                    act.record(self.mysql, lock, { 'heartbeat_time': time, 'auto_id': auto }, '发送完成');
+                    //act.record(self.mysql, lock, { 'heartbeat_time': time, 'auto_id': auto }, '发送完成');
                     return log.info('处理完毕', time);
                 } else {
-                    act.record(self.mysql, lock, { 'quantity': res.length, 'members': res }, '批次用户');
+                    //act.record(self.mysql, lock, { 'quantity': res.length, 'members': res }, '批次用户');
                     log.info('本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto);
                 }
 
