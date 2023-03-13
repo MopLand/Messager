@@ -32,8 +32,6 @@ class GroupsSend {
         this.wx = new wx(conf.weixin, conf.reserve, conf.special);
         this.redis = com.redis(conf.redis);
         this.sider = com.redis(conf.redis);
-
-        conf.mysql.charset = 'utf8mb4';
         this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 
         this.members = {};
@@ -895,19 +893,23 @@ class GroupsSend {
             func(null);
         }
 
-        let cache = this.inst.card_cache + data.cache + user.member_id;
+        var cache = this.inst.card_cache + data.cache + user.member_id;
         let opurl = msgtype == 90 ? self.meituan : self.element;
         let param = msgtype == 90 ? { member_id: user.member_id, plat: 'h5' } : { member_id: user.member_id, ajax: '', callback: '' };
 
-        // 获取红包链接缓存
-		this.sider.get( cache, ( err, ret ) => {
+		//console.log( cache );
 
+        // 获取红包链接缓存
+		self.sider.get( cache, ( err, ret ) => {
+
+			//从缓存读取
 			if (!err && ret) {
 
-                data.content.url = ret;
-                func(data);
+				data.content.url = ret;
 
-            } else {
+				func(data);
+
+			} else {
 
                 req.get(opurl, param, (code, body) => {
 
@@ -922,11 +924,14 @@ class GroupsSend {
                     //成功转链
                     if (body.status >= 0) {
         
-                        log.info('链接成功', { 'user': user, body });
+                        log.info('链接成功', { user, body });
 
-                        let url = msgtype == 90 ? body.result : body.h5_short_link
+						console.log( body );
+
+                        let url = msgtype == 90 ? body.result : body.result.h5_short_link;
         
                         data.content.url = url;
+
                         func(data);
 
                         // 缓存红包链接 3 天
@@ -942,8 +947,10 @@ class GroupsSend {
         
                 });
 
-            }
+			}
+
         });
+
     }
 
     /**

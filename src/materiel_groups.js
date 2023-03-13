@@ -19,7 +19,6 @@ class MaterielGroups {
 		this.conf = conf;
 		this.wx = new wx(conf.weixin, conf.reserve, conf.special);
 		this.redis = com.redis(conf.redis);
-		conf.mysql.charset = 'utf8mb4';
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 	}
 
