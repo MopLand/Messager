@@ -895,13 +895,13 @@ class GroupsSend {
             func(null);
         }
 
-        var cacheKey = this.inst.card_cache + data.cache + user.member_id;
-
-        let url = msgtype == 90 ? self.meituan : self.element;
-        let param = msgtype == 90 ? { member_id: user.member_id, plat: 'h5' } : { userid: user.member_id, ajax: '', callback: '' };
+        let cache = this.inst.card_cache + data.cache + user.member_id;
+        let opurl = msgtype == 90 ? self.meituan : self.element;
+        let param = msgtype == 90 ? { member_id: user.member_id, plat: 'h5' } : { member_id: user.member_id, ajax: '', callback: '' };
 
         // 获取红包链接缓存
-		this.sider.get( cacheKey, ( err, ret ) => {
+		this.sider.get( cache, ( err, ret ) => {
+
 			if (!err && ret) {
 
                 data.content.url = ret;
@@ -909,7 +909,7 @@ class GroupsSend {
 
             } else {
 
-                req.get(url, param, (code, body) => {
+                req.get(opurl, param, (code, body) => {
 
                     try {
                         if (typeof body == 'string') {
@@ -924,14 +924,14 @@ class GroupsSend {
         
                         log.info('链接成功', { 'user': user, body });
 
-                        let url = msgtype == 90 ? body.result : body.valued
+                        let url = msgtype == 90 ? body.result : body.h5_short_link
         
                         data.content.url = url;
                         func(data);
 
                         // 缓存红包链接 3 天
-                        self.sider.set(cacheKey, url);
-                        self.sider.expire(cacheKey, 3600 * 24 * 3);
+                        self.sider.set(cache, url);
+                        self.sider.expire(cache, 3600 * 24 * 3);
         
                     } else {
         
