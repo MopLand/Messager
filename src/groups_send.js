@@ -88,6 +88,9 @@ class GroupsSend {
 			return;
 		}
 
+		//清理失效Git锁
+		log.clean( 3, '/', '.gitlock' );
+
         ///////////////
 
         //消息筛选条件
