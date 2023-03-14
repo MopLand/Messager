@@ -284,8 +284,9 @@ class MomentSend {
      * @param object 用户数据
      * @param object 发圈数据
      * @param integer 延迟时间
+     * @param string 解析商品
      */
-    parseComment(member, params, testing = false, lazy_time = 0) {
+    parseComment(member, params, testing = false, lazy_time = 0, product = 'true') {
 
         var self = this;
         var data = com.clone(params);
@@ -306,7 +307,7 @@ class MomentSend {
             let misc = comm.exch ? act.getExternal(comm.text) : '';
 
             //转链
-            req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': 'true', 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
+            req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': product, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
 
                 try {
                     if (typeof body == 'string') {
@@ -445,7 +446,7 @@ class MomentSend {
 
                 log.info('评论成功', [member.weixin_id, data.package, i, comm.text]);
 
-				//写入发单效果
+				//写入发单效果，仅限有源商品
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product && data.sourced ) {
 					for (let k in comm.product) {
 						act.collect(self, 'moment', {

@@ -152,9 +152,9 @@ class ForwardNew {
                 return log.error('发圈错误', { user, data });
             }
 
-			//预处理评论，再转发朋友圈
+			//预处理评论，再转发朋友圈（product=false 不解析商品，提高效率）
             for (let i = 0; i < user.length; i++) {
-                this.moment.parseComment(user[i], res);
+                this.moment.parseComment(user[i], res, false, 0, 'false');
             }
 
         })
@@ -197,8 +197,8 @@ class ForwardNew {
 
         var func = (i) => {
 
-			//预处理消息
-			self.groups.parseMessage(user[i], data);
+			//预处理消息（product=false 不解析商品，提高效率）
+			self.groups.parseMessage(user[i], data, 0, 'false');
 
             //下一下用户
             if (i < size - 1) {

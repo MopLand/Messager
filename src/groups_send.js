@@ -601,8 +601,9 @@ class GroupsSend {
      * @param object 用户数据
      * @param object 发群数据
      * @param integer 延迟时间
+     * @param string 解析商品
      */
-    parseMessage(member, data, lazy_time = 0) {
+    parseMessage(member, data, lazy_time = 0, product = 'true') {
 
         var user = com.clone(member);
         var data = com.clone(data);
@@ -621,7 +622,7 @@ class GroupsSend {
             let exch = comm.msgtype == 1 && comm.exch;
             let misc = exch ? act.getExternal( comm.content ) : '';
 
-            req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': 'true', 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
+            req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': product, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
 
                 try {
                     if (typeof body == 'string') {
@@ -671,7 +672,7 @@ class GroupsSend {
                         let time = com.getTime();
                         let span = 60 * 1000 * 3;
                         self.sender = time + span;
-                        setTimeout(() => { self.parseMessage(user, data, time); }, span);
+                        setTimeout(() => { self.parseMessage(user, data, time, product); }, span);
                     }
 
                 }
@@ -726,7 +727,7 @@ class GroupsSend {
 
             res.then(ret => {
 
-                //本消息含商品
+                //本消息含商品，仅限有源商品
                 if (msg.product && data.sourced) {
 					for(let k in msg.product) {
 						act.collect(self, 'groups', {
