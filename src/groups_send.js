@@ -232,14 +232,14 @@ class GroupsSend {
 
                 //本地测试，单用户
                 if (size == 1) {
-                    setTimeout(self.forwardMessage.bind(self), span);
+                    setTimeout( self.forwardMessage.bind(self), span );
                 }
 
                 ////////////
 
                 //锁定 GIT
                 if (i == 0) {
-                    self.setLocked(roomid, self.item, user[size - 1], data.package);
+                    self.setLocked( roomid.replace('@chatroom', ''), self.item, user[size - 1], data.package );
                 }
 
             }
