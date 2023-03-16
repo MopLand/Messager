@@ -36,6 +36,7 @@ class GroupsSend {
 
         this.members = {};
         this.updated = {};
+        this.sending = {};
         this.queues = [];
         this.locked = 0;
         this.sender = 0;
@@ -182,7 +183,7 @@ class GroupsSend {
 
             //发送最新消息
             if (size) {
-                self.send(roomid, data);
+                self.send(roomid, data, recv.forced);
             }
 
             log.info('消息数量', { '通知ID': recv.lastid, '原消息': recv.message.length, '筛选后': size });
@@ -204,15 +205,16 @@ class GroupsSend {
      * 循环发送微信群
      * @param string roomid 消息源群ID
      * @param object data 消息数据
+     * @param boolean forced 强制发送
      */
-    send(roomid, data) {
+    send(roomid, data, forced) {
 
         var self = this;
 
         self.getMember(roomid, () => {
 
             //获取用户副本，限定每分钟发送量，并计算每人所需间隔时间
-            var user = com.clone(self.members[roomid]);
+            var user = com.clone( self.members[roomid] );
 
             if (user.length == 0) {
                 log.info('用户为空', user);
@@ -250,7 +252,7 @@ class GroupsSend {
             //开始执行
             func(0);
 
-        });
+        }, forced);
 
     }
 
@@ -260,8 +262,9 @@ class GroupsSend {
      * 拉取有效用户
      * @param string sourced 消息源群ID
      * @param function func 回调方法
+     * @param boolean forced 强制发送
      */
-    getMember( sourced, func ) {
+    getMember( sourced, func, forced ) {
 
         var self = this;
 
@@ -282,12 +285,17 @@ class GroupsSend {
         //二十分钟
         // var time = com.getTime() - self.conf.active;
 
-        var sql = 'SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1 AND FIND_IN_SET( ?, roomids )';
-        var req = [ Number( date ), sourced ];
+        var sql = 'SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1';
+        var req = [ Number( date ) ];
 
         if ( self.nodes > 1 ) {
             sql += ' AND auto_id % ? = ?';
             req.push(self.nodes, self.insid);
+        }
+
+        if ( !forced ) {
+            sql += ' AND FIND_IN_SET( ?, roomids )';
+            req.push(sourced);
         }
 
         sql += ' ORDER BY auto_id ASC';
@@ -299,12 +307,12 @@ class GroupsSend {
                 return;
             }
 
-            let usable = self.filterMemberGroups( res, sourced );
+            let usable = self.filterMemberGroups( res, sourced, forced );
             let member = usable.member;
             let useids = usable.useids;
 
             //最后一个用户加个标记
-            if (useids.length) {
+            if ( useids.length ) {
                 member[useids.length - 1].end = true;
             }
 
@@ -326,10 +334,11 @@ class GroupsSend {
 
     /**
      * 过滤每个用户发群信息
-     * @param {Object} res 
-     * @param {String} sourced
+     * @param object res 
+     * @param string sourced
+     * @param boolean forced 强制发送
      */
-    filterMemberGroups( res, sourced ) {
+    filterMemberGroups( res, sourced, forced ) {
 
         var self = this;
         var member = [];
@@ -358,10 +367,10 @@ class GroupsSend {
 
                 let on      = ele.switch == undefined || ele.switch == 1 ? true : false;
                 let minapp	= ele.minapp == undefined || (ele.minapp && ele.minapp == 1) ? true : false;
-                let anchor	=  true; // ele.anchor == undefined || (ele.anchor && ele.anchor == 1) ? true : false;
+                let anchor	= true; // ele.anchor == undefined || (ele.anchor && ele.anchor == 1) ? true : false;
 
-                // 过滤 有效群;开关打开;小程序和链接不能同时不发(针对拼多多)
-                if ( ele.roomid == sourced && on && ( minapp || anchor) ) {
+                //强制全量；筛选有效群；开关打开；小程序和链接不能同时不发(针对拼多多)
+                if ( forced || ( ele.roomid == sourced && on && ( minapp || anchor) ) ) {
                     ele.minapp	= minapp; // 小程序 (针对拼多多)
                     ele.anchor	= anchor; // 链接 (针对拼多多)
                     return ele;
@@ -612,6 +621,10 @@ class GroupsSend {
         var data = com.clone(data);
         var self = this;
 
+		if( lock = self.sending[user.member_id] ){
+			return log.info('消息独占', { '用户ID': user.member_id, '锁名称': lock, '位置': 'parse' } );
+		}
+
         //无需转链，直接回调
         if (data.convert == 0) {
             self.queues.push({ 'member': user, data });
@@ -713,6 +726,10 @@ class GroupsSend {
         let user = item.member;
         let data = item.data;
 
+		if( lock = self.sending[user.member_id] ){
+			return log.info('消息独占', { '用户ID': user.member_id, '锁名称': lock, '位置': 'forward' } );
+		}
+
         if (typeof user.member_id == 'undefined') {
             return log.info('异常队列', user);
         }
@@ -726,7 +743,9 @@ class GroupsSend {
             let msg = data.message.shift();
             let res = self.sendMsg(user, msg);
 
+			//消息发送锁标记
             self.sender = com.getTime();
+			self.sending[user.member_id] = data.package;
 
             res.then(ret => {
 
@@ -765,6 +784,11 @@ class GroupsSend {
                 if (data.message.length > 0) {
                     setTimeout(() => { func(); }, 2500);
                 }
+
+				//消息包已完成，单用户解锁
+                if (data.message.length == 0) {
+					self.sending[user.member_id] = 0;
+				}
 
 				//队列全部完成
 				if( self.queues.length == 0 ){
