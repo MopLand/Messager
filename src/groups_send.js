@@ -620,6 +620,7 @@ class GroupsSend {
         var user = com.clone(member);
         var data = com.clone(data);
         var self = this;
+		let lock = 0;
 
 		if( lock = self.sending[user.member_id] ){
 			return log.info('消息独占', { '用户ID': user.member_id, '锁名称': lock, '位置': 'parse' } );
@@ -725,6 +726,7 @@ class GroupsSend {
         let item = this.queues.shift();
         let user = item.member;
         let data = item.data;
+		let lock = 0;
 
 		if( lock = self.sending[user.member_id] ){
 			return log.info('消息独占', { '用户ID': user.member_id, '锁名称': lock, '位置': 'forward' } );
