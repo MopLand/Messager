@@ -623,7 +623,7 @@ class GroupsSend {
 		let lock = 0;
 
 		if( lock = self.sending[user.member_id] ){
-			return log.info('消息独占', { '用户ID': user.member_id, '锁名称': lock, '位置': 'parse' } );
+		//	return log.info('消息独占', { '用户ID': user.member_id, '锁名称': lock, '位置': 'parse' } );
 		}
 
         //无需转链，直接回调
@@ -729,7 +729,7 @@ class GroupsSend {
 		let lock = 0;
 
 		if( lock = self.sending[user.member_id] ){
-			return log.info('消息独占', { '用户ID': user.member_id, '锁名称': lock, '位置': 'forward' } );
+		//	return log.info('消息独占', { '用户ID': user.member_id, '锁名称': lock, '位置': 'forward' } );
 		}
 
         if (typeof user.member_id == 'undefined') {
