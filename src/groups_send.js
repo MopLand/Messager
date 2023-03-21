@@ -370,7 +370,7 @@ class GroupsSend {
                 let anchor	= true; // ele.anchor == undefined || (ele.anchor && ele.anchor == 1) ? true : false;
 
                 //强制全量；筛选有效群；开关打开；小程序和链接不能同时不发(针对拼多多)
-                if ( forced || ( ele.roomid == sourced && on && ( minapp || anchor) ) ) {
+                if ( ( on && forced ) || ( ele.roomid == sourced && on && ( minapp || anchor) ) ) {
                     ele.minapp	= minapp; // 小程序 (针对拼多多)
                     ele.anchor	= anchor; // 链接 (针对拼多多)
                     return ele;
