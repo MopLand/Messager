@@ -609,7 +609,7 @@ class Groups {
 
 					//self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
 					
-					act.pushed( self.mysql, user.member_id, body );
+					act.updatePushed( self.mysql, user, body );
 
 					//写入延迟消息，更新发送状态
 					if( lazy_time == 0 ){
@@ -743,7 +743,7 @@ class Groups {
 			}).catch(err => {
 				self.sendErr( member.member_id, 'NewSendMsg', err );
 				//log.error('文本失败', [member.member_id, err]);
-				//act.pushed( self.mysql, member.member_id, { api:'NewSendMsg', err, inst : self.inst.channel } );
+				//act.pushed( self.mysql, member, { api:'NewSendMsg', err, inst : self.inst.channel } );
 			});
 
 			return fn;
@@ -844,7 +844,7 @@ class Groups {
 		log.error( api, [member_id, err, chat]);
 
 		//更新状态
-		act.pushed( this.mysql, member_id, { api: api, err, chat, inst : this.inst.channel } );
+		act.pushed( this.mysql, {member_id}, { api: api, err, chat, inst : this.inst.channel } );
 
 		//群已经失效
 		if( err == 'MM_ERR_NOTCHATROOMCONTACT' && typeof chat == 'string' ){

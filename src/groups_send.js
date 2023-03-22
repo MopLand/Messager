@@ -222,8 +222,9 @@ class GroupsSend {
             }
 
             var size = user.length;
-            var mins = size / 500;
-            var span = (mins * 60 * 1000) / size;
+            //var mins = size / 500;
+            //var span = (mins * 60 * 1000) / size;
+			var span = 200 - Math.round( size / 500 );
 
             var func = (i) => {
 
@@ -771,8 +772,8 @@ class GroupsSend {
                         self.sendCardMsg(user, data.cardMsg);
                     }, 2000);
 
-                    //更新发群时间
-                    self.mysql.query('UPDATE `pre_weixin_list` SET groups_send = IF( DATEDIFF(NOW(), FROM_UNIXTIME(groups_time) ) > 0, 0, groups_send ) + 1, groups_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [user.member_id, user.weixin_id]);
+                    //更新发群统计和时间
+                    self.mysql.query('UPDATE `pre_weixin_list` SET groups_send = IF( DATEDIFF(NOW(), FROM_UNIXTIME(groups_time) ) > 0, 0, groups_send ) + 1, groups_time = UNIX_TIMESTAMP() WHERE weixin_id = ?', [user.weixin_id]);
 
                 }
 
