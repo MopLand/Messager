@@ -268,7 +268,7 @@ class MomentSend {
                     log.info('不要转链', comm);
                 } else if( !keep ) {
                     exch = act.extractTbc(text) || act.detectUrl(text) || act.detectApp(text);
-                    exch && data.convert++;
+                    exch && data.convert ++;
                 }
 
                 data.comment.push({ exch, type, text });
@@ -307,7 +307,7 @@ class MomentSend {
             let misc = comm.exch ? act.getExternal(comm.text) : '';
 
             //转链
-            req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': product, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
+            req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc }, (code, body) => {
 
                 try {
                     if (typeof body == 'string') {

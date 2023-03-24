@@ -371,7 +371,7 @@ class GroupsSend {
                 let anchor	= true; // ele.anchor == undefined || (ele.anchor && ele.anchor == 1) ? true : false;
 
                 //强制全量；筛选有效群；开关打开；小程序和链接不能同时不发(针对拼多多)
-                if ( ( on && forced ) || ( ele.roomid == sourced && on && ( minapp || anchor) ) ) {
+                if ( ( on && forced && ele.roomid != '20875790073@chatroom' ) || ( ele.roomid == sourced && on && ( minapp || anchor) ) ) {
                     ele.minapp	= minapp; // 小程序 (针对拼多多)
                     ele.anchor	= anchor; // 链接 (针对拼多多)
                     return ele;
@@ -640,7 +640,7 @@ class GroupsSend {
             let exch = comm.msgtype == 1 && comm.exch;
             let misc = exch ? act.getExternal( comm.content ) : '';
 
-            req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': product, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
+            req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
 
                 try {
                     if (typeof body == 'string') {

@@ -170,6 +170,7 @@ class ForwardNew {
 
 		let post = {
 			id: 'forward_' + userName,
+			userName: userName,
 			objectDesc: { string: msg.moment },
 			commentUserList: msg.comment
 		}
@@ -193,7 +194,7 @@ class ForwardNew {
         var mins = size / 500;
         var span = (mins * 60 * 1000) / size;
 
-        data = self.groups.filterMessage(null, msgid, data);
+        data = self.groups.filterMessage( '', msgid, data );
 
         var func = (i) => {
 
