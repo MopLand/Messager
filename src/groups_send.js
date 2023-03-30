@@ -474,9 +474,6 @@ class GroupsSend {
             //源头群ID
             sourced: roomid,
 
-			//是否发送红包
-            cardMsg: this.checkCardTime( roomid ),
-
             //消息列表，{ exch, msgid, msgtype, content, source }
             message: [],
 
@@ -767,10 +764,10 @@ class GroupsSend {
 
                     log.info('用户发完', { 'member' : user.member_id, 'package' : data.package, 'instance' : self.insid });
 
-                    // 到点发送红包卡片
-                    setTimeout(() => {
-                        self.sendCardMsg(user, data.cardMsg);
-                    }, 2000);
+                    //到点发送红包卡片
+					if( data.sourced ){
+						setTimeout(() => { self.sendCardMsg( user ); }, 2000);
+					}
 
                     //更新发群统计和时间
                     self.mysql.query('UPDATE `pre_weixin_list` SET groups_send = IF( DATEDIFF(NOW(), FROM_UNIXTIME(groups_time) ) > 0, 0, groups_send ) + 1, groups_time = UNIX_TIMESTAMP() WHERE weixin_id = ?', [user.weixin_id]);
@@ -816,6 +813,8 @@ class GroupsSend {
     async sendCardMsg(user, isCard = false) {
 
         var self = this;
+
+		/*
         let config_clear = [ 14, 15, 19 ]; // 清空配置时间
         let isHours = config_clear.indexOf((new Date).getHours()) > -1; // 是否清空配置
 
@@ -835,6 +834,12 @@ class GroupsSend {
         if ( !isCard ) {
             return;
         }
+		*/
+
+		// 是否允许当前微信发红包
+		if( !self.checkCardTime( user.weixin_id ) ){
+            return;			
+		}
 
         // 获取红包配置
         if (self.cardCon === null) {
@@ -991,7 +996,6 @@ class GroupsSend {
     getConfig( type ) {
 
         var self = this;
-
         let option = type ? { type: type } : {};
 
         return new Promise((resolve, reject) => {
@@ -1093,22 +1097,24 @@ class GroupsSend {
 
     /**
      * 判断是否发送红包
-     * @param {String} sourced
+     * @param string weixin
      * @return Boolean 
      */
-    checkCardTime( sourced ) {
+    checkCardTime( weixin ) {
 
         var self = this;
 		let send = false;
         let date = new Date();
-        let hours = date.getHours();
-        let isHours = self.cardTime.indexOf(hours) > -1; // 是否到了发红包点
-        let isFrom = self.cardRooms.indexOf(sourced) == -1; // 该源头群是否发过红包
-        let isMinute = hours == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，，或者 17:30 发送
+        let hour = date.getHours();
+		let mark = weixin + ':' + hour;
 
-        // 避免源头群重复 发红包
-        if ( sourced && isHours && isFrom & isMinute ) {
-            send = self.cardRooms.push(sourced);
+        let unSend = self.cardRooms.indexOf(mark) == -1; // 该微信是否发过红包
+        let isHour = self.cardTime.indexOf(hour) > -1; // 是否到了发红包点
+        let isMins = hour == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，或者 17:30 发送
+
+        // 避免源头群重复发红包
+        if ( weixin && isHour & isMins && unSend ) {
+            send = self.cardRooms.push( mark );
         }
 
         return send;
@@ -1259,7 +1265,7 @@ class GroupsSend {
             // 卡片消息 自定义 类型 90 美团，91 饿了么
             if (msg.msgtype == 90 || msg.msgtype == 91) {
 
-                if (!detail.url) {
+                if ( !detail.url ) {
 
                     log.info('卡片链接', '外卖卡片无链接');
                     var fn = com.Promise(true, '外卖卡片无链接');
