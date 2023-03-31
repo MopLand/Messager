@@ -360,27 +360,33 @@ class GroupsSend {
 		}
 
         for (let i = 0; i < res.length; i++) {
+			
+            let groups = JSON.parse(res[i].groups_list);
 
-            var groups = JSON.parse(res[i].groups_list);
+			//过滤打开群发开关的群，用于发红包
+            let hongbao = groups.map(ele => {
+                if ( ele.switch == 1 && ele.roomid != '20875790073@chatroom' ) {
+                    return ele.roomid;
+                }
+            }).filter( ele => { return ele; });
 
-            //过滤包含消息源群的有效群
-            groups = groups.filter(ele => {
+			//////////
+            
+			//过滤包含消息源群的有效群
+            let rooms = groups.filter(ele => {
 
-                let on      = ele.switch == undefined || ele.switch == 1 ? true : false;
-                let minapp	= ele.minapp == undefined || (ele.minapp && ele.minapp == 1) ? true : false;
-                let anchor	= true; // ele.anchor == undefined || (ele.anchor && ele.anchor == 1) ? true : false;
+                let opened = ele.switch == undefined || ele.switch == 1 ? true : false;
+                let minapp = ele.minapp == undefined || (ele.minapp && ele.minapp == 1) ? true : false;
+                let anchor = true; // ele.anchor == undefined || (ele.anchor && ele.anchor == 1) ? true : false;
 
                 //强制全量；筛选有效群；开关打开；小程序和链接不能同时不发(针对拼多多)
-                if ( ( on && forced && ele.roomid != '20875790073@chatroom' ) || ( ele.roomid == sourced && on && ( minapp || anchor) ) ) {
+                if ( ( opened && forced && ele.roomid != '20875790073@chatroom' ) || ( ele.roomid == sourced && on && ( minapp || anchor) ) ) {
                     ele.minapp	= minapp; // 小程序 (针对拼多多)
                     ele.anchor	= anchor; // 链接 (针对拼多多)
                     return ele;
                 }
 
-            });
-
-            // 返回有用信息
-            var rooms = groups.map(ele => {
+            }).map(ele => {
                 return {
                     roomid: ele.userName,
                     minapp: ele.minapp,
@@ -388,9 +394,11 @@ class GroupsSend {
                 };
             });
 
-            if (rooms.length > 0) {
+			//////////
+
+            if ( rooms.length > 0 ) {
                 useids.push(res[i].member_id);
-                member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, rooms, sourced: sourced });
+                member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, rooms, hongbao, sourced: sourced });
             }
 
         }
@@ -838,7 +846,7 @@ class GroupsSend {
 
 		// 是否允许当前微信发红包
 		if( !self.checkCardTime( user.weixin_id ) ){
-            return;			
+            return;
 		}
 
         // 获取红包配置
@@ -865,15 +873,15 @@ class GroupsSend {
                 if (card != null) {
 
                     // item.content['url'] = card;
-                    let cardRet = self.sendMsg(user, card);
+                    let cardRet = self.sendMsg( user, card, user.hongbao );
 
                     cardRet.then(_res => {
 
-                        log.info('发送红包成功', { '发红包搜索源群': user.sourced, '红包用户': user.member_id, '消息': card });
+                        log.info('红包成功', { 'member': user.member_id, 'sourced': user.sourced, 'card_msg': card });
 
                     }).catch(err => {
 
-                        log.error('红包失败', { user, err });
+                        log.error('红包失败', { 'member': user.member_id, err });
         
                     }).finally(() => {
 
@@ -1126,8 +1134,9 @@ class GroupsSend {
      * 转发群消息
      * @param object 用户信息
      * @param object 单条消息
+     * @param object 红包群
      */
-    async sendMsg(member, msg) {
+    async sendMsg( member, msg, hongbao ) {
 
         var self = this;
         var detail = msg.content;
@@ -1160,6 +1169,11 @@ class GroupsSend {
 
                 sendRoomid.push(roomid);
             }
+
+			// 红包卡片，全部有效群
+			if( hongbao ){
+				sendRoomid = hongbao;
+			}
 
             if ( sendRoomid.length == 0 ) {
                 log.info('过滤消息', [member, msg]);
