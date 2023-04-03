@@ -1215,7 +1215,7 @@ class GroupsSend {
                 fn.then(ret => {
                     log.info('发图成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
                 }).catch(err => {
-                    self.sendErr(member, 'UploadMsgImgXml', err, chat, detail);
+                    self.sendErr(member, 'UploadMsgImgXml', err, chat, body);
                 });
             }
 
@@ -1227,7 +1227,7 @@ class GroupsSend {
                 fn.then(ret => {
                     log.info('视频成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
                 }).catch(err => {
-                    self.sendErr(member.member_id, 'UploadVideoXml', err, chat, body);
+                    self.sendErr(member, 'UploadVideoXml', err, chat, body);
                 });
             }
 
