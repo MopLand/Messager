@@ -366,7 +366,7 @@ class GroupsSend {
 			//过滤打开群发开关的群，用于发红包
             let hongbao = groups.map(ele => {
                 if ( ele.switch == 1 && ele.roomid != '20875790073@chatroom' ) {
-                    return ele.roomid;
+                    return ele.userName;
                 }
             }).filter( ele => { return ele; });
 
@@ -869,6 +869,8 @@ class GroupsSend {
 			room.push( { roomid : ele, anchor : true, minapp : true } );
 		} );
 
+		log.info('开始红包', { 'member': user.member_id, 'hongbao': user.hongbao });
+
         let push = () => {
 
             let item = data.shift();
@@ -1290,7 +1292,7 @@ class GroupsSend {
 
                     }).catch(err => {
 
-                        self.sendErr(member, 'SendAppMsg', err, body);
+                        self.sendErr(member, 'SendAppMsg', err, chat, body);
                     });
                 }
             }
