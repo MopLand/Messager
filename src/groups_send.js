@@ -863,6 +863,11 @@ class GroupsSend {
         // self.cardRooms.push(user.sourced);
 
         let data = com.clone(self.cardCon);
+		let room = [];
+
+		user.hongbao.forEach( ele => {
+			room.push( { roomid : ele, anchor : true, minapp : true } );
+		} );
 
         let push = () => {
 
@@ -873,7 +878,7 @@ class GroupsSend {
                 if (card != null) {
 
                     // item.content['url'] = card;
-                    let cardRet = self.sendMsg( user, card, user.hongbao );
+                    let cardRet = self.sendMsg( user, card, room );
 
                     cardRet.then(_res => {
 
@@ -894,6 +899,7 @@ class GroupsSend {
                 } 
 
             }, (item) => {
+
                 if (item.msgtype != 90 && item.msgtype != 91) {
                     return { 'request' : false, 'respond' : item };
                 } else {
@@ -1139,54 +1145,41 @@ class GroupsSend {
     async sendMsg( member, msg, hongbao ) {
 
         var self = this;
-        var detail = msg.content;
+        var body = msg.content;	
+        var rooms = hongbao ? hongbao : member.rooms;
 
         // 用户发群数量
-        let size = member.rooms.length;
-
-        if (size == 0) {
-            log.error('发群用户对象', member);
-            return com.Promise(false, '发群用户对象为空');
+        if ( rooms.length == 0 ) {
+            log.error('用户空群', member);
+            return com.Promise(false, '用户空群');
         }
 
+		/////////////
+
         //文本
-        if (msg.msgtype == 1) {
+        if ( msg.msgtype == 1 ) {
 
             // 判断个人商城链接
-            detail = act.replaceUserid(detail, member.member_id);
+            body = act.replaceUserid( body, member.member_id );
 
             // 从 rooms 发群对象中获取 群数组同时发送文本
-            let sendRoomid = [];
+            let chats = [];
 
-            for (var i = 0; i < size; i++) {
+            for (var i = 0; i < rooms.length; i++) {
 
-                let roomid = member.rooms[i] && member.rooms[i].roomid ? member.rooms[i].roomid : '';
-                let anchor = member.rooms[i] && member.rooms[i].anchor ? member.rooms[i].anchor : false;
-
-                if ( msg.exch && !anchor && act.detectUrl(detail) ) {
+                if ( msg.exch && !rooms[i].anchor && act.detectUrl(body) ) {
                     continue;
                 }
 
-                sendRoomid.push(roomid);
+                chats.push(rooms[i].roomid);
             }
 
-			// 红包卡片，全部有效群
-			if( hongbao ){
-				sendRoomid = hongbao;
-			}
-
-            if ( sendRoomid.length == 0 ) {
-                log.info('过滤消息', [member, msg]);
+            if ( chats.length == 0 ) {
+                log.info('过滤消息', [member, msg, chats]);
                 return com.Promise(true, [member, msg]);
             }
 
-			/*
-            if (this.inst.origin && this.inst.origin.test(detail)) {
-                msg.exch = true;
-            }
-			*/
-
-            let fn = this.wx.NewSendMsg(member.weixin_id, sendRoomid, detail, msg.source, 1);
+            let fn = this.wx.NewSendMsg(member.weixin_id, chats, body, msg.source, 1);
 
             fn.then(ret => {
                 log.info('文本成功', { 'member' : member.member_id, 'count' : ret.count, 'instance' : self.insid });
@@ -1198,15 +1191,17 @@ class GroupsSend {
 
         }
 
+		/////////////
+
         //小程序 替换UID
-        if (msg.msgtype == 49) {
-            detail = detail.replace(/userid=(\d*)/g, 'userid=' + member.member_id);
+        if ( msg.msgtype == 49 ) {
+            body = body.replace(/userid=(\d*)/g, 'userid=' + member.member_id);
         }
 
-        for (var i = 0; i < size; i++) {
+        for (var i = 0; i < rooms.length; i++) {
 
-            let chat = member.rooms[i] && member.rooms[i].roomid ? member.rooms[i].roomid : '';
-            let mini = member.rooms[i] && member.rooms[i].minapp ? true : false;
+            let chat = rooms[i].roomid;
+            let mini = rooms[i].minapp;
 
             if (chat == '') {
                 continue;
@@ -1215,7 +1210,7 @@ class GroupsSend {
             //图片
             if (msg.msgtype == 3) {
 
-                var fn = this.wx.UploadMsgImgXml(member.weixin_id, chat, detail);
+                var fn = this.wx.UploadMsgImgXml(member.weixin_id, chat, body);
 
                 fn.then(ret => {
                     log.info('发图成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
@@ -1227,28 +1222,28 @@ class GroupsSend {
             //视频
             if (msg.msgtype == 43) {
 
-                var fn = this.wx.UploadVideoXml(member.weixin_id, chat, detail);
+                var fn = this.wx.UploadVideoXml(member.weixin_id, chat, body);
 
                 fn.then(ret => {
                     log.info('视频成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
                 }).catch(err => {
-                    self.sendErr(member.member_id, 'UploadVideoXml', err, chat, detail);
+                    self.sendErr(member.member_id, 'UploadVideoXml', err, chat, body);
                 });
             }
 
             //表情
             if (msg.msgtype == 47) {
 
-                var fn = this.wx.SendEmojiXml(member.weixin_id, chat, detail);
+                var fn = this.wx.SendEmojiXml(member.weixin_id, chat, body);
 
                 fn.then(ret => {
                     log.info('表情成功', { 'member' : member.member_id, chat, ret, 'instance' : self.insid });
                 }).catch(err => {
-                    self.sendErr(member, 'SendEmojiXml', err, chat, detail);
+                    self.sendErr(member, 'SendEmojiXml', err, chat, body);
                 });
 
                 //多个微信群，适当延迟
-                if (size > 1 && i < size - 1) {
+                if ( rooms.length > 1 && i < rooms.length - 1 ) {
                     await com.sleep(1000);
                 }
 
@@ -1260,12 +1255,12 @@ class GroupsSend {
                 //发送小程序
                 if ((member.tag & 2) == 0) {
 
-                    var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, detail);
+                    var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, body);
 
                     fn.then(ret => {
                         log.info('小程序成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
                     }).catch(err => {
-                        self.sendErr(member, 'SendAppMsgXml', err, chat, detail);
+                        self.sendErr(member, 'SendAppMsgXml', err, chat, body);
                     });
 
                 } else {
@@ -1279,7 +1274,7 @@ class GroupsSend {
             // 卡片消息 自定义 类型 90 美团，91 饿了么
             if (msg.msgtype == 90 || msg.msgtype == 91) {
 
-                if ( !detail.url ) {
+                if ( !body.url ) {
 
                     log.info('卡片链接', '外卖卡片无链接');
                     var fn = com.Promise(true, '外卖卡片无链接');
@@ -1287,7 +1282,7 @@ class GroupsSend {
                 } else {
 
                     // 发送卡片信息 类似小程序
-                    var fn = this.wx.SendAppMsg(member.weixin_id, chat, '', 0, 5, '', '', detail);
+                    var fn = this.wx.SendAppMsg(member.weixin_id, chat, '', 0, 5, '', '', body);
 
                     fn.then(ret => {
 
@@ -1295,7 +1290,7 @@ class GroupsSend {
 
                     }).catch(err => {
 
-                        self.sendErr(member, 'SendAppMsg', err, detail);
+                        self.sendErr(member, 'SendAppMsg', err, body);
                     });
                 }
             }
