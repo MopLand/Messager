@@ -249,7 +249,7 @@ class ForwardNew {
 				//是否在选中的群里面，pre_weixin_list.roomids
                 let isroom = roomids ? (roomids.indexOf(ele.userName) > -1) : true;
 
-                if ( opened && isroom && isstatus && (minapp || anchor) ) {
+                if ( opened && isroom && (minapp || anchor) ) {
                     ele.minapp = minapp; // 小程序 (针对拼多多)
                     ele.anchor = anchor; // 链接 (针对拼多多)
                     return ele;
