@@ -107,6 +107,14 @@ class ForwardNew {
             req.push( msg.weixin );
         }
 
+		if ( msg.type == 'moment' ) {
+			sql += ' AND w.moment = 1';
+		}
+
+		if ( msg.type == 'groups' ) {
+			sql += ' AND w.groups_num > 0';
+		}
+
         self.mysql.query(sql, req, function (err, res) {
 
             if ( err || res.length == 0 ){
@@ -231,27 +239,23 @@ class ForwardNew {
 
             let groups = JSON.parse(res[i].groups_list);
 
-            groups = groups.filter(ele => {
-                let on = true; //ele.switch == undefined || ele.switch == 1 ? true : false;
+			//过滤包含消息源群的有效群
+            let rooms = groups.filter(ele => {
+
+                let opened = ele.switch == undefined || ele.switch == 1 ? true : false;
                 let minapp = true;
                 let anchor = true;
 
 				//是否在选中的群里面，pre_weixin_list.roomids
                 let isroom = roomids ? (roomids.indexOf(ele.userName) > -1) : true;
 
-				//是否符合发群类型，pre_weixin_room.status
-                //let isstatus = platform ? (ele.status.indexOf(platform) > -1) : true;
-                let isstatus = true;
-
-                if (isroom && isstatus && on && (minapp || anchor)) {
+                if ( opened && isroom && isstatus && (minapp || anchor) ) {
                     ele.minapp = minapp; // 小程序 (针对拼多多)
                     ele.anchor = anchor; // 链接 (针对拼多多)
                     return ele;
                 }
-            });
 
-            // 返回有用信息
-            var rooms = groups.map(ele => {
+            }).map(ele => {
                 return {
                     roomid: ele.userName,
                     minapp: ele.minapp,

@@ -436,15 +436,11 @@ class GroupsSend {
                 return ele.userName != group_id;
             });
 
-            var roomids = [];
-            for (let i = 0; i < newgrp.length; i++) {
-
-                let item = newgrp[i].roomid;
-
-                if (item && roomids.indexOf(item) == -1) {
-                    roomids.push(item);
-                }
-            }
+            var roomids = newgrp.map( ele => {
+				return ele.roomid;
+			}).filter( function( ele, pos, arr) {
+				return arr.indexOf( ele, 0) === pos;
+			});
 
             //更新微信群
             self.mysql.query('UPDATE `pre_weixin_list` SET groups_num = ?, groups_list = ?, roomids = ?, updated_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [newgrp.length, JSON.stringify(newgrp), roomids.join(','), member_id, weixin_id]);
