@@ -469,6 +469,9 @@ class GroupsSend {
             //实例ID
             insid: this.insid,
 
+            //消息数量
+            msgsize: 0,
+
             //需要转链
             convert: 0,
 
@@ -606,6 +609,8 @@ class GroupsSend {
 			log.info('未知链接', { roomid, pakId, msgs });
 		}
 
+		data.msgsize = data.message.length;
+
         return data;
 
     }
@@ -734,8 +739,8 @@ class GroupsSend {
 		//	return log.info('消息独占', { '用户ID': user.member_id, '锁名称': lock, '位置': 'forward' } );
 		}
 
-        if (typeof user.member_id == 'undefined') {
-            return log.info('异常队列', user);
+        if (typeof user.member_id == 'undefined' || data.msgsize != data.message.length ) {
+            return log.info('异常队列', { user, data });
         }
 
         log.info('当前微信', { '用户ID': user.member_id, '微信号': user.weixin_id, '群数量': user.rooms.length, '消息量': data.message.length });
