@@ -108,7 +108,7 @@ class ForwardNew {
         }
 
 		if ( msg.type == 'moment' ) {
-			sql += ' AND w.moment = 1';
+		//	sql += ' AND w.moment = 1';
 		}
 
 		if ( msg.type == 'groups' ) {
