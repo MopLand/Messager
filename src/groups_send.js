@@ -481,7 +481,7 @@ class GroupsSend {
             //源头群ID
             sourced: roomid,
 
-            //消息列表，{ exch, msgid, msgtype, content, source }
+            //消息列表，{ msgid, source, msgtype, content, keyword }
             message: [],
 
 			//创建时间
@@ -586,11 +586,11 @@ class GroupsSend {
                 data.message.push({ 
 					msgid: item.msgId, 
 					rowid: item.newMsgId, 
+					source: item.msgSource, 
 					msgtype: item.msgType, 
 					content: text, 
-					source: item.msgSource, 
 					product: null, 
-					exch 
+					keyword: exch 
 				});
 
             }
@@ -627,6 +627,7 @@ class GroupsSend {
         var user = com.clone(member);
         var data = com.clone(data);
         var self = this;
+		let once = 0;
 		let lock = 0;
 
 		if( lock = self.sending[user.member_id] ){
@@ -643,7 +644,7 @@ class GroupsSend {
         for (let i = 0; i < data.message.length; i++) {
 
             let comm = data.message[i];
-            let exch = comm.msgtype == 1 && comm.exch;
+            let exch = comm.msgtype == 1 && comm.keyword;
             let misc = exch ? act.getExternal( comm.content ) : '';
 
             req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
@@ -667,8 +668,11 @@ class GroupsSend {
                     //原始商品信息
                     comm.product = body.product;
 
-                    //转链成功，执行回调
-                    comm.exch && data.convert--;
+                    //转链成功，移除标记
+					if( comm.keyword ){
+						comm.keyword = null;
+						data.convert--;
+					}
 
 					//全部转链完成，开始发送
                     if (data.convert == 0) {
@@ -684,16 +688,16 @@ class GroupsSend {
 
                     let beian = body.special && 'beian' == body.special;
 
-                    if (exch) {
+                    if ( exch ) {
                         log.info('转链失败', { 'member_id': user.member_id, body, lazy_time, 'convert': data.convert });
                     }
 
                     //self.mysql.query('UPDATE `pre_weixin_list` SET status = ?, status_time = ? WHERE member_id = ?', [ JSON.stringify( body ), com.getTime(), user.member_id ] );
                     act.updatePushed(self.mysql, user, body);
 
-                    //写入延迟消息，更新发送状态
-                    if (!beian && lazy_time == 0) {
-                        let time = com.getTime();
+                    //写入延迟消息，更新发送状态，每组消息只重试一次
+                    if ( !beian && lazy_time == 0 && once == 0 ) {
+                        let time = once = com.getTime();
                         let span = 60 * 1000 * 3;
                         self.sender = time + span;
                         setTimeout(() => { self.parseMessage(user, data, time, product); }, span);
@@ -1170,7 +1174,7 @@ class GroupsSend {
 
             for (var i = 0; i < rooms.length; i++) {
 
-                if ( msg.exch && !rooms[i].anchor && act.detectUrl(body) ) {
+                if ( msg.keyword && !rooms[i].anchor && act.detectUrl(body) ) {
                     continue;
                 }
 
