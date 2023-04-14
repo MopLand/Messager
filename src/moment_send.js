@@ -445,6 +445,7 @@ class MomentSend {
             pm.then(ret => {
 
                 log.info('评论成功', [member.weixin_id, data.package, i, comm.text]);
+                log.info('解析商品', comm.product);
 
 				//写入发单效果，仅限有源商品
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product && data.sourced ) {
