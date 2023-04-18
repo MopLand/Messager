@@ -376,14 +376,11 @@ class MomentSend {
     forwardMoment(member, data) {
 
         let self = this;
-        let text = data.subject;
+		let post = com.clone(data);
 
-        let pm = this.wx.SnsPostXml(member.weixin_id, text);
+        let pm = this.wx.SnsPostXml(member.weixin_id, post.subject);
 
         pm.then(ret => {
-
-            //转发评论，使用自己的发圈ID
-            let post = com.clone(data);
 
             this.forwardComment(member, post, ret.snsObject.id);
 
