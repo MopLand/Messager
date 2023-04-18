@@ -387,7 +387,7 @@ class MomentSend {
 
             this.forwardComment(member, post, ret.snsObject.id);
 
-            log.info('发圈成功', [member.weixin_id, post.package]);
+            log.info('发圈成功', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'post_id' : ret.snsObject.id });
 
         }).catch(err => {
 
@@ -409,7 +409,7 @@ class MomentSend {
                 }
             }
 
-            log.error('发圈出错', [member.member_id, err]);
+            log.error('发圈出错', {'weixin_id': member.weixin_id, 'package' : post.package, 'member_id': member.member_id, 'error' : err });
             act.updatePushed(self.mysql, member, body);
 
         });
@@ -436,7 +436,7 @@ class MomentSend {
 			//适当延迟，保证评论顺序
             //if (!last && comm.exch) {
 			//if ( !last ) {
-				await com.sleep(1000);
+				await com.sleep(1500);
 			//}
 
             //评论
@@ -444,7 +444,7 @@ class MomentSend {
 
             pm.then(ret => {
 
-                log.info('评论成功', [member.weixin_id, data.package, i, comm.text]);
+                log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'index' : i, 'text' : comm.text });
                 log.info('解析商品', comm.product);
 
 				//写入发单效果，仅限有源商品
@@ -459,14 +459,14 @@ class MomentSend {
 
             }).catch(err => {
 
-                log.error('评论失败', [member.weixin_id, data.package, i, err]);
+                log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'index' : i, 'error' : err });
                 act.updatePushed(self.mysql, member, { api: 'SnsComment', act: 'text', txt: comm.text, err });
 
                 ////////
 
                 setTimeout(() => {
                     self.wx.SnsObjectOp(member.weixin_id, post_id, 1);
-                    log.error('删除发圈', [member.weixin_id, post_id, lazy_time]);
+                    log.error('删除发圈', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time });
                 }, 15000);
 				
             });
