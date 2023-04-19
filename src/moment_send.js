@@ -433,7 +433,7 @@ class MomentSend {
 			//适当延迟，保证评论顺序
             //if (!last && comm.exch) {
 			//if ( !last ) {
-				await com.sleep(1500);
+				await com.sleep(2000);
 			//}
 
             //评论
