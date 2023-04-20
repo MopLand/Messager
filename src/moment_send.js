@@ -401,7 +401,9 @@ class MomentSend {
             //判定为垃圾消息
             if (typeof err == 'string' && self.inst.cancel) {
 
-                if ( ret = err.match(self.inst.cancel) ) {
+				let ret = err.match(self.inst.cancel);
+
+                if ( ret ) {
 
                     self.abort = ret[0];
 
