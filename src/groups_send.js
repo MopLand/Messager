@@ -659,8 +659,8 @@ class GroupsSend {
 
                 ///////////////
 
-                //成功转链数量
-                if (body.status > 0) {
+                //成功转链数量 或 没有失败（原样返回）
+                if (body.status > 0 || body.fail == 0) {
 
                     //文本
                     comm.content = body.result;

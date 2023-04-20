@@ -321,8 +321,8 @@ class MomentSend {
 
                 ///////////////
 
-                //成功转链数量
-                if (body.status > 0) {
+                //成功转链数量 或 没有失败（原样返回）
+                if (body.status > 0 || body.fail == 0) {
 
                     comm.text = body.result;
                     comm.product = body.product;
@@ -382,9 +382,17 @@ class MomentSend {
 
         pm.then(ret => {
 
-            this.forwardComment(member, post, ret.snsObject.id);
+			if( ret.snsObject.id ){
 
-            log.info('发圈成功', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'post_id' : ret.snsObject.id });
+				this.forwardComment(member, post, ret.snsObject.id);
+
+            	log.info('发圈成功', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'post_id' : ret.snsObject.id });
+
+			}else{
+
+				log.debug('发圈异常', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'result' : ret });
+
+			}
 
         }).catch(err => {
 
@@ -393,9 +401,7 @@ class MomentSend {
             //判定为垃圾消息
             if (typeof err == 'string' && self.inst.cancel) {
 
-                var ret = err.match(self.inst.cancel);
-
-                if (ret) {
+                if ( ret = err.match(self.inst.cancel) ) {
 
                     self.abort = ret[0];
 
@@ -456,15 +462,27 @@ class MomentSend {
 
             }).catch(err => {
 
-                log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'index' : i, 'error' : err });
+                log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'index' : i, 'lazy_time' : lazy_time, 'error' : err });
                 act.updatePushed(self.mysql, member, { api: 'SnsComment', act: 'text', txt: comm.text, err });
 
                 ////////
 
-                setTimeout(() => {
-                    self.wx.SnsObjectOp(member.weixin_id, post_id, 1);
-                    log.error('删除发圈', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time });
-                }, 15000);
+				//三分钟后，再尝试一次
+				if( lazy_time == 0 && post_id ){
+					
+					let time = com.getTime();
+                    let span = 60 * 1000 * 3;
+
+                    setTimeout(() => { self.forwardComment(member, data, post_id, time); }, span);
+
+				}else{
+
+					setTimeout(() => {
+						self.wx.SnsObjectOp(member.weixin_id, post_id, 1);
+						log.error('删除发圈', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time });
+					}, 5000);
+
+				}
 				
             });
 
