@@ -322,7 +322,7 @@ class MomentSend {
                 ///////////////
 
                 //成功转链数量 或 没有失败（原样返回）
-                if (body.status > 0 || body.fail == 0) {
+                if ( body.status > 0 || ( body.status == body.fail && body.fail == 0 ) ) {
 
                     comm.text = body.result;
                     comm.product = body.product;
