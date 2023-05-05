@@ -122,7 +122,8 @@ class MomentSend {
         var date = new Date(last * 1000).format('yyyyMMdd');
 		
 		// 文件锁名称
-		var lock = self.item + ( post.userName ? '_' + post.userName : '' );
+		//var lock = self.item + ( post.userName ? '_' + post.userName : '' );
+		var lock = post.userName ? post.userName : self.item;
 
         //取消中断
         self.abort = false;
@@ -170,24 +171,18 @@ class MomentSend {
                     return log.error('读取错误', err);
                 }
 
-                //发送完成，解锁 GIT
-                if (res.length == 0) {
-                    com.unlock( lock );
-                    //act.record(self.mysql, lock, { 'heartbeat_time': time, 'auto_id': auto }, '发送完成');
-                    return log.info('处理完毕', time);
-                } else {
-                    //act.record(self.mysql, lock, { 'quantity': res.length, 'members': res }, '批次用户');
-                    log.info('本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto);
-                }
+				//act.record(self.mysql, lock, { 'quantity': res.length, 'members': res }, '批次用户');
+				log.info('本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto);
 
                 for (var i = 0; i < res.length; i++) {
 
+					//禁发素材 打开时，跳过
                     if (self.item == 'moment_mtl' && res[i] && res[i].tag && (res[i].tag & 8)) {
                         continue;
                     }
 
                     // 测试号只记录10天数据
-                    if (testing && i >= 10 ) {
+                    if ( testing && i >= 10 ) {
                         break;
                     }
 
@@ -200,13 +195,17 @@ class MomentSend {
                     }
 
                 }
-
-                if (testing) {
+				
+                //（异步）发送完成，解锁 GIT
+                if ( res.length == 0 || self.nodes > 1 || testing ) {
                     com.unlock( lock );
-                    return log.info('测试完毕', time);
-                } else {
-                    //单实例时，再次执行，传入最后ID
-                    self.nodes == 1 && setTimeout(() => { func(res[i - 1].auto_id); }, 2000);
+                    //act.record(self.mysql, lock, { 'heartbeat_time': time, 'auto_id': auto }, '发送完成');
+                    return log.info('处理完毕', time);
+                }
+				
+                //单实例时，再次执行，传入最后ID
+				if( self.nodes == 1 ) {
+                    setTimeout(() => { func(res[i - 1].auto_id); }, 2000);
                 }
 
             });
