@@ -158,7 +158,11 @@ class MomentSend {
 				req.push(self.nodes, self.insid);
 			}
 
-			sql += ' ORDER BY w.auto_id ASC LIMIT 100';
+			sql += ' ORDER BY w.auto_id ASC';
+
+			if ( self.nodes == 1 ) {
+				sql += ' LIMIT 200';
+			}
 
             self.mysql.query(sql, req, function (err, res) {
 
@@ -201,8 +205,8 @@ class MomentSend {
                     com.unlock( lock );
                     return log.info('测试完毕', time);
                 } else {
-                    //再次执行，传入最后ID
-                    setTimeout(() => { func(res[i - 1].auto_id); }, 2000);
+                    //单实例时，再次执行，传入最后ID
+                    self.nodes == 1 && setTimeout(() => { func(res[i - 1].auto_id); }, 2000);
                 }
 
             });
@@ -296,15 +300,23 @@ class MomentSend {
 
 			//可能存在无评论情况
             let comm = data.comment[i] || {};
+			let text = comm.text;
 
-            // 判断个人商城链接
+            //替换个人商城链接或邀请码
             if ( !comm.noreplace ) {
                 //log.info('邀请码', [member.member_id, member.invite_code, comm]);
                 comm.text = act.replaceUserid(comm.text, member.member_id);
                 comm.text = act.replaceInvite(comm.text, member.invite_code);
             }
 
+			//已经替换过 UID 或邀请码，无需转链
+			if( text != comm.text ){
+				comm.exch = false;
+			}
+
             let misc = comm.exch ? act.getExternal(comm.text) : '';
+
+			///////////////
 
             //转链
             req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc }, (code, body) => {
@@ -317,7 +329,7 @@ class MomentSend {
                     body = { 'status': -code, 'body': body, 'error': e.toString() };
                 }
 
-                log.info('转链结果', [member.member_id, body, lazy_time]);
+                log.info('转链结果', { 'member' : member.member_id, 'body' : body, 'lazy_time' : lazy_time, 'instance' : self.insid } );
 
                 ///////////////
 
@@ -386,11 +398,11 @@ class MomentSend {
 
 				this.forwardComment(member, post, ret.snsObject.id);
 
-            	log.info('发圈成功', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'post_id' : ret.snsObject.id });
+            	log.info('发圈成功', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'post_id' : ret.snsObject.id, 'instance' : self.insid });
 
 			}else{
 
-				log.debug('发圈异常', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'result' : ret });
+				log.debug('发圈异常', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'result' : ret, 'instance' : self.insid });
 
 			}
 
@@ -414,7 +426,7 @@ class MomentSend {
                 }
             }
 
-            log.error('发圈出错', {'weixin_id': member.weixin_id, 'package' : post.package, 'member_id': member.member_id, 'error' : err });
+            log.error('发圈出错', {'weixin_id': member.weixin_id, 'package' : post.package, 'member_id': member.member_id, 'error' : err, 'instance' : self.insid });
             act.updatePushed(self.mysql, member, body);
 
         });
@@ -449,8 +461,8 @@ class MomentSend {
 
             pm.then(ret => {
 
-                log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'index' : i, 'text' : comm.text });
-                log.info('解析商品', comm.product);
+                log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'index' : i, 'text' : comm.text, 'instance' : self.insid });
+                //log.info('解析商品', comm.product);
 
 				//写入发单效果，仅限有源商品
                 if ( ['moment_send', 'moment'].indexOf(self.item) > -1 && comm.product && data.sourced ) {
@@ -464,7 +476,7 @@ class MomentSend {
 
             }).catch(err => {
 
-                log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'index' : i, 'lazy_time' : lazy_time, 'error' : err });
+                log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'index' : i, 'lazy_time' : lazy_time, 'error' : err, 'instance' : self.insid });
                 act.updatePushed(self.mysql, member, { api: 'SnsComment', act: 'text', txt: comm.text, err });
 
                 ////////
@@ -481,7 +493,7 @@ class MomentSend {
 
 					setTimeout(() => {
 						self.wx.SnsObjectOp(member.weixin_id, post_id, 1);
-						log.error('删除发圈', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time });
+						log.error('删除发圈', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time, 'instance' : self.insid });
 					}, 5000);
 
 				}
