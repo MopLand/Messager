@@ -459,8 +459,7 @@ class MomentSend {
             let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, comm.text);
 
             pm.then(ret => {
-
-                log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'index' : i, 'text' : comm.text, 'comment' : data.comment.length, 'lazy_time' : lazy_time, 'product' : comm.product, 'instance' : self.insid });
+				
                 //log.info('解析商品', comm.product);
 
 				//写入发单效果，仅限有源商品
@@ -475,6 +474,8 @@ class MomentSend {
 
 				//删除已成功评论
 				data.comment.splice( i, 1 );
+
+                log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'index' : i, 'text' : comm.text, 'comment' : data.comment.length, 'lazy_time' : lazy_time, 'product' : comm.product, 'instance' : self.insid });
 
             }).catch(err => {
 
