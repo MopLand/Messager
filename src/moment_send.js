@@ -488,7 +488,7 @@ class MomentSend {
 				comm.sent = 1;
 				//data.comment.splice( i, 1 ); i--;
 
-				log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'text' : comm.text, 'comment' : data.comment.length, 'lazy_time' : lazy_time, 'product' : comm.product, 'instance' : self.insid });
+				log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'text' : comm.text, 'comment' : i, 'lazy_time' : lazy_time, 'product' : comm.product, 'instance' : self.insid });
 
             }).catch(err => {
 
