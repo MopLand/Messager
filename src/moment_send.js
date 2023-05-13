@@ -440,15 +440,15 @@ class MomentSend {
      * @param integer 发圈ID
      * @param integer 延迟时间
      */
-    async forwardComment(member, data, post_id, lazy_time = 0) {
+	async forwardComment(member, data, post_id, lazy_time = 0) {
 
-        var self = this;
+		var self = this;
 		var stop = null;
 
         for (let i = 0; i < data.comment.length; i++) {
 
-            let comm = data.comment[i];
-            let last = i == data.comment.length - 1;
+			let comm = data.comment[i];
+			let last = i == data.comment.length - 1;
 
 			//有定时器，直接退出
 			if( stop ) break;
@@ -479,11 +479,12 @@ class MomentSend {
 				//删除已成功评论
 				data.comment.splice( i, 1 ); i--;
 
-                log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'index' : i, 'text' : comm.text, 'comment' : data.comment.length, 'lazy_time' : lazy_time, 'product' : comm.product, 'instance' : self.insid });
+				log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'text' : comm.text, 'comment' : data.comment.length, 'lazy_time' : lazy_time, 'product' : comm.product, 'instance' : self.insid });
 
             }).catch(err => {
 
-                log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'index' : i, 'lazy_time' : lazy_time, 'error' : err, 'instance' : self.insid });
+                log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'text' : comm.text, 'lazy_time' : lazy_time, 'error' : err, 'instance' : self.insid });
+
                 act.updatePushed(self.mysql, member, { api: 'SnsComment', act: 'text', txt: comm.text, err });
 
                 ////////
