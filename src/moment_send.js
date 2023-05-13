@@ -397,7 +397,7 @@ class MomentSend {
 
 				this.forwardComment(member, post, ret.snsObject.id);
 
-            	log.info('发圈成功', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'post_id' : ret.snsObject.id, 'instance' : self.insid });
+            	log.info('发圈成功', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'post_id' : ret.snsObject.id, 'comment' : post.comment.length, 'instance' : self.insid });
 
 			}else{
 
@@ -450,14 +450,17 @@ class MomentSend {
 			let comm = data.comment[i];
 			let last = i == data.comment.length - 1;
 
-			//有定时器，直接退出
-			if( stop ) break;
-
 			//适当延迟，保证评论顺序
             //if (!last && comm.exch) {
 			//if ( !last ) {
 				await com.sleep(2000);
 			//}
+
+			//有定时器，直接退出
+			if( stop ){
+				log.error('评论跳出', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'text' : comm.text, 'lazy_time' : lazy_time, 'instance' : self.insid });
+				break;
+			}
 
             //评论
             let pm = self.wx.SnsComment(member.weixin_id, post_id, comm.type, comm.text);
@@ -493,7 +496,7 @@ class MomentSend {
 				if( lazy_time == 0 && post_id ){
 					
 					let time = com.getTime();
-                    let span = 60 * 1000 * 3;
+                    let span = 60 * 1000 * 2;
 
                     stop = setTimeout(() => { self.forwardComment(member, data, post_id, time); }, span);
 
