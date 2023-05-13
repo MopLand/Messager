@@ -450,6 +450,11 @@ class MomentSend {
 			let comm = data.comment[i];
 			let last = i == data.comment.length - 1;
 
+			//已送出，跳过
+			if( comm.sent ){
+				continue;
+			}
+
 			//适当延迟，保证评论顺序
             //if (!last && comm.exch) {
 			//if ( !last ) {
@@ -479,8 +484,9 @@ class MomentSend {
 					}
                 }
 
-				//删除已成功评论
-				data.comment.splice( i, 1 ); i--;
+				//已成功评论标记
+				comm.sent = 1;
+				//data.comment.splice( i, 1 ); i--;
 
 				log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'text' : comm.text, 'comment' : data.comment.length, 'lazy_time' : lazy_time, 'product' : comm.product, 'instance' : self.insid });
 
