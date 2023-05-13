@@ -443,11 +443,15 @@ class MomentSend {
     async forwardComment(member, data, post_id, lazy_time = 0) {
 
         var self = this;
+		var stop = null;
 
         for (let i = 0; i < data.comment.length; i++) {
 
             let comm = data.comment[i];
             let last = i == data.comment.length - 1;
+
+			//有定时器，直接退出
+			if( stop ) break;
 
 			//适当延迟，保证评论顺序
             //if (!last && comm.exch) {
@@ -473,7 +477,7 @@ class MomentSend {
                 }
 
 				//删除已成功评论
-				data.comment.splice( i, 1 );
+				data.comment.splice( i, 1 ); i--;
 
                 log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'index' : i, 'text' : comm.text, 'comment' : data.comment.length, 'lazy_time' : lazy_time, 'product' : comm.product, 'instance' : self.insid });
 
@@ -490,11 +494,11 @@ class MomentSend {
 					let time = com.getTime();
                     let span = 60 * 1000 * 3;
 
-                    setTimeout(() => { self.forwardComment(member, data, post_id, time); }, span);
+                    stop = setTimeout(() => { self.forwardComment(member, data, post_id, time); }, span);
 
 				}else{
 
-					setTimeout(() => {
+					stop = setTimeout(() => {
 						self.wx.SnsObjectOp(member.weixin_id, post_id, 1);
 						log.error('删除发圈', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time, 'instance' : self.insid });
 					}, 5000);
