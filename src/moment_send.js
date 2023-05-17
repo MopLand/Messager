@@ -492,7 +492,7 @@ class MomentSend {
 
             }).catch(err => {
 
-                log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'text' : comm.text, 'lazy_time' : lazy_time, 'error' : err, 'instance' : self.insid });
+                log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'error' : err, 'post_id' : post_id, 'text' : comm.text, 'lazy_time' : lazy_time, 'instance' : self.insid });
 
                 act.updatePushed(self.mysql, member, { api: 'SnsComment', act: 'text', txt: comm.text, err });
 
