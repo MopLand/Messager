@@ -174,6 +174,11 @@ class MomentSend {
 				//act.record(self.mysql, lock, { 'quantity': res.length, 'members': res }, '批次用户');
 				log.info('本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto);
 
+				//最后一个用户加个标记
+				if ( res.length ) {
+					res[res.length - 1].end = true;
+				}
+
                 for (var i = 0; i < res.length; i++) {
 
 					//禁发素材 打开时，跳过
@@ -480,7 +485,7 @@ class MomentSend {
 						act.collect(self, 'moment', {
 							"platform": comm.product[k],
 							"item_id": k,
-						}, data, { [data.sourced] : ret.snsObject.createTime });
+						}, data, { [data.sourced] : ret.snsObject.createTime }, member.end );
 					}
                 }
 
@@ -488,7 +493,7 @@ class MomentSend {
 				comm.sent = 1;
 				//data.comment.splice( i, 1 ); i--;
 
-				log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'product' : comm.product, 'post_id' : post_id, 'text' : comm.text, 'comment' : i, 'lazy_time' : lazy_time, 'instance' : self.insid });
+				log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'product' : comm.product, 'post_id' : post_id, 'text' : comm.text, 'comment' : i, 'lazy_time' : lazy_time, 'lastman' : member.end ? 1 : 0, 'instance' : self.insid });
 
             }).catch(err => {
 

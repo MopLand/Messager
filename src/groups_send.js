@@ -768,14 +768,14 @@ class GroupsSend {
 						act.collect(self, 'groups', {
 							"platform": msg.product[k],
 							"item_id": k,
-						}, data, { [data.sourced] : self.sender });
+						}, data, { [data.sourced] : self.sender }, user.end );
 					}
                 }
 
                 //消息包已完成
                 if (data.message.length == 0) {
 
-                    log.info('用户发完', { 'member' : user.member_id, 'package' : data.package, 'instance' : self.insid });
+                    log.info('用户发完', { 'member' : user.member_id, 'package' : data.package, 'lastman' : user.end ? 1 : 0, 'instance' : self.insid });
 
                     //到点发送红包卡片
 					if( data.sourced ){
