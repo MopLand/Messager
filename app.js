@@ -144,6 +144,17 @@ if (func == 'password') {
 
 }
 
+//发送统计
+if (func == 'collect') {
+	const Activity = require('./lib/activity');
+
+	let test1 = Activity.collect( null, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : 0, 'package' : '123123' }, {}, false );
+	let test2 = Activity.collect( null, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : 0, 'package' : '123123' }, {}, false );
+
+	console.log( test1 );
+	console.log( test2 );
+}
+
 //链接提取
 if (func == 'links') {
 
