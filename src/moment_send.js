@@ -398,7 +398,7 @@ class MomentSend {
 
         pm.then(ret => {
 
-			if( ret.snsObject.id ){
+			if( ret.snsObject.id && ret.snsObject.id != '0' ){
 
 				this.forwardComment(member, post, ret.snsObject.id);
 
