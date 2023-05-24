@@ -13,6 +13,10 @@ const Logger = require('../lib/logger');
 const tag = com.fileName(__filename, false);
 const log = new Logger(tag);
 
+process.on('uncaughtException',function(e){
+    log.info( '异常事件', e );
+});
+
 class MomentSend {
 
     /**
@@ -243,7 +247,7 @@ class MomentSend {
             //是否转链
             convert: 0,
 
-            //评论列表，{ exch, type, text }
+            //评论列表，{ exch, type, text, sent }
             comment: [],
 
 			//朋友圈消息包id
