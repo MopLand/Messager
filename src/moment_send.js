@@ -197,12 +197,6 @@ class MomentSend {
 
                     //预处理评论，再转发朋友圈
                     self.parseComment(res[i], data, testing);
-
-                    // 不为测试消息时更新发圈时间
-                    if (!testing) {
-                        self.mysql.query('UPDATE `pre_weixin_list` SET moment_send = IF( DATEDIFF(NOW(), FROM_UNIXTIME(moment_time) ) > 0, 0, moment_send ) + 1, moment_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [res[i].member_id, res[i].weixin_id]);
-                    }
-
                 }
 				
                 //（异步）发送完成，解锁 GIT
@@ -397,7 +391,6 @@ class MomentSend {
 
         let self = this;
 		let post = com.clone(data);
-
         let pm = this.wx.SnsPostXml(member.weixin_id, post.subject);
 
         pm.then(ret => {
@@ -407,6 +400,9 @@ class MomentSend {
 				this.forwardComment(member, post, ret.snsObject.id);
 
             	log.info('发圈成功', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'post_id' : ret.snsObject.id, 'comment' : post.comment.length, 'instance' : self.insid });
+
+				//更新发圈时间和次数
+				self.mysql.query('UPDATE `pre_weixin_list` SET moment_send = IF( DATEDIFF(NOW(), FROM_UNIXTIME(moment_time) ) > 0, 0, moment_send ) + 1, moment_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [member.member_id, member.weixin_id]);
 
 			}else{
 
