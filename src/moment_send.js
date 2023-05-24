@@ -30,7 +30,7 @@ class MomentSend {
         this.sider = com.redis(conf.redis);
         this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
         this.delay = [];
-        this.twice = {};act();
+        this.twice = {};
         this.abort = false;
     }
 
