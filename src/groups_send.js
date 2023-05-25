@@ -55,8 +55,9 @@ class GroupsSend {
         var channel = 'mm_groups_send';
 
         ///////////////
+
         // 获取卡片消息配置
-        this.cardConfig = this.inst.card_config
+        this.cardConfig = this.inst.card_config;
 
         // 获取美团H5链接
         this.meituan = this.inst.meituan;
