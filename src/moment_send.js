@@ -198,6 +198,8 @@ class MomentSend {
                     //预处理评论，再转发朋友圈
                     self.parseComment(res[i], data, testing);
                 }
+
+				/////////////
 				
                 //（异步）发送完成，解锁 GIT
                 if ( res.length == 0 || self.nodes > 1 || testing ) {
@@ -292,11 +294,14 @@ class MomentSend {
      * @param integer 延迟时间
      * @param string 解析商品
      */
-    parseComment(member, params, testing = false, lazy_time = 0, product = 'true') {
+    async parseComment(member, params, testing = false, lazy_time = 0, product = 'true') {
 
         var self = this;
         var data = com.clone(params);
         var size = data.comment.length;
+
+		//适当延迟，减少高并发请求
+		await com.sleep( member.member_id / 1000 );
 
         var parse = (i) => {
 
@@ -377,6 +382,7 @@ class MomentSend {
                 }
 
             }, self.conf.options);
+
         }
 
         parse(0);
