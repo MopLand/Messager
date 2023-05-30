@@ -344,13 +344,9 @@ class MomentSend {
                     comm.text = body.result;
                     comm.product = body.product;
 
+                    // 最后一个评论转链成功
                     if ( i >= (size - 1) ) {
-                        // 最后一个评论转链成功
-                        if (testing) {
-                            act.record(self.mysql, self.item + '_test', { 'member': member, 'data': data.comment }, '测试发送');
-                        } else {
-                            self.forwardMoment(member, data);
-                        }
+                        self.forwardMoment(member, data);
                     } else {
                         parse(++i);
                     }
@@ -361,13 +357,10 @@ class MomentSend {
                     body.source = 'moment';
 
                     let beian = body.special && 'beian' == body.special;
-
-                    if (testing) {
-                        act.record(self.mysql, self.item + '_test', { 'member': member, 'data': body }, '转链失败');
-                    } else {
-                        act.updatePushed(self.mysql, member, body);
-                        log.error('转链失败', [member.weixin_id, lazy_time, beian]);
-                    }
+                    
+                    act.updatePushed(self.mysql, member, body);
+					
+                    log.error('转链失败', [member.weixin_id, lazy_time, beian]);
                 }
 
             }, (data) => {
