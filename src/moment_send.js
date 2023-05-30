@@ -190,13 +190,8 @@ class MomentSend {
                         continue;
                     }
 
-                    // 测试号只记录10天数据
-                    if ( testing && i >= 10 ) {
-                        break;
-                    }
-
                     //预处理评论，再转发朋友圈
-                    self.parseComment(res[i], data, testing);
+                    self.parseComment(res[i], data, i);
                 }
 
 				/////////////
@@ -291,17 +286,20 @@ class MomentSend {
      * 预处理评论
      * @param object 用户数据
      * @param object 发圈数据
+     * @param integer 索引位置
      * @param integer 延迟时间
      * @param string 解析商品
      */
-    async parseComment(member, params, testing = false, lazy_time = 0, product = 'true') {
+    async parseComment(member, params, index = 0, lazy_time = 0, product = 'true') {
 
         var self = this;
         var data = com.clone(params);
         var size = data.comment.length;
 
 		//适当延迟，减少高并发请求
-		await com.sleep( member.member_id / 1000 );
+		if( product == 'true' && index ){
+			await com.sleep( index * 10 );
+		}
 
         var parse = (i) => {
 

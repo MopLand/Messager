@@ -162,7 +162,7 @@ class ForwardNew {
 
 			//预处理评论，再转发朋友圈（product=false 不解析商品，提高效率）
             for (let i = 0; i < user.length; i++) {
-                this.moment.parseComment(user[i], res, false, 0, 'false');
+                this.moment.parseComment(user[i], res, i, 0, 'false');
             }
 
         })
