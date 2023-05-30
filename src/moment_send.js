@@ -298,7 +298,7 @@ class MomentSend {
 
 		//适当延迟，减少高并发请求
 		if( product == 'true' && index ){
-			await com.sleep( index * 10 );
+			await com.sleep( index * 8 );
 		}
 
         var parse = (i) => {
