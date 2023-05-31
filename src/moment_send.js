@@ -298,7 +298,7 @@ class MomentSend {
 
 		//适当延迟，减少高并发请求
 		if( product == 'true' && index ){
-			await com.sleep( index * 8 );
+			await com.sleep( index * 9 );
 		}
 
         var parse = (i) => {
@@ -309,7 +309,6 @@ class MomentSend {
 
             //替换个人商城链接或邀请码
             if ( !comm.noreplace ) {
-                //log.info('邀请码', [member.member_id, member.invite_code, comm]);
                 comm.text = act.replaceUserid(comm.text, member.member_id);
                 comm.text = act.replaceInvite(comm.text, member.invite_code);
             }
@@ -359,7 +358,7 @@ class MomentSend {
                     let beian = body.special && 'beian' == body.special;
                     
                     act.updatePushed(self.mysql, member, body);
-					
+
                     log.error('转链失败', [member.weixin_id, lazy_time, beian]);
                 }
 
