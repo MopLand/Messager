@@ -10,6 +10,7 @@ const Heartbeat = require('./src/heartbeat');
 const Forward = require('./src/forward');
 const MomentSend = require('./src/moment_send');
 const GroupsSend = require('./src/groups_send');
+const SocketSend = require('./src/socket_send');
 
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
@@ -61,6 +62,12 @@ if (func == 'materiel_groups') {
 //多群消息源（在用）
 if (func == 'groups_send') {
 	let klas = new GroupsSend(conf);
+		klas.init();
+}
+
+//群消息SW（在用）
+if (func == 'socket_send') {
+	let klas = new SocketSend(conf);
 		klas.init();
 }
 

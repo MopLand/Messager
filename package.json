@@ -32,6 +32,7 @@
 		"callback-promise-union": "^1.0.1",
 		"mysql": "*",
 		"pm2": "*",
+		"ws": "*",
 		"redis": "*",
 		"crypto": "*",
 		"fast-xml-parser": "*",
