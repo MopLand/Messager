@@ -21,7 +21,7 @@ class SocketSend {
      */
     constructor(conf) {
         this.conf = conf;
-        this.socket = null;
+        this.client = [];
         this.redis = com.redis(conf.redis);
     }
 
@@ -38,7 +38,7 @@ class SocketSend {
 
 		wss.on('connection', function connection(ws) {
 
-			self.socket = ws;
+			self.client.push( ws );
 
 			ws.on('error', console.error);
 
@@ -76,8 +76,10 @@ class SocketSend {
             let recv = JSON.parse(message);
             log.info('收到消息', recv);
 
-            //发送最新消息           
-			self.socket.send(recv.roomid, recv.message, recv.forced);
+            //发送最新消息
+			self.client.forEach( cl => {
+				cl.send(recv.roomid, recv.message, recv.forced);
+			} )			
 
         });
 
