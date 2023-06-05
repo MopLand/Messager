@@ -185,8 +185,8 @@ class MomentSend {
 
                 for (var i = 0; i < res.length; i++) {
 
-					//禁发素材 打开时，跳过
-                    if (self.item == 'moment_mtl' && res[i] && res[i].tag && (res[i].tag & 8)) {
+					//禁发素材 标签跳过
+                    if ( ( self.item == 'moment_mtl' || self.item == 'moment_send' ) && res[i] && res[i].tag && (res[i].tag & 8) ) {
                         continue;
                     }
 
@@ -420,7 +420,7 @@ class MomentSend {
                     self.abort = ret[0];
 
                     // 营销素材 判定为垃圾消息则禁发素材
-                    if (self.item == 'moment_mtl') {
+                    if( self.item == 'moment_mtl' || self.item == 'moment_send' ) {
                         body.isAbort = true;
                     }
                 }
