@@ -888,7 +888,7 @@ class GroupsSend {
                     // item.content['url'] = card;
                     let cardRet = self.sendMsg( user, card, room );
 
-                    cardRet.then(_res => {
+                    cardRet.then(res => {
 
                         log.info('红包成功', { 'member': user.member_id, 'sourced': user.sourced, 'card_msg': card });
 

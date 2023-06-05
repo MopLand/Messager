@@ -17,6 +17,10 @@ process.on('uncaughtException',function(e){
     log.info( '异常事件', { 'error': e.message, 'stack' : e.stack } );
 });
 
+process.on('unhandledRejection',function(reason, promise){
+    log.info( '异常事件', { 'reason': reason, 'promise' : promise } );
+});
+
 class MomentSend {
 
     /**
@@ -403,6 +407,8 @@ class MomentSend {
 			}else{
 
 				log.debug('发圈异常', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'result' : ret, 'instance' : self.insid });
+
+				act.updatePushed(self.mysql, member, { api: 'SnsPostXml', err : 'MMSNS_POST_ID_EMPTY', isAbort: true });
 
 			}
 
