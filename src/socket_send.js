@@ -30,7 +30,7 @@ class SocketSend {
         let self = this;
 
         //Redis消息频道
-        var channel = 'mm_groups_send';
+        var channel = 'mm_socket_send';
 
         ///////////////
 
@@ -79,7 +79,7 @@ class SocketSend {
             //发送最新消息
 			self.client.forEach( cl => {
 				cl.send(message);
-			} )			
+			} );
 
         });
 
