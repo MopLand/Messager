@@ -3,7 +3,6 @@
     "script": "app.js",
     "args": "socket_send",
     "cwd": "/disk/www/Messager",
-    "instances": "5",
     "error_file": "./logs/wx_socket_send_err.log",
     "out_file": "./logs/wx_socket_send_out.log",
     "merge_logs": true,
