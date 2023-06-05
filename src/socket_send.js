@@ -78,7 +78,7 @@ class SocketSend {
 
             //发送最新消息
 			self.client.forEach( cl => {
-				cl.send(recv);
+				cl.send(message);
 			} )			
 
         });
