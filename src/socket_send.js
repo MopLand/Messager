@@ -34,7 +34,7 @@ class SocketSend {
 
         ///////////////
 
-        const wss = new ws.Server({ port: 88 });
+        const wss = new ws.Server({ port: 8080 });
 
 		wss.on('connection', function connection(ws) {
 
