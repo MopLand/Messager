@@ -46,7 +46,7 @@ class SocketSend {
 				console.log('received: %s', data);
 			});
 
-			ws.send('something');
+			ws.send('ok');
 
 		});
 		
@@ -78,7 +78,7 @@ class SocketSend {
 
             //发送最新消息
 			self.client.forEach( cl => {
-				cl.send(recv.roomid, recv.message, recv.forced);
+				cl.send(recv);
 			} )			
 
         });
