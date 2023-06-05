@@ -21,21 +21,24 @@ class SocketSend {
      */
     constructor(conf) {
         this.conf = conf;
+        this.socket = null;
         this.redis = com.redis(conf.redis);
     }
 
     async init() {
+
+        let self = this;
 
         //Redis消息频道
         var channel = 'mm_groups_send';
 
         ///////////////
 
-        const wss = new ws.Server({ port: 8080 });
+        const wss = new ws.Server({ port: 88 });
 
 		wss.on('connection', function connection(ws) {
 
-			this.socket = ws;
+			self.socket = ws;
 
 			ws.on('error', console.error);
 
@@ -74,7 +77,7 @@ class SocketSend {
             log.info('收到消息', recv);
 
             //发送最新消息           
-			this.socket.send(recv.roomid, recv.message, recv.forced);
+			self.socket.send(recv.roomid, recv.message, recv.forced);
 
         });
 
