@@ -426,7 +426,8 @@ class MomentSend {
                     self.abort = ret[0];
 
                     // 营销素材 判定为垃圾消息则禁发素材
-                    if( self.item == 'moment_mtl' || self.item == 'moment_send' ) {
+                    //if( self.item == 'moment_mtl' || self.item == 'moment_send' ) {
+					if( self.item == 'moment_mtl' ) {
                         body.isAbort = true;
                     }
                 }
