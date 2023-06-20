@@ -408,7 +408,7 @@ class MomentSend {
 
 				log.debug('发圈异常', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'result' : ret, 'instance' : self.insid });
 
-				act.updatePushed(self.mysql, member, { api: 'SnsPostXml', err : 'MMSNS_POST_ID_EMPTY', isAbort: true });
+				act.updatePushed(self.mysql, member, { api: 'SnsPostXml', err : 'MMSNS_POST_ID_EMPTY' });
 
 			}
 
@@ -426,8 +426,8 @@ class MomentSend {
                     self.abort = ret[0];
 
                     // 营销素材 判定为垃圾消息则禁发素材
-                    //if( self.item == 'moment_mtl' || self.item == 'moment_send' ) {
-					if( self.item == 'moment_mtl' ) {
+                    if( self.item == 'moment_mtl' || self.item == 'moment_send' ) {
+					//if( self.item == 'moment_mtl' ) {
                         body.isAbort = true;
                     }
                 }
