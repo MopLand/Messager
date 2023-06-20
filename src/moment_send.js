@@ -517,8 +517,15 @@ class MomentSend {
 				}else{
 
 					stop = setTimeout(() => {
-						self.wx.SnsObjectOp(member.weixin_id, post_id, 1);
-						log.error('删除发圈', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time, 'instance' : self.insid });
+
+						let op = self.wx.SnsObjectOp(member.weixin_id, post_id, 1);
+
+						op.then(ret => {
+							log.info('删除发圈', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time, 'instance' : self.insid });
+						}).catch(err => {
+							log.error('删除失败', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time, 'error' : err, 'instance' : self.insid });
+						});
+
 					}, 5000);
 
 				}
