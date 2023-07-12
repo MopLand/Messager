@@ -19,7 +19,7 @@ const tag = Common.fileName( __filename, false );
 const log = new Logger(tag);
 
 // 清理日志;
-log.clean();
+log.clean( 5 );
 
 process.env.UV_THREADPOOL_SIZE = 128;
 console.log( '-------------' + Common.getTime() +'-------------' );
