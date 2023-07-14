@@ -73,8 +73,9 @@ class SocketSend {
         //处理 Redis 消息
         this.redis.on('message', function (channel, message) {
 
+            log.info('收到消息', message);
+			
             let recv = JSON.parse(message);
-            log.info('收到消息', recv);
 
             //发送最新消息
 			self.client.forEach( cl => {
