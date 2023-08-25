@@ -157,7 +157,7 @@ var conf = {
 		card_config: 'https://proxy.guodongbaohe.com/cps/getCards',
 
 		// 生成美团外卖链接接口
-		meituan: 'https://proxy.guodongbaohe.com/meituan/coupon',
+		meituan: 'https://proxy.guodongbaohe.com/meituan/geturl',
 
 		// 生成饿了么外卖链接接口
 		element: 'http://proxy.guodongbaohe.com/builder/elePromotion',
