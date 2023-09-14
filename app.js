@@ -147,6 +147,7 @@ if (func == 'password') {
 	let size = Common.getArgv('size');
 	let word = Activity.extractTbc( text, size );
 
+	console.log( text );
 	console.log( word );
 
 }
@@ -164,13 +165,17 @@ if (func == 'collect') {
 
 //链接提取
 if (func == 'links') {
+	const Activity = require('./lib/activity');
 
 	let text = Common.getArgv('text');
+	let rule = Common.getArgv('rule');
+
 	let link = text.match( /(https?):\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;]+[-A-Za-z0-9+&@#\/%=~_|]/gm );
+	let word = Activity.detectUrl( text, rule );
 
 	console.dir( text );
 	console.dir( link );
-	console.dir( false == false );
+	console.dir( word );
 
 }
 
