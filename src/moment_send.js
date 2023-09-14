@@ -274,7 +274,8 @@ class MomentSend {
                     data.convert = 0;
                     log.info('不要转链', comm);
                 } else if( !keep ) {
-                    exch = act.extractTbc(text) || act.detectUrl(text) || act.detectApp(text);
+                    log.info('口令识别', { 'text' : text, 'code' : act.extractTbc(text) } );
+                    exch = ( act.extractTbc(text) || act.detectUrl(text) || act.detectApp(text) );
                     exch && data.convert ++;
                 }
 
