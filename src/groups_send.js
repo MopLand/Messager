@@ -26,7 +26,7 @@ class GroupsSend {
     /**
      * 构造函数
      */
-    constructor(conf) {
+    constructor( conf, logd = null ) {
         this.inst = {};
         this.conf = conf;
         this.wx = new wx(conf.weixin, conf.reserve, conf.special);
@@ -44,6 +44,11 @@ class GroupsSend {
         this.cardCon = null; // 红包卡片配置
         this.cardTime = [11, 17]; // 发红包时间点
         this.cardRooms = []; // 已发送过红包消息的源头群
+
+		if( logd ){
+			log = logd;
+		}
+
     }
 
     async init() {

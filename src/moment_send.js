@@ -26,7 +26,7 @@ class MomentSend {
     /**
      * 构造函数
      */
-    constructor(conf) {
+    constructor( conf, logd = null ) {
         this.inst = {};
         this.conf = conf;
         this.wx = new wx(conf.weixin, conf.reserve, conf.special);
@@ -36,6 +36,10 @@ class MomentSend {
         this.delay = [];
         this.twice = {};
         this.abort = false;
+
+		if( logd ){
+			log = logd;
+		}
     }
 
     init(item = 'moment_send') {

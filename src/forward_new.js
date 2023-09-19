@@ -31,8 +31,8 @@ class ForwardNew {
     }
 
     init() {
-        this.moment = new MomentSend(this.conf);
-        this.groups = new GroupsSend(this.conf);
+        this.moment = new MomentSend(this.conf, log);
+        this.groups = new GroupsSend(this.conf, log);
 
         //订阅消息发送
         this.subscribe('mm_forward_new');
