@@ -12,7 +12,7 @@ const req = require('../lib/request');
 const act = require('../lib/activity');
 const Logger = require('../lib/logger');
 const tag = com.fileName(__filename, false);
-const log = new Logger( tag, true, true );
+const log = new Logger(tag);
 
 class SocketSend {
 
