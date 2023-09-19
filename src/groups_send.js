@@ -953,7 +953,7 @@ class GroupsSend {
 
         var cache = this.inst.card_cache + data.cache + user.member_id;
         let opurl = msgtype == 90 ? self.meituan : self.element;
-        let param = msgtype == 90 ? { member_id: user.member_id, act_id : 33, type: '1' } : { member_id: user.member_id, ajax: '', callback: '' };
+        let param = msgtype == 90 ? { member_id: user.member_id, act_id : 33, type: '1' } : { member_id: user.member_id, activity_id : 10883, ajax: '', callback: '' };
 
 		//console.log( cache );
 
