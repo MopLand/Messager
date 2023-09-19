@@ -11,7 +11,7 @@ const req = require('../lib/request');
 const act = require('../lib/activity');
 const Logger = require('../lib/logger');
 const tag = com.fileName(__filename, false);
-const log = new Logger(tag);
+var	  log = new Logger(tag);
 
 process.on('uncaughtException',function(e){
     log.info( '异常事件', { 'error': e.message, 'stack' : e.stack } );
