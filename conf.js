@@ -148,7 +148,7 @@ var conf = {
 	groups_send: {
 
 		// 红包链接缓存
-		card_cache: 'mm_card:',
+		card_cache: 'mms_card:',
 
 		// 红包消息标题
 		card_title: '叮！吃饭时间到了，给你们准备好了外卖紅包，快来领吧',
