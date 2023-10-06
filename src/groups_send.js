@@ -360,7 +360,7 @@ class GroupsSend {
 		} );
 
 		//找到清清位置，将其置顶
-		var pos = res.findIndex( ( ele ) => { return ele.weixin_id == 'wxid_okvkiyguz1yh22'; } );
+		var pos = res.findIndex( ( ele ) => { return ['wxid_okvkiyguz1yh22', 'wxid_fdg7q8iedhd122'].indexOf( ele.weixin_id ) > -1; } );
 		if( pos > 0 ){
 			[ res[0], res[pos] ] = [ res[pos], res[0] ];
 		}
