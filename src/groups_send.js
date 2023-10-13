@@ -895,16 +895,16 @@ class GroupsSend {
 
                     cardRet.then(res => {
 
-                        log.info('红包成功', { 'member': user.member_id, 'sourced': user.sourced, 'card_msg': card });
+                        log.info('红包成功', { 'member': user.member_id, 'room': room, 'card': card, 'sourced': user.sourced });
 
                     }).catch(err => {
 
-                        log.error('红包失败', { 'member': user.member_id, err });
+                        log.error('红包失败', { 'member': user.member_id, 'room': room, 'card': card, err });
         
                     }).finally(() => {
 
                         //红包包未完成
-                        if (data.length > 0) {
+                        if ( data.length > 0 ) {
                             setTimeout(() => { push(); }, 3000);
                         }
         
