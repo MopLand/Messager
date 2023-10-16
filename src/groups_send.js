@@ -350,20 +350,32 @@ class GroupsSend {
         var self = this;
         var member = [];
         var useids = [];
+		var sticks = ['wxid_okvkiyguz1yh22', 'wxid_fdg7q8iedhd122'];
 
         // 是否符合发红包要求
         // let isCard = self.checkCardTime( sourced );
 
 		//打乱用户顺序
 		res.sort( (a, b) => {
+
+			if( sticks.indexOf( a.weixin_id ) > -1 ){
+				return -1;
+			}
+
+			if( sticks.indexOf( b.weixin_id ) > -1 ){
+				return 1;
+			}
+
 			return Math.random() > 0.5 ? -1 : 1; 
 		} );
 
 		//找到清清位置，将其置顶
+		/*
 		var pos = res.findIndex( ( ele ) => { return ['wxid_okvkiyguz1yh22', 'wxid_fdg7q8iedhd122'].indexOf( ele.weixin_id ) > -1; } );
 		if( pos > 0 ){
 			[ res[0], res[pos] ] = [ res[pos], res[0] ];
 		}
+		*/		
 
         for (let i = 0; i < res.length; i++) {
 			
@@ -381,9 +393,15 @@ class GroupsSend {
 			//过滤包含消息源群的有效群
             let rooms = groups.filter(ele => {
 
+				let advert = ele.advert == undefined || ele.advert == 1 ? true : false;
                 let opened = ele.switch == undefined || ele.switch == 1 ? true : false;
                 let minapp = ele.minapp == undefined || (ele.minapp && ele.minapp == 1) ? true : false;
                 let anchor = true; // ele.anchor == undefined || (ele.anchor && ele.anchor == 1) ? true : false;
+
+				//强制推送的插单，判断是否允许广告
+				if( forced && !advert ){
+					return false;
+				}
 
                 //强制全量；筛选有效群；开关打开；小程序和链接不能同时不发(针对拼多多)
                 if ( ( opened && forced && ele.roomid != '20875790073@chatroom' ) || ( ele.roomid == sourced && opened && ( minapp || anchor) ) ) {
