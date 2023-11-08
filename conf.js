@@ -31,8 +31,8 @@ var conf = {
 	redis: {
 		host     : '127.0.0.1',
 		port     : 6379,
-		password : 'root',
 		prefix   : 'jellybox_',
+		password : 'root',
 	},
 
 	//MySQL
@@ -148,19 +148,19 @@ var conf = {
 	groups_send: {
 
 		// 红包链接缓存
-		card_cache: 'mms_card:',
+		card_cache: 'mm_card:',
 
 		// 红包消息标题
 		card_title: '叮！吃饭时间到了，给你们准备好了外卖紅包，快来领吧',
 
 		// 外卖红包卡片文案配置
-		card_config: 'https://proxy.guodongbaohe.com/cps/getCards',
+		card_config: 'https://proxy.guodongbaohe.com/cps/hongbao',
 
 		// 生成美团外卖链接接口
-		meituan: 'https://proxy.guodongbaohe.com/meituan/geturl',
+		//meituan: 'https://proxy.guodongbaohe.com/meituan/geturl',
 
 		// 生成饿了么外卖链接接口
-		element: 'http://proxy.guodongbaohe.com/builder/elePromotion',
+		//element: 'http://proxy.guodongbaohe.com/builder/elePromotion',
 
 		// 卡片时间
 		card_time: [11, 17],

@@ -41,7 +41,8 @@ class GroupsSend {
         this.locked = 0;
         this.sender = 0;
 
-        this.cardCon = null; // 红包卡片配置
+		this.hongbao = [];	//红包卡片配置
+        //this.cardCon = null; // 红包卡片配置
         this.cardTime = [11, 17]; // 发红包时间点
         this.cardRooms = []; // 已发送过红包消息的源头群
 
@@ -65,10 +66,10 @@ class GroupsSend {
         this.cardConfig = this.inst.card_config;
 
         // 获取美团H5链接
-        this.meituan = this.inst.meituan;
+        //this.meituan = this.inst.meituan;
 
         // 饿了么
-        this.element = this.inst.element;
+        //this.element = this.inst.element;
 
         // 发红包时间点
         this.cardTime = this.inst.card_time;
@@ -97,6 +98,9 @@ class GroupsSend {
 
 		//清理失效Git锁
 		log.clean( 3, '/', '.gitlock' );
+
+		//获取红包配置
+		this.getConfig( this.inst.card_config );
 
         ///////////////
 
@@ -843,301 +847,29 @@ class GroupsSend {
     ////////// 红包相关方法 //////////
 
     /**
-     * 发送卡片消息
-     * @param object 用户信息
-     * @param bool 是否发送红包
+     * 红包卡片配置
+     * @param string 配置地址
      */
-    async sendCardMsg(user, isCard = false) {
+    getConfig( url ) {
 
-        var self = this;
+		var self = this;
 
-		/*
-        let config_clear = [ 14, 15, 19 ]; // 清空配置时间
-        let isHours = config_clear.indexOf((new Date).getHours()) > -1; // 是否清空配置
+        req.get(url, {}, (code, body) => {
 
-        // 判断是否符合发红包时间
-        if ( isHours ) {
+			log.info('红包配置', body);
 
-            // 不在红包时间 重置全局数据
-            if ( !(self.cardCon === null) ) {
-                self.cardCon = null;
-                self.cardRooms = [];
-            }
-
-            return;
-        }
-
-        // 用户红包属性判断
-        if ( !isCard ) {
-            return;
-        }
-		*/
-
-		// 是否允许当前微信发红包
-		if( !self.checkCardTime( user.weixin_id ) ){
-            return;
-		}
-
-        // 获取红包配置
-        if (self.cardCon === null) {
-            self.cardCon = self.parseCardMessage( await self.getConfig() );
-        }
-
-        // 如果全局
-        if (self.cardCon === null || (typeof self.cardCon == 'object' && self.cardCon.length == 0)) {
-            return;
-        }
-
-        // 保存已发送过红包的源群
-        // self.cardRooms.push(user.sourced);
-
-        let data = com.clone(self.cardCon);
-		let room = [];
-
-		user.hongbao.forEach( ele => {
-			room.push( { roomid : ele, anchor : true, minapp : true } );
-		} );
-
-		log.info('开始红包', { 'member': user.member_id, 'hongbao': user.hongbao });
-
-        let push = () => {
-
-            let item = data.shift();
-
-            self.parseCardMsg(user, item, (card) => {
-
-                if (card != null) {
-
-                    // item.content['url'] = card;
-                    let cardRet = self.sendMsg( user, card, room );
-
-                    cardRet.then(res => {
-
-                        log.info('红包成功', { 'member': user.member_id, 'room': room, 'card': card, 'sourced': user.sourced });
-
-                    }).catch(err => {
-
-                        log.error('红包失败', { 'member': user.member_id, 'room': room, 'card': card, err });
-        
-                    }).finally(() => {
-
-                        //红包包未完成
-                        if ( data.length > 0 ) {
-                            setTimeout(() => { push(); }, 3000);
-                        }
-        
-                    });
-                } 
-
-            }, (item) => {
-
-                if (item.msgtype != 90 && item.msgtype != 91) {
-                    return { 'request' : false, 'respond' : item };
-                } else {
-                    return { 'request' : true };
-                }
-                
-            });
-        }
-
-        push();
-    }
-
-    /**
-     * 预处理卡片消息
-     * @param object 用户数据
-     * @param object 发群数据
-     * @param function 返回函数
-     * @param function 拦截方法
-     */
-    parseCardMsg(user, data, func, blocker = null) {
-		
-        var self = this;
-        var msgtype = data.msgtype;
-
-        if (!user.member_id) {
-            log.info('红包无效用户', { 'user': user, msgtype });
-            func(null);
-        }
-
-        if ( blocker ) {
-            let ret = blocker( data );
-
-            if( ret.request == false ){
-				func( ret.respond );
-				return;
-			}
-        }
-
-        if (!data.cache) {
-            log.info('红包缓存错误', { 'user': user, data });
-            func(null);
-        }
-
-        var cache = this.inst.card_cache + data.cache + user.member_id;
-        let opurl = msgtype == 90 ? self.meituan : self.element;
-        let param = msgtype == 90 ? { member_id: user.member_id, act_id : 33, type: '1' } : { member_id: user.member_id, activity_id : 10883, ajax: '', callback: '' };
-
-		//console.log( cache );
-
-        // 获取红包链接缓存
-		self.sider.get( cache, ( err, ret ) => {
-
-			//从缓存读取
-			if (!err && ret) {
-
-				data.content.url = ret;
-
-				func(data);
-
-			} else {
-
-                req.get(opurl, param, (code, body) => {
-
-                    try {
-                        if (typeof body == 'string') {
-                            body = JSON.parse(body);
-                        }
-                    } catch (e) {
-                        body = { 'status': -code, 'body': body, 'error': e.toString() };
-                    }
-        
-                    //成功转链
-                    if (body.status >= 0) {
-        
-                        log.info('链接成功', { user, body });
-
-						console.log( body );
-
-                        let url = msgtype == 90 ? body.result : body.result.h5_short_link;
-        
-                        data.content.url = url;
-
-                        func(data);
-
-                        // 缓存红包链接 3 天
-                        self.sider.set(cache, url);
-                        self.sider.expire(cache, 3600 * 24 * 3);
-        
-                    } else {
-        
-                        log.info('链接失败', { 'member_id': user.member_id, body });
-        
-                        func(null);
-                    }
-        
-                });
-
+			try {
+				if (typeof body == 'string') {
+					body = JSON.parse(body);
+				}
+				self.hongbao = body.result;
+			} catch (e) {
+				body = { 'status': -code, 'body': body, 'error': e.toString() };
+				log.info('红包错误', body);
 			}
 
-        });
+		});
 
-    }
-
-    /**
-     * 发单配置
-     * @param string type
-     */
-    getConfig( type ) {
-
-        var self = this;
-        let option = type ? { type: type } : {};
-
-        return new Promise((resolve, reject) => {
-
-            req.get(self.cardConfig, option, (code, body) => {
-
-                log.info('配置结果', body);
-
-                try {
-                    if (typeof body == 'string') {
-                        body = JSON.parse(body);
-                    }
-                } catch (e) {
-                    body = { 'status': -code, 'body': body, 'error': e.toString() };
-                }
-
-                if (body.status >= 0) {
-
-                    resolve(body.result);
-
-                } else {
-
-                    log.info('配置错误', body);
-
-                    resolve([])
-                }
-            });
-        })
-    }
-
-    /**
-     * 配置红包消息包
-     * @param object 红包配置信息
-     */
-    parseCardMessage( data ) {
-
-        var self = this;
-        var msgs = [{
-            msgtype: 47,
-            content: `<msg>
-                <emoji fromusername="wxid_frgh4iv691jk22" tousername="8049512147@chatroom" type="2" idbuffer="media:0_0" md5="b678563ef6b7efb1b346bc6da6040e8a" len="181020" productid="" androidmd5="b678563ef6b7efb1b346bc6da6040e8a" androidlen="181020" s60v3md5="b678563ef6b7efb1b346bc6da6040e8a" s60v3len="181020" s60v5md5="b678563ef6b7efb1b346bc6da6040e8a" s60v5len="181020" cdnurl="http://emoji.qpic.cn/wx_emoji/lym8NlLVX3gUoFynz5lu5kASeMic6NXXyWuyGms627Z07wqfZK9ADZUCvOGXU0yVj/" designerid="" thumburl="" encrypturl="http://emoji.qpic.cn/wx_emoji/lym8NlLVX3gUoFynz5lu5kASeMic6NXXyWuyGms627Z04oAKGYUic7jnMS0TKCFkPf/" aeskey="545d84c316bf958cd293e95646037d58" externurl="http://emoji.qpic.cn/wx_emoji/GicyFVCQdyeV1kjWKnfcnNefkGW1l8ALl9DuaUfnfaKKM6uUrJDcs6dl6EsUzPX4j/" externmd5="b5ef9dc1931a2bd4dff23d0a1258c92d" width="640" height="71" tpurl="" tpauthkey="" attachedtext="" attachedtextcolor="" lensid="" emojiattr="" linkid=""></emoji>
-            </msg>`
-        }];
-        let size = 0;
-
-        if (self.inst && self.inst.card_title) {
-            msgs.push({
-                msgtype: 1,
-                content: self.inst.card_title
-            });
-        }
-
-        // 美团红包卡片配置
-        if ( data.meituan) {
-
-            let meituan = data.meituan;
-            let mcache = 'cmeituan_';
-
-            // 红包链接 缓存 key 设置
-            if ( meituan.cache ) {
-                // 防止缓存键值重名
-                mcache = 'm' + meituan.cache;
-                delete meituan['cache'];
-            }
-
-            msgs.push({
-                cache: mcache,
-                msgtype: 90,
-                content: meituan
-            });
-
-            size +=1;
-        }
-
-        // 饿了么红包卡片配置
-        if (data.elment) {
-
-            let elment = data.elment;
-            let ecache = 'element_';
-
-            // 红包链接 缓存 key 设置
-            if ( elment.cache ) {
-                // 防止缓存键值重名
-                ecache = 'e' + elment.cache;
-                delete elment['cache'];
-            }
-
-            msgs.push({
-                cache: ecache,
-                msgtype: 91,
-                content: elment
-            });
-
-            size +=1;
-        }
-
-        return size > 0 ? msgs : [];
     }
 
     /**
@@ -1163,6 +895,209 @@ class GroupsSend {
         }
 
         return send;
+    }
+
+    /**
+     * 预处理红包消息
+     * @param object 红包配置信息
+     */
+    fmtMsgList( data ) {
+
+        var msgs = [{
+            msgtype: 47,
+            content: `<msg>
+                <emoji fromusername="wxid_frgh4iv691jk22" tousername="8049512147@chatroom" type="2" idbuffer="media:0_0" md5="b678563ef6b7efb1b346bc6da6040e8a" len="181020" productid="" androidmd5="b678563ef6b7efb1b346bc6da6040e8a" androidlen="181020" s60v3md5="b678563ef6b7efb1b346bc6da6040e8a" s60v3len="181020" s60v5md5="b678563ef6b7efb1b346bc6da6040e8a" s60v5len="181020" cdnurl="http://emoji.qpic.cn/wx_emoji/lym8NlLVX3gUoFynz5lu5kASeMic6NXXyWuyGms627Z07wqfZK9ADZUCvOGXU0yVj/" designerid="" thumburl="" encrypturl="http://emoji.qpic.cn/wx_emoji/lym8NlLVX3gUoFynz5lu5kASeMic6NXXyWuyGms627Z04oAKGYUic7jnMS0TKCFkPf/" aeskey="545d84c316bf958cd293e95646037d58" externurl="http://emoji.qpic.cn/wx_emoji/GicyFVCQdyeV1kjWKnfcnNefkGW1l8ALl9DuaUfnfaKKM6uUrJDcs6dl6EsUzPX4j/" externmd5="b5ef9dc1931a2bd4dff23d0a1258c92d" width="640" height="71" tpurl="" tpauthkey="" attachedtext="" attachedtextcolor="" lensid="" emojiattr="" linkid=""></emoji>
+            </msg>`
+        }];
+
+		if (this.inst && this.inst.card_title) {
+            msgs.push({
+                msgtype: 1,
+                content: this.inst.card_title
+            });
+        }
+
+		var size = msgs.length;
+
+		//var msgs = [];
+
+		for (let k in data) {
+			if( data[k].status == 'on' ){
+				msgs.push({
+					msgtype: 90,
+					subtype: k,
+					content: data[k]
+				});
+			}
+		}
+
+        return msgs.length > size ? msgs : [];
+    }
+
+    /**
+     * 发送卡片消息
+     * @param object 用户信息
+     * @param bool 强制发送
+     */
+    async sendCardMsg(user, force = false) {
+
+        var self = this;
+
+		/*
+        let config_clear = [ 14, 15, 19 ]; // 清空配置时间
+        let isHours = config_clear.indexOf((new Date).getHours()) > -1; // 是否清空配置
+
+        // 判断是否符合发红包时间
+        if ( isHours ) {
+
+            // 不在红包时间 重置全局数据
+            if ( !(self.cardCon === null) ) {
+                self.cardCon = null;
+                self.cardRooms = [];
+            }
+
+            return;
+        }
+
+        // 用户红包属性判断
+        if ( !isCard ) {
+            return;
+        }
+		*/
+
+		//是否允许当前微信发红包
+		if( !force && !self.checkCardTime( user.weixin_id ) ){
+            return;
+		}
+
+        // 保存已发送过红包的源群
+        // self.cardRooms.push(user.sourced);
+
+		//生成红包消息列表
+        let data = self.fmtMsgList( self.hongbao );
+		let room = [];
+
+		//获取用户发红包群
+		user.hongbao.forEach( ele => {
+			room.push( { roomid : ele, anchor : true, minapp : true } );
+		} );
+
+		log.info('开始红包', { 'member': user.member_id, 'hongbao': user.hongbao });
+
+        let push = () => {
+
+            let item = data.shift();
+
+            self.parseCardMsg(user, item, (card) => {
+
+                //if ( card != null ) {
+
+					delete card.content['api'];
+					delete card.content['status'];
+
+                    let ret = self.sendMsg( user, card, room );
+
+                    ret.then(res => {
+
+                        log.info('红包成功', { 'member': user.member_id, 'room': room, 'card': card, 'sourced': user.sourced });
+
+                    }).catch(err => {
+
+                        log.error('红包失败', { 'member': user.member_id, 'room': room, 'card': card, err });
+        
+                    }).finally(() => {
+
+                        //红包包未完成
+                        if ( data.length > 0 ) {
+                            setTimeout(() => { push(); }, 3000);
+                        }
+        
+                    });
+                //}
+                
+            });
+        }
+
+        push();
+    }
+
+    /**
+     * 预处理卡片消息
+     * @param object 用户数据
+     * @param object 发群数据
+     * @param function 返回函数
+     */
+    parseCardMsg(user, item, func) {
+		
+        var self = this;
+
+        if ( !user.member_id ) {
+            log.info('红包无效用户', { 'user': user, item });
+            func(null);
+        }
+
+		//红包类型 type = 90
+		if( item.msgtype != 90 ){
+			func( item );
+			return;
+		}
+
+		////////////
+
+        //var cache = this.inst.card_cache + ':' + item.subtype + ':' + user.member_id;
+
+		if( item.content.api.indexOf('{UID}') > -1 ){
+			var opurl = item.content.api.replace('{UID}', user.member_id);
+		}else{
+			var opurl = item.content.api + '&member_id=' + user.member_id;
+		}
+
+		//console.log( 'cache', cache );
+
+		req.get( opurl, {}, (code, body) => {
+
+			try {
+				if (typeof body == 'string') {
+					body = JSON.parse(body);
+				}
+			} catch (e) {
+				body = { 'status': -code, 'body': body, 'error': e.toString() };
+			}
+
+			//成功转链
+			if (body.status >= 0) {
+
+				log.info('链接成功', { user, body });
+
+				//滴滴 h5_link，饿了么 h5_short_link，美团 result
+				item.content.url = body.result.h5_link || body.result.h5_short_link || body.result;
+
+				//console.log( item.content.url );
+				func( item );
+
+				// 缓存红包链接 3 天
+				//self.sider.set(cache, item.content.url);
+				//self.sider.expire(cache, 3600 * 24 * 3);
+
+			} else {
+
+				log.info('链接失败', { 'member_id': user.member_id, body });
+
+				//func( null );
+			}
+
+		}, ( tmp ) => {
+			
+			// 获取红包链接缓存
+			//self.sider.get( cache, ( err, ret ) => {
+			//	if (!err && ret) {
+			//		return { 'request': false, 'respond': { 'status': 1, 'result': ret } };
+			//	}else{
+					return { 'request': true };
+			//	}
+			//});
+
+		});
     }
 
     ////////// 消息发送相关方法 //////////
@@ -1302,8 +1237,8 @@ class GroupsSend {
 
             }
 
-            // 卡片消息 自定义 类型 90 美团，91 饿了么
-            if (msg.msgtype == 90 || msg.msgtype == 91) {
+            //红包卡片
+            if (msg.msgtype == 90 ) {
 
                 if ( !body.url ) {
 

@@ -2,20 +2,22 @@
 	"name": "messager",
 	"version": "0.0.1",
 	"license": "MIT",
-	"description": "Umeng Push Server",
+	"description": "Wechat Messager And Umeng Push Server",
 	"author": "Lay <veryide@qq.com>",
 	"files": [
 		"lib",
+		"src",
+		"run",
 		"LICENSE",
 		"README.md"
 	],
 	"keywords": [
-		"umeng",
 		"push",
-		"umeng push",
-		"umeng push sdk",
-		"u push",
-		"u push sdk"
+		"umeng",
+		"wechat",
+		"groups",
+		"moment",
+		"forward"
 	],
 	"main": "./lib",
 	"publishConfig": {
@@ -30,14 +32,14 @@
 	},
 	"dependencies": {
 		"callback-promise-union": "^1.0.1",
-		"mysql": "*",
-		"pm2": "*",
-		"ws": "*",
-		"redis": "*",
 		"crypto": "*",
 		"fast-xml-parser": "*",
+		"mysql": "^2.18.1",
+		"pm2": "*",
+		"redis": "^3.0.2",
 		"request": "*",
 		"umeng-push-server-sdk": "*",
+		"ws": "*",
 		"xml2js": "^0.4.23"
 	}
 }
