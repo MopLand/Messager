@@ -188,8 +188,7 @@ if (func == 'card') {
 	//let card = klas.parseCardMsg( { 'member_id' : 10008 }, { 'msgtype' : 80, 'cache' : 'elment', 'content' : {"title":"【饿了么外卖】第5个人领最大红包！","des":"饿了么外卖超市药店鲜花，手快有，手慢无~","thumburl":"https://assets.exp.com/.jpg"} }, console.log );
 
 	setTimeout( () => {
-		let card = klas.sendCardMsg( { 'member_id' : 10008, 'hongbao' : ['18935808677@chatroom'] }, true );
-		console.log( card );
-	}, 1000);	
+		klas.sendCardMsg( { 'member_id' : 10008, 'hongbao' : ['18935808677@chatroom'] }, true );
+	}, 100);	
 
 }

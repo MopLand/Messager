@@ -939,7 +939,7 @@ class GroupsSend {
      * @param object 用户信息
      * @param bool 强制发送
      */
-    async sendCardMsg(user, force = false) {
+    sendCardMsg(user, force = false) {
 
         var self = this;
 
@@ -982,7 +982,7 @@ class GroupsSend {
 			room.push( { roomid : ele, anchor : true, minapp : true } );
 		} );
 
-		log.info('开始红包', { 'member': user.member_id, 'hongbao': user.hongbao });
+		log.info('开始红包', { 'member': user.member_id, 'hongbao': user.hongbao, 'msglist': data });
 
         let push = () => {
 
@@ -1018,7 +1018,7 @@ class GroupsSend {
             });
         }
 
-        push();
+        data.length && push();		
     }
 
     /**
@@ -1033,8 +1033,11 @@ class GroupsSend {
 
         if ( !user.member_id ) {
             log.info('红包无效用户', { 'user': user, item });
-            func(null);
+            //func(null);
+			return;
         }
+
+		//console.log( 'item', item );
 
 		//红包类型 type = 90
 		if( item.msgtype != 90 ){
