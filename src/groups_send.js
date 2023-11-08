@@ -77,6 +77,9 @@ class GroupsSend {
         // 已发送或禁发红包消息的源头群
         this.cardRooms = this.inst.card_rooms;
 
+		//获取红包配置
+		this.getConfig( this.inst.card_config );
+
         ///////////////
 
         //当前 PM2 实例数量
@@ -98,9 +101,6 @@ class GroupsSend {
 
 		//清理失效Git锁
 		log.clean( 3, '/', '.gitlock' );
-
-		//获取红包配置
-		this.getConfig( this.inst.card_config );
 
         ///////////////
 
@@ -545,8 +545,8 @@ class GroupsSend {
 
             }
 
-            //支持的消息类型：1 文字、3 图片、43 视频、47 表情、49 小程序、90 美团、 91 饿了么
-            if ([1, 3, 43, 47, 49, 90, 91].indexOf(item.msgType) == -1) {
+            //支持的消息类型：1 文字、3 图片、43 视频、47 表情、49 小程序、90 红包
+            if ([1, 3, 43, 47, 49, 90].indexOf(item.msgType) == -1) {
                 continue;
             }
 
@@ -943,35 +943,10 @@ class GroupsSend {
 
         var self = this;
 
-		/*
-        let config_clear = [ 14, 15, 19 ]; // 清空配置时间
-        let isHours = config_clear.indexOf((new Date).getHours()) > -1; // 是否清空配置
-
-        // 判断是否符合发红包时间
-        if ( isHours ) {
-
-            // 不在红包时间 重置全局数据
-            if ( !(self.cardCon === null) ) {
-                self.cardCon = null;
-                self.cardRooms = [];
-            }
-
-            return;
-        }
-
-        // 用户红包属性判断
-        if ( !isCard ) {
-            return;
-        }
-		*/
-
-		//是否允许当前微信发红包
+		//当前是否允许发红包
 		if( !force && !self.checkCardTime( user.weixin_id ) ){
             return;
 		}
-
-        // 保存已发送过红包的源群
-        // self.cardRooms.push(user.sourced);
 
 		//生成红包消息列表
         let data = self.fmtMsgList( self.hongbao );
@@ -982,7 +957,7 @@ class GroupsSend {
 			room.push( { roomid : ele, anchor : true, minapp : true } );
 		} );
 
-		log.info('开始红包', { 'member': user.member_id, 'hongbao': user.hongbao, 'msglist': data });
+		log.info('开始红包', { 'member': user.member_id, 'groups': user.hongbao, 'hongbao': data });
 
         let push = () => {
 
@@ -1024,7 +999,7 @@ class GroupsSend {
     /**
      * 预处理卡片消息
      * @param object 用户数据
-     * @param object 发群数据
+     * @param object 红包消息（单条）
      * @param function 返回函数
      */
     parseCardMsg(user, item, func) {
@@ -1032,15 +1007,16 @@ class GroupsSend {
         var self = this;
 
         if ( !user.member_id ) {
-            log.info('红包无效用户', { 'user': user, item });
+            log.info('无效用户', { 'user': user, item });
             //func(null);
 			return;
         }
 
 		//console.log( 'item', item );
 
-		//红包类型 type = 90
-		if( item.msgtype != 90 ){
+		//红包类型 type = 90，必需有 api
+		if( item.msgtype != 90 || !item.content.api ){
+			log.info('红包消息', { user, item });
 			func( item );
 			return;
 		}

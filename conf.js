@@ -151,7 +151,7 @@ var conf = {
 		card_cache: 'mm_card:',
 
 		// 红包消息标题
-		card_title: '叮！吃饭时间到了，给你们准备好了外卖紅包，快来领吧',
+		card_title: '叮！打车/吃饭时间到了，给你们准备好了外卖紅包，快来领吧',
 
 		// 外卖红包卡片文案配置
 		card_config: 'https://proxy.guodongbaohe.com/cps/hongbao',

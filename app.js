@@ -189,6 +189,6 @@ if (func == 'card') {
 
 	setTimeout( () => {
 		klas.sendCardMsg( { 'member_id' : 10008, 'hongbao' : ['18935808677@chatroom'] }, true );
-	}, 100);	
+	}, 1000);	
 
 }
