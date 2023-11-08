@@ -862,7 +862,7 @@ class GroupsSend {
 				if (typeof body == 'string') {
 					body = JSON.parse(body);
 				}
-				self.hongbao = body.result;
+				self.hongbao = self.fmtMsgList( body.result );
 			} catch (e) {
 				body = { 'status': -code, 'body': body, 'error': e.toString() };
 				log.info('红包错误', body);
@@ -949,7 +949,7 @@ class GroupsSend {
 		}
 
 		//生成红包消息列表
-        let data = self.fmtMsgList( self.hongbao );
+        let bags = com.clone( self.hongbao );
 		let room = [];
 
 		//获取用户发红包群
@@ -957,11 +957,11 @@ class GroupsSend {
 			room.push( { roomid : ele, anchor : true, minapp : true } );
 		} );
 
-		log.info('开始红包', { 'member': user.member_id, 'groups': user.hongbao, 'hongbao': data });
+		log.info('开始红包', { 'member': user.member_id, 'groups': user.hongbao, 'hongbao': bags });
 
         let push = () => {
 
-            let item = data.shift();
+            let item = bags.shift();
 
             self.parseCardMsg(user, item, (card) => {
 
@@ -983,7 +983,7 @@ class GroupsSend {
                     }).finally(() => {
 
                         //红包包未完成
-                        if ( data.length > 0 ) {
+                        if ( bags.length > 0 ) {
                             setTimeout(() => { push(); }, 3000);
                         }
         
@@ -993,7 +993,7 @@ class GroupsSend {
             });
         }
 
-        data.length && push();		
+        bags.length && push();		
     }
 
     /**
