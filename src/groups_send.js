@@ -426,7 +426,7 @@ class GroupsSend {
 
             if ( rooms.length > 0 ) {
                 useids.push(res[i].member_id);
-                member.push({ member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, rooms, hongbao, sourced: sourced });
+                member.push({ auto_id: res[i].auto_id, member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, rooms, hongbao, sourced: sourced });
             }
 
         }
@@ -1260,15 +1260,18 @@ class GroupsSend {
      */
     sendErr(user, api, err, chat, text) {
 
+		//用户信息
+		let simp = { 'auto_id': user.auto_id, 'member_id': user.member_id, 'weixin_id': user.weixin_id, 'sourced' : user.sourced };
+
         //写入日志
-        log.error(api, [user, err, chat, text]);
+        log.error(api, [simp, err, chat, text]);
 
         //更新状态
-        act.updatePushed(this.mysql, user, { api: api, err, chat });
+        act.updatePushed(this.mysql, simp, { api: api, err, chat });
 
         //群已经失效
         if (err == 'MM_ERR_NOTCHATROOMCONTACT' && typeof chat == 'string') {
-            this.delGroup(user.member_id, user.weixin_id, chat);
+            this.delGroup(simp.member_id, simp.weixin_id, chat);
         }
 
     }
