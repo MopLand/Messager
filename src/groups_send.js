@@ -1186,7 +1186,7 @@ class GroupsSend {
                 var fn = this.wx.SendEmojiXml(member.weixin_id, chat, body);
 
                 fn.then(ret => {
-                    log.info('表情成功', { 'member' : member.member_id, chat, ret, 'instance' : self.insid });
+                    log.info('表情成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
                 }).catch(err => {
                     self.sendErr(member, 'SendEmojiXml', err, chat, body);
                 });
