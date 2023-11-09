@@ -856,7 +856,7 @@ class GroupsSend {
 
         req.get(url, {}, (code, body) => {
 
-			log.shoot('红包配置', body);
+			log.shoot('红包配置', body, self.insid);
 
 			try {
 				if (typeof body == 'string') {
@@ -865,7 +865,7 @@ class GroupsSend {
 				self.hongbao = self.fmtMsgList( body.result );
 			} catch (e) {
 				body = { 'status': -code, 'body': body, 'error': e.toString() };
-				log.shoot('红包错误', body);
+				log.shoot('红包错误', body, self.insid);
 			}
 
 		});
