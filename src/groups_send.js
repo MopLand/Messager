@@ -856,7 +856,7 @@ class GroupsSend {
 
         req.get(url, {}, (code, body) => {
 
-			log.info('红包配置', body);
+			log.shoot('红包配置', body);
 
 			try {
 				if (typeof body == 'string') {
@@ -865,7 +865,7 @@ class GroupsSend {
 				self.hongbao = self.fmtMsgList( body.result );
 			} catch (e) {
 				body = { 'status': -code, 'body': body, 'error': e.toString() };
-				log.info('红包错误', body);
+				log.shoot('红包错误', body);
 			}
 
 		});
@@ -957,7 +957,7 @@ class GroupsSend {
 			room.push( { roomid : ele, anchor : true, minapp : true } );
 		} );
 
-		log.info('开始红包', { 'member': user.member_id, 'groups': user.hongbao, 'hongbao': bags });
+		log.info('开始红包', { 'member': user.member_id, 'groups': user.hongbao, 'hongbao': bags, 'instance' : self.insid });
 
         let push = () => {
 
@@ -971,14 +971,15 @@ class GroupsSend {
 					delete card.content['status'];
 
                     let ret = self.sendMsg( user, card, room );
+					let tag = card.title || card.msgtype;
 
                     ret.then(res => {
 
-                        log.info('红包成功', { 'member': user.member_id, 'room': room, 'card': card, 'sourced': user.sourced });
+                        log.info('红包成功', { 'member': user.member_id, 'room': user.hongbao, 'card': tag, 'sourced': user.sourced, 'instance' : self.insid });
 
                     }).catch(err => {
 
-                        log.error('红包失败', { 'member': user.member_id, 'room': room, 'card': card, err });
+                        log.error('红包失败', { 'member': user.member_id, 'room': user.hongbao, 'card': tag, 'instance' : self.insid, err });
         
                     }).finally(() => {
 
