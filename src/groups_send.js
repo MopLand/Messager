@@ -960,7 +960,7 @@ class GroupsSend {
 		//群ID简写
 		let gids = user.hongbao.join(',').replace(/@chatroom/g,'');
 
-		log.info('开始红包', { 'member': user.member_id, 'groups': gids, 'hongbao': bags, 'rawdata': bags.length ? 'OK' : self.hongbao, 'instance' : self.insid });
+		log.info('开始红包', { 'member': user.member_id, 'groups': gids, 'hongbao': bags.length, 'rawdata': bags.length ? 'OK' : self.hongbao, 'instance' : self.insid });
 
         let push = () => {
 
