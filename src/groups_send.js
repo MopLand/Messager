@@ -957,7 +957,10 @@ class GroupsSend {
 			room.push( { roomid : ele, anchor : true, minapp : true } );
 		} );
 
-		log.info('开始红包', { 'member': user.member_id, 'groups': user.hongbao, 'hongbao': bags, 'instance' : self.insid });
+		//群ID简写
+		let gids = user.hongbao.join(',').replace(/@chatroom/g,'');
+
+		log.info('开始红包', { 'member': user.member_id, 'groups': gids, 'hongbao': bags, 'rawdata': bags.length ? 'OK' : self.hongbao, 'instance' : self.insid });
 
         let push = () => {
 
@@ -975,11 +978,11 @@ class GroupsSend {
 
                     ret.then(res => {
 
-                        log.info('红包成功', { 'member': user.member_id, 'room': user.hongbao, 'card': tag, 'sourced': user.sourced, 'instance' : self.insid });
+                        log.info('红包成功', { 'member': user.member_id, 'groups': gids, 'card': tag, 'sourced': user.sourced, 'instance' : self.insid });
 
                     }).catch(err => {
 
-                        log.error('红包失败', { 'member': user.member_id, 'room': user.hongbao, 'card': tag, 'instance' : self.insid, err });
+                        log.error('红包失败', { 'member': user.member_id, 'groups': gids, 'card': tag, 'instance' : self.insid, err });
         
                     }).finally(() => {
 
