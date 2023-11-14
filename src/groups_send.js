@@ -1012,7 +1012,7 @@ class GroupsSend {
         let hour = new Date().getHours();
 
 		//无用户信息或不在指定时段，跳过不发
-        if ( !user.member_id || ( item.quantum && item.quantum != hour ) ) {
+        if ( !user.member_id || ( item.quantum && item.quantum.indexOf( hour ) > -1 ) ) {
             log.info('无效用户', { 'user': user, item });
             //func(null);
 			return;

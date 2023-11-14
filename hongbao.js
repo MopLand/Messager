@@ -37,7 +37,7 @@ var bags = [
 	{
 		'msgtype': 90,
 		'subtype': 'didi',
-		'quantum': '11',
+		'quantum': [23],
 		'content': {
 			"title": "【滴滴打车】限时领最大红包！",
 			"status": "on",
@@ -48,7 +48,7 @@ var bags = [
 	},
 	{
 		'msgtype': 3,
-		'quantum': '11',
+		'quantum': [17],
 		'rawdata': {
 			"existflag": 0,
 			"retcode": 0,
@@ -78,7 +78,7 @@ var bags = [
 	{
 		'msgtype': 1,
 		'subtype': 'didi',
-		'quantum': '11',
+		'quantum': [17],
 		'content': `滴滴打车券天天领
 			出行单单享优惠🚗
 			
