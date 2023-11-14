@@ -9,6 +9,7 @@ const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const req = require('../lib/request');
 const act = require('../lib/activity');
+const Redbag = require('../hongbao');
 const Logger = require('../lib/logger');
 const tag = com.fileName(__filename, false);
 var	  log = new Logger( tag, true, true );
@@ -41,8 +42,7 @@ class GroupsSend {
         this.locked = 0;
         this.sender = 0;
 
-		this.hongbao = [];	//红包卡片配置
-        //this.cardCon = null; // 红包卡片配置
+		this.hongbao = Redbag;	//红包卡片配置
         this.cardTime = [11, 17]; // 发红包时间点
         this.cardRooms = []; // 已发送过红包消息的源头群
 
@@ -78,7 +78,7 @@ class GroupsSend {
         this.cardRooms = this.inst.card_rooms;
 
 		//获取红包配置
-		this.getConfig( this.inst.card_config );
+		//this.getConfig( this.inst.card_config );
 
         ///////////////
 
@@ -1009,8 +1009,10 @@ class GroupsSend {
     parseCardMsg(user, item, func) {
 		
         var self = this;
+        let hour = new Date().getHours();
 
-        if ( !user.member_id ) {
+		//无用户信息或不在指定时段，跳过不发
+        if ( !user.member_id || ( item.quantum || item.quantum == hour ) ) {
             log.info('无效用户', { 'user': user, item });
             //func(null);
 			return;
@@ -1020,7 +1022,7 @@ class GroupsSend {
 
 		//红包类型 type = 90，必需有 api
 		if( item.msgtype != 90 || !item.content.api ){
-			log.info('红包消息', { user, item });
+			//log.info('红包消息', { user, item });
 			func( item );
 			return;
 		}
@@ -1113,6 +1115,8 @@ class GroupsSend {
 
             // 从 rooms 发群对象中获取 群数组同时发送文本
             let chats = [];
+
+			//console.log( body );
 
             for (var i = 0; i < rooms.length; i++) {
 
