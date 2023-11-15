@@ -80,12 +80,12 @@ var bags = [
 		'subtype': 'didi',
 		'quantum': [17],
 		'content': `滴滴打车券天天领
-			出行单单享优惠🚗
+出行单单享优惠🚗
 			
-			最高110元券包限时抢🧧
-			1⃣滴滴，优惠券包：https://v.didi.cn/p/ek0p7zW?source_id={UID}
+最高110元券包限时抢🧧
+1⃣滴滴，优惠券包：https://v.didi.cn/p/ek0p7zW?source_id={UID}
 			
-			2⃣花小猪，也有打车券咯！优惠券包：https://x.huaxz.cn/x/n9g7PZj?source_id={UID}`
+2⃣花小猪，也有打车券咯！优惠券包：https://x.huaxz.cn/x/n9g7PZj?source_id={UID}`
 	}
 
 ];
