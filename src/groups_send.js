@@ -949,8 +949,18 @@ class GroupsSend {
 		}
 
 		//生成红包消息列表
+        let hour = new Date().getHours();
         let bags = com.clone( self.hongbao );
 		let room = [];
+
+		//筛选有效红包消息
+		bags = bags.filter( msg => {
+			if( msg.quantum && msg.quantum.indexOf( hour ) == -1 ){
+				return false;
+			}else{
+				return true;
+			}
+		})
 
 		//获取用户发红包群
 		user.hongbao.forEach( ele => {
@@ -962,13 +972,21 @@ class GroupsSend {
 
 		log.info('开始红包', { 'member': user.member_id, 'groups': gids, 'hongbao': bags.length, 'rawdata': bags.length ? 'OK' : self.hongbao, 'instance' : self.insid });
 
+		//红包包未完成
+		let next = () => {
+			if ( bags.length > 0 ) {
+				setTimeout(() => { push(); }, 3000);
+			}
+		};
+
+		//循环推送消息
         let push = () => {
 
             let item = bags.shift();
 
             self.parseCardMsg(user, item, (card) => {
 
-                //if ( card != null ) {
+				if( card ){
 
 					delete card.content['api'];
 					delete card.content['status'];
@@ -976,28 +994,24 @@ class GroupsSend {
                     let ret = self.sendMsg( user, card, room );
 					let tag = card.title || card.msgtype;
 
-                    ret.then(res => {
+                    ret.then( ret => {
 
                         log.info('红包成功', { 'member': user.member_id, 'groups': gids, 'card': tag, 'sourced': user.sourced, 'instance' : self.insid });
 
-                    }).catch(err => {
+                    }).catch( err => {
 
                         log.error('红包失败', { 'member': user.member_id, 'groups': gids, 'card': tag, 'instance' : self.insid, err });
         
-                    }).finally(() => {
+                    }).finally( next );
 
-                        //红包包未完成
-                        if ( bags.length > 0 ) {
-                            setTimeout(() => { push(); }, 3000);
-                        }
-        
-                    });
-                //}
+				}else{
+					next();
+				}
                 
             });
         }
 
-        bags.length && push();		
+        bags.length && push();
     }
 
     /**
@@ -1009,12 +1023,11 @@ class GroupsSend {
     parseCardMsg(user, item, func) {
 		
         var self = this;
-        let hour = new Date().getHours();
 
-		//无用户信息或不在指定时段，跳过不发
-        if ( !user.member_id || ( item.quantum && item.quantum.indexOf( hour ) == -1 ) ) {
+		//无用户信息，跳过不发
+        if ( !user.member_id ) {
             log.info('无效用户', { 'user': user, item });
-            //func(null);
+            func( null );
 			return;
         }
 
@@ -1050,7 +1063,7 @@ class GroupsSend {
 			}
 
 			//成功转链
-			if (body.status >= 0) {
+			if ( body.status >= 0 ) {
 
 				log.info('链接成功', { user, body });
 
@@ -1067,8 +1080,7 @@ class GroupsSend {
 			} else {
 
 				log.info('链接失败', { 'member_id': user.member_id, body });
-
-				//func( null );
+				func( null );
 			}
 
 		}, ( tmp ) => {
