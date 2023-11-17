@@ -960,7 +960,7 @@ class GroupsSend {
 			}else{
 				return true;
 			}
-		})
+		});
 
 		//获取用户发红包群
 		user.hongbao.forEach( ele => {
@@ -988,11 +988,15 @@ class GroupsSend {
 
 				if( card ){
 
-					delete card.content['api'];
-					delete card.content['status'];
+					//delete card.content['api'];
+					//delete card.content['status'];
 
                     let ret = self.sendMsg( user, card, room );
-					let tag = card.title || card.msgtype;
+					//let tag = card.title || card.msgtype;
+					//let tag = card.msgtype == 90 ? /<title>(.+?)<\/title>/.exec( card.content )[1] : card.msgtype;
+					let tag = card.msgtype;
+
+					console.log( tag );
 
                     ret.then( ret => {
 
@@ -1009,7 +1013,7 @@ class GroupsSend {
 				}
                 
             });
-        }
+        };
 
         bags.length && push();
     }
@@ -1030,6 +1034,12 @@ class GroupsSend {
             func( null );
 			return;
         }
+
+
+		func( item );
+		return;
+
+		///////////////
 
 		//console.log( 'item', item );
 
@@ -1237,17 +1247,21 @@ class GroupsSend {
             }
 
             //红包卡片
-            if (msg.msgtype == 90 ) {
+            if (msg.msgtype == 90) {
 
-                if ( !body.url ) {
+                //if ( !body.url ) {
 
-                    log.info('卡片链接', '外卖卡片无链接');
-                    var fn = com.Promise(true, '外卖卡片无链接');
+                //    log.info('卡片链接', '外卖卡片无链接');
+                //    var fn = com.Promise(true, '外卖卡片无链接');
 
-                } else {
+                //} else {
+
+					// 判断个人商城链接
+					body = act.replaceUserid( body, member.member_id );
 
                     // 发送卡片信息 类似小程序
-                    var fn = this.wx.SendAppMsg(member.weixin_id, chat, '', 0, 5, '', '', body);
+                    //var fn = this.wx.SendAppMsg(member.weixin_id, chat, '', 0, 5, '', '', body);
+                    var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, body);
 
                     fn.then(ret => {
 
@@ -1257,7 +1271,7 @@ class GroupsSend {
 
                         self.sendErr(member, 'SendAppMsg', err, chat, body);
                     });
-                }
+                //}
             }
 
         }
