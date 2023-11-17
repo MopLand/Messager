@@ -46,7 +46,7 @@ var bags = [
 				<des>今日可领红包9元/12元/18元，人人有份，速度领~</des>
 				<type>5</type>
 				<action>view</action>
-				<url>https://proxy.guodongbaohe.com/meituan/geturl?act_id=33&type=1&res_type=jump&member_id={UID}</url>
+				<url>https://proxy.guodongbaohe.com/meituan/geturl?act_id=33&amp;type=1&amp;res_type=jump&amp;member_id={UID}</url>
 				<appattach>
 					<cdnthumbaeskey />
 					<aeskey />
@@ -75,7 +75,7 @@ var bags = [
 				<des>饿了么外卖升级，18元红包限时限量抢，手慢无~</des>
 				<type>5</type>
 				<action>view</action>
-				<url>http://proxy.guodongbaohe.com/builder/elePromotion?activity_id=10883&redirect=true&member_id={UID}</url>
+				<url>http://proxy.guodongbaohe.com/builder/elePromotion?activity_id=10883&amp;redirect=true&amp;member_id={UID}</url>
 				<appattach>
 					<cdnthumbaeskey />
 					<aeskey />
