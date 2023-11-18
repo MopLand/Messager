@@ -163,10 +163,10 @@ var conf = {
 		//element: 'http://proxy.guodongbaohe.com/builder/elePromotion',
 
 		// 卡片时间
-		card_time: [11, 17],
+		card_time: [11, 16, 17],
 
 		// 卡片 发红包分钟
-		card_minute: 30,
+		card_minute: 20,
 
 		// 禁发红包消息源头群
 		card_rooms: [],

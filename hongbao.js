@@ -9,7 +9,14 @@ var bags = [
 
 	{
 		'msgtype': 1,
-		'content': '叮！打车/吃饭时间到了，给你们准备好了紅包，快来领吧'
+		'quantum': [16],
+		'content': '滳！打车时间到了，给你们准备好了紅包，快来领吧'
+	},
+
+	{
+		'msgtype': 1,
+		'quantum': [11,17],
+		'content': '叮！吃饭时间到了，给你们准备好了紅包，快来领吧'
 	},
 
 	{
@@ -40,6 +47,7 @@ var bags = [
 	{
 		'msgtype': 90,
 		'subtype': 'meituan',
+		'quantum': [11,17],
 		'content': `<?xml version="1.0"?><msg>
 			<appmsg appid="" sdkver="0">
 				<title>【美团红包】免费领</title>
@@ -69,6 +77,7 @@ var bags = [
 	{
 		'msgtype': 90,
 		'subtype': 'elment',
+		'quantum': [11,17],
 		'content': `<?xml version="1.0"?><msg>
 			<appmsg appid="" sdkver="0">
 				<title>【饿了么外卖】第5个人领最大红包！</title>
@@ -110,7 +119,7 @@ var bags = [
 	},
 	{
 		'msgtype': 3,
-		'quantum': [17],
+		'quantum': [16],
 		'rawdata': {
 			"existflag": 0,
 			"retcode": 0,
@@ -140,7 +149,7 @@ var bags = [
 	{
 		'msgtype': 1,
 		'subtype': 'didi',
-		'quantum': [17],
+		'quantum': [16],
 		'content': `滴滴打车券天天领
 出行单单享优惠🚗
 			

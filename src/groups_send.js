@@ -887,7 +887,8 @@ class GroupsSend {
 
         let unSend = self.cardRooms.indexOf(mark) == -1; // 该微信是否发过红包
         let isHour = self.cardTime.indexOf(hour) > -1; // 是否到了发红包点
-        let isMins = hour == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，或者 17:30 发送
+        //let isMins = hour == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，或者 17:30 发送
+        let isMins = date.getMinutes() >= self.inst.card_minute; // 几点的几分发送
 
         // 避免源头群重复发红包
         if ( weixin && isHour & isMins && unSend ) {
