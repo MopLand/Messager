@@ -166,7 +166,7 @@ var conf = {
 		card_time: [11, 16, 17],
 
 		// 卡片 发红包分钟
-		card_minute: 20,
+		card_minute: 10,
 
 		// 禁发红包消息源头群
 		card_rooms: [],

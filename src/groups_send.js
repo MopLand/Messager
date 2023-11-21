@@ -41,10 +41,7 @@ class GroupsSend {
         this.queues = [];
         this.locked = 0;
         this.sender = 0;
-
 		this.hongbao = Redbag;	//红包卡片配置
-        this.cardTime = [11, 17]; // 发红包时间点
-        this.cardRooms = []; // 已发送过红包消息的源头群
 
 		if( logd ){
 			log = logd;
