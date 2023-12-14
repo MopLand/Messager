@@ -29,16 +29,16 @@ var conf = {
 
 	//Redis
 	redis: {
-		host     : '127.0.0.1',
-		port     : 6379,
+		host	 : '127.0.0.1',
+		port	 : 6379,
 		prefix   : 'jellybox_',
 		password : 'root',
 	},
 
 	//MySQL
 	mysql: {
-		host     : '127.0.0.1',
-		user     : 'root',
+		host	 : '127.0.0.1',
+		user	 : 'root',
 		password : 'root',
 		database : 'project_jellybox',
 		charset  : 'utf8mb4',

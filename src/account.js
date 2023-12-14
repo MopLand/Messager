@@ -8,9 +8,9 @@ const log = new Logger( tag );
 
 class Account {
 
-    /**
-     * 构造函数
-     */
+	/**
+	 * 构造函数
+	 */
 	constructor(conf, save = './') {
 
 		//实例化微信
@@ -24,10 +24,10 @@ class Account {
 	}
 
 	/**
-     * 引导扫码登录
-     * @param string weixin 微信Id
-     * @param string device 设备Id
-     */
+	 * 引导扫码登录
+	 * @param string weixin 微信Id
+	 * @param string device 设备Id
+	 */
 	init( wxid = '', device = '' ){
 
 		var uuid = '';
@@ -41,7 +41,7 @@ class Account {
 			log.error('登录出错', err);
 		});
 
-        log.info( 'Process', JSON.stringify( process.env ) );
+		log.info( 'Process', JSON.stringify( process.env ) );
 		
 		////////////
 
@@ -93,11 +93,11 @@ class Account {
 
 	}
 
-    /**
-     * 处理用户登录（获取二维码或推送登录）
-     * @param string weixin 微信Id
-     * @param string device 设备Id
-     */
+	/**
+	 * 处理用户登录（获取二维码或推送登录）
+	 * @param string weixin 微信Id
+	 * @param string device 设备Id
+	 */
 	login( wxid = '', device = '' ) {
 
 		var self = this;
@@ -117,10 +117,10 @@ class Account {
 
 	}
 
-    /**
-     * 检查登录状态
-     * @param string wxId 微信Id
-     */
+	/**
+	 * 检查登录状态
+	 * @param string wxId 微信Id
+	 */
 	check( uuid ) {
 
 		var pm = this.wx.CheckLogin(uuid);
@@ -150,10 +150,10 @@ class Account {
 		*/
 	}
 
-    /**
-     * 提交登录
-     * @param string wxId 微信Id
-     */
+	/**
+	 * 提交登录
+	 * @param string wxId 微信Id
+	 */
 	submit( wxid ) {
 
 		var pm = this.wx.ManualAuth( wxid );
@@ -172,10 +172,10 @@ class Account {
 	}
 
 	 /**
-     * 联系人
-     * @param string wxId 微信Id
-     * @param string room 微信群Id
-     */
+	 * 联系人
+	 * @param string wxId 微信Id
+	 * @param string room 微信群Id
+	 */
 	contact( wxid, room ) {
 
 		var wxid = wxid || this.conf.wechat;

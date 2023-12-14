@@ -13,9 +13,9 @@ const log = new Logger( tag );
 
 class Course {
 
-    /**
-     * 构造函数
-     */
+	/**
+	 * 构造函数
+	 */
 	constructor(conf) {
 		this.inst = {};
 		this.conf = conf;
@@ -71,11 +71,11 @@ class Course {
 	}
 
 	/**
-     * 订阅消息
-     * @param string 微信ID
-     * @param string 消息标记
-     * @param string 消息频道
-     */
+	 * 订阅消息
+	 * @param string 微信ID
+	 * @param string 消息标记
+	 * @param string 消息频道
+	 */
 	subscribe( wechat, marker, channel ) {
 
 		let self = this;
@@ -274,9 +274,9 @@ class Course {
 	}
 
 	/**
-     * 将消息存档
+	 * 将消息存档
 	 * @param object 消息数据
-     */
+	 */
 	archiveMessage( data ){
 		
 		let then = new Date();

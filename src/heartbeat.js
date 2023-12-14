@@ -14,9 +14,9 @@ const log = new Logger( tag );
 
 class Heartbeat {
 
-    /**
-     * 构造函数
-     */
+	/**
+	 * 构造函数
+	 */
 	constructor(conf) {
 		this.inst = {};
 		this.conf = conf;
@@ -40,10 +40,10 @@ class Heartbeat {
 		//半小时以内有心跳
 		this.range = com.getTime() - 60 * 30;
 
-        //当前 PM2 实例数量
+		//当前 PM2 实例数量
 		let pwd = process.cwd();
-        let txt = fs.readFileSync(pwd + '/run/heartbeat.json');
-        let set = JSON.parse(txt);
+		let txt = fs.readFileSync(pwd + '/run/heartbeat.json');
+		let set = JSON.parse(txt);
 
 		//实例ID，PM2 分流
 		this.nodes = set.instances || 1;
