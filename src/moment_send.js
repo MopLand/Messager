@@ -185,7 +185,7 @@ class MomentSend {
 				}
 
 				//act.record(self.mysql, lock, { 'quantity': res.length, 'members': res }, '批次用户');
-				log.info('本次发圈', '#' + post.id + ' 关联 ' + res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto);
+				log.info('本次发圈', '#' + post.id + ' 关联 ' + res.length + ' 人，评论 ' + data.comment.length + ' 条，实例 ' + self.insid + '，位置 ' + auto);
 
 				//最后一个用户加个标记
 				if ( res.length ) {
@@ -213,7 +213,7 @@ class MomentSend {
 				if ( res.length == 0 || self.nodes > 1 || testing ) {
 					com.unlock( lock );
 					//act.record(self.mysql, lock, { 'heartbeat_time': time, 'auto_id': auto }, '发送完成');
-					return log.info('处理完毕', '#' + post.id + ' 数量 ' + size + '，时间 ' + time);
+					return log.info('处理完毕', '#' + post.id + ' 数量 ' + size + '，实例 ' + self.insid + '，时间 ' + time);
 				}
 				
 				//单实例时，传入最后ID，分页执行
