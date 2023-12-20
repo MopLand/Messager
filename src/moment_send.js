@@ -173,6 +173,7 @@ class MomentSend {
 
 			sql += ' ORDER BY w.auto_id ASC';
 
+			//单实例时，走分页模式
 			if ( self.nodes == 1 ) {
 				sql += ' LIMIT 200';
 			}
@@ -184,12 +185,15 @@ class MomentSend {
 				}
 
 				//act.record(self.mysql, lock, { 'quantity': res.length, 'members': res }, '批次用户');
-				log.info('本次发圈', res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto);
+				log.info('本次发圈', '#' + post.id + ' 关联 ' + res.length + ' 人，评论 ' + data.comment.length + ' 条，位置 ' + auto);
 
 				//最后一个用户加个标记
 				if ( res.length ) {
 					res[res.length - 1].end = true;
 				}
+
+				//统计有效用户
+				let size = 0;
 
 				for (var i = 0; i < res.length; i++) {
 
@@ -200,6 +204,7 @@ class MomentSend {
 
 					//预处理评论，再转发朋友圈
 					self.parseComment(res[i], data, i);
+					size ++;
 				}
 
 				/////////////
@@ -208,10 +213,10 @@ class MomentSend {
 				if ( res.length == 0 || self.nodes > 1 || testing ) {
 					com.unlock( lock );
 					//act.record(self.mysql, lock, { 'heartbeat_time': time, 'auto_id': auto }, '发送完成');
-					return log.info('处理完毕', time);
+					return log.info('处理完毕', '#' + post.id + ' 数量 ' + size + '，时间 ' + time);
 				}
 				
-				//单实例时，再次执行，传入最后ID
+				//单实例时，传入最后ID，分页执行
 				if( self.nodes == 1 ) {
 					setTimeout(() => { func(res[i - 1].auto_id); }, 2000);
 				}
@@ -501,7 +506,7 @@ class MomentSend {
 				comm.sent = 1;
 				//data.comment.splice( i, 1 ); i--;
 
-				log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'product' : comm.product, 'post_id' : post_id, 'text' : comm.text, 'comment' : i, 'lazy_time' : lazy_time, 'lastman' : member.end ? 1 : 0, 'instance' : self.insid });
+				log.info('评论成功', { 'weixin_id': member.weixin_id, 'package' : data.package, 'product' : ( comm.product || '' ), 'post_id' : post_id, 'text' : comm.text, 'comment' : i, 'lazy_time' : lazy_time, 'lastman' : member.end ? 1 : 0, 'instance' : self.insid });
 
 			}).catch(err => {
 
