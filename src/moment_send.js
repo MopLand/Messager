@@ -347,7 +347,7 @@ class MomentSend {
 					body = { 'status': -code, 'body': body, 'error': e.toString() };
 				}
 
-				log.info('转链结果', { 'member' : member.member_id, 'body' : body, 'lazy_time' : lazy_time, 'instance' : self.insid } );
+				//log.info('转链结果', { 'member' : member.member_id, 'body' : body, 'lazy_time' : lazy_time, 'instance' : self.insid } );
 
 				///////////////
 
@@ -373,7 +373,7 @@ class MomentSend {
 					
 					act.updatePushed(self.mysql, member, body);
 
-					log.error('转链失败', [member.weixin_id, lazy_time, beian]);
+					log.error('转链失败', { 'member_id': member.member_id, 'package' : data.package, 'body' : body, 'beian' : beian, 'lazy_time' : lazy_time, 'instance' : self.insid });
 				}
 
 			}, (data) => {
