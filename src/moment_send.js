@@ -416,7 +416,7 @@ class MomentSend {
 
 			}else{
 
-				log.debug('发圈异常', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'result' : ret, 'instance' : self.insid });
+				log.debug('发圈异常', { 'weixin_id' : member.weixin_id, 'package' : post.package, 'expection' : ret, 'instance' : self.insid });
 
 				act.updatePushed(self.mysql, member, { api: 'SnsPostXml', err : 'MMSNS_POST_ID_EMPTY' });
 
@@ -443,7 +443,7 @@ class MomentSend {
 				}
 			}
 
-			log.error('发圈出错', {'weixin_id': member.weixin_id, 'package' : post.package, 'member_id': member.member_id, 'error' : err, 'instance' : self.insid });
+			log.error('发圈出错', {'weixin_id': member.weixin_id, 'package' : post.package, 'failed' : err, 'member_id': member.member_id, 'instance' : self.insid });
 			act.updatePushed(self.mysql, member, body);
 
 		});
@@ -481,7 +481,7 @@ class MomentSend {
 
 			//有定时器，直接退出
 			if( stop ){
-				log.error('评论跳出', { 'weixin_id': member.weixin_id, 'package' : data.package, 'post_id' : post_id, 'text' : comm.text, 'lazy_time' : lazy_time, 'instance' : self.insid });
+				log.error('评论跳出', { 'weixin_id': member.weixin_id, 'package' : data.package, 'break' : comm.text, 'post_id' : post_id, 'lazy_time' : lazy_time, 'instance' : self.insid });
 				break;
 			}
 
@@ -510,7 +510,7 @@ class MomentSend {
 
 			}).catch(err => {
 
-				log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'error' : err, 'post_id' : post_id, 'text' : comm.text, 'lazy_time' : lazy_time, 'instance' : self.insid });
+				log.error('评论失败', { 'weixin_id': member.weixin_id, 'package' : data.package, 'comment' : err, 'post_id' : post_id, 'text' : comm.text, 'lazy_time' : lazy_time, 'instance' : self.insid });
 
 				act.updatePushed(self.mysql, member, { api: 'SnsComment', act: 'text', txt: comm.text, err });
 
