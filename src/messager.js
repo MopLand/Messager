@@ -88,8 +88,14 @@ class Messager {
 				alias.forEach( ( uid, idx ) => {
 					msg.alias = uid;
 					msg.ticker = idx == 1 ? 'CC: ' + msg.ticker : msg.ticker;
-					self.sendAndroid( msg );
-					self.sendIPhone( msg );
+					
+					if( msg.device == 'android' || !msg.device ){
+						self.sendAndroid( msg );
+					}
+
+					if( msg.device == 'iphone' || !msg.device ){
+						self.sendIPhone( msg );
+					}					
 				} );
 
 				//消息数自减，同时更新消息状态
