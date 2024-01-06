@@ -179,9 +179,9 @@ class Messager {
 		var ret = umeng.send(this.ios);
 
 		ret.then( ret => {
-			console.log('iPhone	', msg.tag, '#' + msg.msgid, 'Alias ' + msg.alias, ret ? '成功' : '失败', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
+			console.log('iPhone ', msg.tag, '#' + msg.msgid, 'Alias ' + msg.alias, ret ? '成功' : '失败', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
 		}).catch( err => {
-			console.log('iPhone	', msg.tag, '#' + msg.msgid, err);
+			console.log('iPhone ', msg.tag, '#' + msg.msgid, err);
 		});
 
 	}
