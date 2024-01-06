@@ -186,7 +186,7 @@ class Account {
 			var pm = this.wx.InitContact( wxid, 999999999 );
 		}
 
-		pm.then( ret => {			
+		pm.then( ret => {
 			log.info( '接口返回', ret );
 		}).catch( err => {
 			log.error( '联系人错误', [wxid, err] );
