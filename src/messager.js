@@ -95,7 +95,7 @@ class Messager {
 
 					if( msg.device == 'iphone' || !msg.device ){
 						self.sendIPhone( msg );
-					}					
+					}
 				} );
 
 				//消息数自减，同时更新消息状态
@@ -146,9 +146,9 @@ class Messager {
 		var ret = umeng.send(this.and);
 
 		ret.then( ret => {
-			console.log('Android', '#' + msg.msgid, 'Alias ' + msg.alias, ret ? '成功' : '失败', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
+			console.log('Android', msg.tag, '#' + msg.msgid, 'Alias ' + msg.alias, ret ? '成功' : '失败', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
 		}).catch( err => {
-			console.log('Android', '#' + msg.msgid, err);
+			console.log('Android', msg.tag, '#' + msg.msgid, err);
 		});
 
 	}
@@ -179,9 +179,9 @@ class Messager {
 		var ret = umeng.send(this.ios);
 
 		ret.then( ret => {
-			console.log('iPhone', '#' + msg.msgid, 'Alias ' + msg.alias, ret ? '成功' : '失败', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
+			console.log('iPhone	', msg.tag, '#' + msg.msgid, 'Alias ' + msg.alias, ret ? '成功' : '失败', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
 		}).catch( err => {
-			console.log('iPhone', '#' + msg.msgid, err);
+			console.log('iPhone	', msg.tag, '#' + msg.msgid, err);
 		});
 
 	}
