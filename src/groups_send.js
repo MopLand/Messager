@@ -166,7 +166,12 @@ class GroupsSend {
 		//处理 Redis 消息
 		this.redis.on('message', function (channel, message) {
 
-			let recv = JSON.parse(message);
+			let recv;
+			try {
+				recv = JSON.parse(message);
+			} catch (e) {
+				return log.error('消息异常', { 'instance' : self.insid, channel, message });
+			}
 
 			//正在读取消息，锁还未失效
 			if (self.locked && self.locked >= com.getTime() - wait) {
