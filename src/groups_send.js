@@ -170,6 +170,7 @@ class GroupsSend {
 			try {
 				recv = JSON.parse(message);
 			} catch (e) {
+				com.locked(channel + '.' + com.getTime(), message);
 				return log.error('消息异常', { 'instance' : self.insid, channel, message });
 			}
 
