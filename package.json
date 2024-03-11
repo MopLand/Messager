@@ -35,11 +35,10 @@
 		"crypto": "*",
 		"fast-xml-parser": "*",
 		"mysql": "^2.18.1",
-		"pm2": "*",
-		"redis": "^3.0.2",
-		"request": "*",
+		"redis": "^4.6.13",
+		"request": "^2.88.2",
 		"umeng-push-server-sdk": "*",
 		"ws": "*",
-		"xml2js": "^0.4.23"
+		"xml2js": "^0.6.2"
 	}
 }

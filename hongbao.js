@@ -49,7 +49,7 @@ var bags = [
 				<type>5</type>
 				<action>view</action>
 				<urlx>https://proxy.guodongbaohe.com/meituan/geturl?act_id=33&amp;type=1&amp;res_type=jump&amp;member_id={UID}</urlx>
-				<url>http://xyz.f3url.com/share/channel/meituan?member_id={UID}</url>
+				<url>http://xyz.f1url.com/share/channel/meituan?member_id={UID}</url>
 				<appattach>
 					<cdnthumbaeskey />
 					<aeskey />
@@ -80,7 +80,7 @@ var bags = [
 				<type>5</type>
 				<action>view</action>
 				<urlx>http://proxy.guodongbaohe.com/builder/elePromotion?activity_id=10883&amp;redirect=true&amp;member_id={UID}</urlx>
-				<url>http://act.f4url.com/share/channel/ele?member_id={UID}</url>
+				<url>http://act.f2url.com/share/channel/ele?member_id={UID}</url>
 				<appattach>
 					<cdnthumbaeskey />
 					<aeskey />
