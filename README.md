@@ -35,10 +35,8 @@
 	pm2 start run/moment_mtl.json
 	pm2 start run/moment_send.json
 	pm2 start run/socket_send.json
-	pm2 start run/messager.json
-
 	pm2 start run/groups_send.json
-
+	pm2 start run/messager.json
 	
 # Logs
 	tail -f /disk/www/Messager/logs/wx_groups_out.log
