@@ -59,23 +59,11 @@ class GroupsSend {
 
 		///////////////
 
-		// 获取卡片消息配置
-		this.cardConfig = this.inst.card_config;
-
-		// 获取美团H5链接
-		//this.meituan = this.inst.meituan;
-
-		// 饿了么
-		//this.element = this.inst.element;
-
 		// 发红包时间点
 		this.cardTime = this.inst.card_time;
 
 		// 已发送或禁发红包消息的源头群
 		this.cardRooms = this.inst.card_rooms;
-
-		//获取红包配置
-		//this.getConfig( this.inst.card_config );
 
 		///////////////
 
@@ -359,9 +347,6 @@ class GroupsSend {
 		var useids = [];
 		var sticks = ['wxid_okvkiyguz1yh22', 'wxid_fdg7q8iedhd122'];
 
-		// 是否符合发红包要求
-		// let isCard = self.checkCardTime( sourced );
-
 		//打乱用户顺序
 		res.sort( (a, b) => {
 
@@ -608,7 +593,7 @@ class GroupsSend {
 				let exch = false;
 
 				//不转链，文本类型，没有配置原样规则 或 文本不匹配
-				if ( !keep && item.msgType == 1 && (!this.inst.origin || !this.inst.origin.test(text)) ) {
+				if ( !keep && item.msgType == 1 && ( !this.inst.origin || !this.inst.origin.test(text) ) ) {
 					exch = (act.extractTbc(text) || act.detectUrl(text) || act.detectApp(text));
 					exch && data.convert++;
 				}
@@ -850,32 +835,6 @@ class GroupsSend {
 	////////// 红包相关方法 //////////
 
 	/**
-	 * 红包卡片配置
-	 * @param string 配置地址
-	 */
-	getConfig( url ) {
-
-		var self = this;
-
-		req.get(url, {}, (code, body) => {
-
-			log.shoot('红包配置', body, self.insid);
-
-			try {
-				if (typeof body == 'string') {
-					body = JSON.parse(body);
-				}
-				self.hongbao = self.fmtMsgList( body.result );
-			} catch (e) {
-				body = { 'status': -code, 'body': body, 'error': e.toString() };
-				log.shoot('红包错误', body, self.insid);
-			}
-
-		});
-
-	}
-
-	/**
 	 * 判断是否发送红包
 	 * @param string weixin
 	 * @return Boolean 
@@ -890,7 +849,6 @@ class GroupsSend {
 
 		let unSend = self.cardRooms.indexOf(mark) == -1; // 该微信是否发过红包
 		let isHour = self.cardTime.indexOf(hour) > -1; // 是否到了发红包点
-		//let isMins = hour == 11 || date.getMinutes() >= self.inst.card_minute; // 11 发送，或者 17:30 发送
 		let isMins = date.getMinutes() >= self.inst.card_minute; // 几点的几分发送
 
 		// 避免源头群重复发红包
@@ -1039,76 +997,9 @@ class GroupsSend {
 			return;
 		}
 
-
 		func( item );
 		return;
 
-		///////////////
-
-		//console.log( 'item', item );
-
-		//红包类型 type = 90，必需有 api
-		if( item.msgtype != 90 || !item.content.api ){
-			//log.info('红包消息', { user, item });
-			func( item );
-			return;
-		}
-
-		////////////
-
-		//var cache = this.inst.card_cache + ':' + item.subtype + ':' + user.member_id;
-
-		if( item.content.api.indexOf('{UID}') > -1 ){
-			var opurl = item.content.api.replace('{UID}', user.member_id);
-		}else{
-			var opurl = item.content.api + '&member_id=' + user.member_id;
-		}
-
-		//console.log( 'cache', cache );
-
-		req.get( opurl, {}, (code, body) => {
-
-			try {
-				if (typeof body == 'string') {
-					body = JSON.parse(body);
-				}
-			} catch (e) {
-				body = { 'status': -code, 'body': body, 'error': e.toString() };
-			}
-
-			//成功转链
-			if ( body.status >= 0 ) {
-
-				log.info('链接成功', { user, body });
-
-				//滴滴 h5_link，饿了么 h5_short_link，美团 result
-				item.content.url = body.result.h5_link || body.result.h5_short_link || body.result;
-
-				//console.log( item.content.url );
-				func( item );
-
-				// 缓存红包链接 3 天
-				//self.sider.set(cache, item.content.url);
-				//self.sider.expire(cache, 3600 * 24 * 3);
-
-			} else {
-
-				log.info('链接失败', { 'member_id': user.member_id, body });
-				func( null );
-			}
-
-		}, ( tmp ) => {
-			
-			// 获取红包链接缓存
-			//self.sider.get( cache, ( err, ret ) => {
-			//	if (!err && ret) {
-			//		return { 'request': false, 'respond': { 'status': 1, 'result': ret } };
-			//	}else{
-					return { 'request': true };
-			//	}
-			//});
-
-		});
 	}
 
 	////////// 消息发送相关方法 //////////
@@ -1142,14 +1033,10 @@ class GroupsSend {
 			// 从 rooms 发群对象中获取 群数组同时发送文本
 			let chats = [];
 
-			//console.log( body );
-
 			for (var i = 0; i < rooms.length; i++) {
-
 				if ( msg.keyword && !rooms[i].anchor && act.detectUrl(body) ) {
 					continue;
 				}
-
 				chats.push(rooms[i].roomid);
 			}
 
@@ -1253,29 +1140,22 @@ class GroupsSend {
 			//红包卡片
 			if (msg.msgtype == 90) {
 
-				//if ( !body.url ) {
+				// 判断个人商城链接
+				body = act.replaceUserid( body, member.member_id );
 
-				//	log.info('卡片链接', '外卖卡片无链接');
-				//	var fn = com.Promise(true, '外卖卡片无链接');
+				// 发送卡片信息 类似小程序
+				//var fn = this.wx.SendAppMsg(member.weixin_id, chat, '', 0, 5, '', '', body);
+				var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, body);
 
-				//} else {
+				fn.then(ret => {
 
-					// 判断个人商城链接
-					body = act.replaceUserid( body, member.member_id );
+					log.info('卡片消息', { 'member' : member.member_id, 'msgid' : ret.msgId, 'instance' : self.insid });
 
-					// 发送卡片信息 类似小程序
-					//var fn = this.wx.SendAppMsg(member.weixin_id, chat, '', 0, 5, '', '', body);
-					var fn = this.wx.SendAppMsgXml(member.weixin_id, chat, body);
+				}).catch(err => {
 
-					fn.then(ret => {
+					self.sendErr(member, 'SendAppMsg', err, chat, body);
+				});
 
-						log.info('卡片消息', { 'member' : member.member_id, 'msgid' : ret.msgId, 'instance' : self.insid });
-
-					}).catch(err => {
-
-						self.sendErr(member, 'SendAppMsg', err, chat, body);
-					});
-				//}
 			}
 
 		}

@@ -147,38 +147,45 @@ var conf = {
 	// 多源头群
 	groups_send: {
 
-		// 红包链接缓存
-		card_cache: 'mm_card:',
-
 		// 红包消息标题
-		card_title: '叮！打车/吃饭时间到了，给你们准备好了紅包，快来领吧',
-
-		// 外卖红包卡片文案配置
-		card_config: 'https://proxy.guodongbaohe.com/cps/hongbao',
-
-		// 生成美团外卖链接接口
-		//meituan: 'https://proxy.guodongbaohe.com/meituan/geturl',
-
-		// 生成饿了么外卖链接接口
-		//element: 'http://proxy.guodongbaohe.com/builder/elePromotion',
+		card_title: '',
 
 		// 卡片时间
 		card_time: [11, 16, 17],
 
 		// 卡片 发红包分钟
-		card_minute: 10,
+		card_minute: 20,
 
 		// 禁发红包消息源头群
 		card_rooms: [],
 
 		// 原样转出，不转链
-		origin: /淘礼金|淘密令|京东券/,
+		origin: /猫超券|京东券|猫超(.+)券/,
 
 		// 链接白名单
 		//whited: /(https?):\/\/(.+).(f3url|f4url|bhrax|kuaizhan).(com|net)\/(.+)uid=(\d*)/i,
 		whited: '',
 
 	},
+
+	// 朋友圈（新，先转链后发圈）
+	moment_send: {
+
+		//忽略标识符
+		ignore: 'SKIP',
+	
+		//原样标识符
+		origin: /KEEP|猫超券|京东券|猫超(.+)券/,
+
+		//遇错误中断发送
+		cancel: /MMSNS_RET_SPAM/,
+
+		//消息时间戳
+		marker: 'mm_moment_id',
+
+		//发圈完成指令
+		complete: 'OK'
+	},	
 
 	// 采集群消息配置
 	materiel_groups: {
@@ -190,25 +197,6 @@ var conf = {
 
 		// 定时采集时间间隔 单位秒 默认10秒
 		time_interval: 20
-	},
-
-	// 朋友圈（新，先转链后发圈）
-	moment_send: {
-
-		//忽略标识符
-		ignore: 'SKIP',
-	
-		//原样标识符
-		origin: /KEEP|猫超券|淘礼金|淘密令|京东券/,
-
-		//遇错误中断发送
-		cancel: /MMSNS_RET_SPAM/,
-
-		//消息时间戳
-		marker: 'mm_moment_id',
-
-		//发圈完成指令
-		complete: 'OK'
 	}
 
 }
