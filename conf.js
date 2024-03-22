@@ -178,7 +178,7 @@ var conf = {
 		origin: /KEEP|猫超券|京东券|猫超(.+)券/,
 
 		//遇错误中断发送
-		cancel: /MMSNS_RET_SPAM/,
+		cancel: '',
 
 		//消息时间戳
 		marker: 'mm_moment_id',
