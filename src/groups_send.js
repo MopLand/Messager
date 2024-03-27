@@ -313,9 +313,10 @@ class GroupsSend {
 			let member = usable.member;
 			let useids = usable.useids;
 
-			//最后一个用户加个标记
+			//第一个和最后一个用户加个标记
 			if ( useids.length ) {
-				member[useids.length - 1].end = true;
+				member[0].first = true;
+				member[useids.length - 1].last = true;
 			}
 
 			// sourced 该消息源群用户缓存
@@ -784,14 +785,14 @@ class GroupsSend {
 						act.collect(self, 'groups', {
 							"platform": msg.product[k],
 							"item_id": k,
-						}, data, { [data.sourced] : self.sender }, user.end );
+						}, data, { [data.sourced] : self.sender }, user.last );
 					}
 				}
 
 				//消息包已完成
 				if (data.message.length == 0) {
 
-					log.info('用户发完', { 'member' : user.member_id, 'package' : data.package, 'lastman' : user.end ? 1 : 0, 'instance' : self.insid });
+					log.info('用户发完', { 'member' : user.member_id, 'package' : data.package, 'lastman' : user.last ? 1 : 0, 'instance' : self.insid });
 
 					//到点发送红包卡片
 					if( data.sourced ){
