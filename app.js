@@ -156,8 +156,8 @@ if (func == 'password') {
 if (func == 'collect') {
 	const Activity = require('./lib/activity');
 
-	let test1 = Activity.collect( null, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : 0, 'package' : '123123' }, {}, false );
-	let test2 = Activity.collect( null, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : 0, 'package' : '123123' }, {}, false );
+	let test1 = Activity.collect( null, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : 0, 'package' : '123123' }, { 'sourced' : 'moment' }, false );
+	let test2 = Activity.collect( null, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : 0, 'package' : '123123' }, { 'sourced' : 'groups' }, false );
 
 	console.log( test1 );
 	console.log( test2 );
