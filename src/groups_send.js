@@ -715,7 +715,7 @@ class GroupsSend {
 					//写入延迟消息，更新发送状态，每组消息只重试一次
 					if ( !beian && lazy_time == 0 && once == 0 ) {
 						let time = once = com.getTime();
-						let span = 60 * 1000 * 3;
+						let span = 60 * 1000 * 2;
 						self.sender = time + span;
 						setTimeout(() => { self.parseMessage(user, data, time, product); }, span);
 					}
