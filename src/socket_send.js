@@ -1,15 +1,11 @@
 'use strict'
 
 /**
- * 微信群控制器
+ * 群消息 WebSocket
  */
 
-const fs = require('fs');
 const ws = require('ws');
-const wx = require('../lib/weixin');
 const com = require('../lib/common');
-const req = require('../lib/request');
-const act = require('../lib/activity');
 const Logger = require('../lib/logger');
 const tag = com.fileName(__filename, false);
 const log = new Logger(tag);
@@ -73,14 +69,22 @@ class SocketSend {
 		//处理 Redis 消息
 		this.redis.on('message', function (channel, message) {
 
-			log.info('收到消息', message);
-			
-			let recv = JSON.parse(message);
+			try {
 
-			//发送最新消息
-			self.client.forEach( cl => {
-				cl.send(message);
-			} );
+				log.info('收到消息', message);
+
+				let recv = JSON.parse(message);
+
+				//发送最新消息
+				self.client.forEach( cl => {
+					cl.send(message);
+				} );
+
+				log.info('转发消息', '消息包 #' + recv.lastid + ' 包含 ' + recv.message.length + ' 条消息，转发给 ' + self.client.length + ' 个客户端');
+
+			} catch (e) {
+				return log.error('消息异常', { channel, message });
+			}
 
 		});
 
