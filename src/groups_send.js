@@ -374,9 +374,9 @@ class GroupsSend {
 			
 			let groups = JSON.parse(res[i].groups_list);
 
-			//过滤打开群发开关的群，用于发红包
+			//过滤打开群发开关的群，用于发红包（发消息和爆款推送都要打开）
 			let hongbao = groups.map(ele => {
-				if ( ele.switch == 1 && ele.roomid != '20875790073@chatroom' ) {
+				if ( ele.switch == 1 && ele.advert == 1 && ele.roomid != '20875790073@chatroom' ) {
 					return ele.userName;
 				}
 			}).filter( ele => { return ele; });
