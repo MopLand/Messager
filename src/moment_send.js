@@ -313,7 +313,7 @@ class MomentSend {
 
 		//适当延迟，减少高并发请求
 		if( product == 'true' && index ){
-			await com.sleep( index * 10 );
+			await com.sleep( index * act.randomNum(15, 30) );
 		}
 
 		var parse = (i) => {
@@ -402,6 +402,13 @@ class MomentSend {
 
 		let self = this;
 		let post = com.clone(data);
+
+		//插入随机表情符号
+		let desc = /<contentDesc>(.+?)<\/contentDesc>/s.exec( post.subject );
+		if( desc && desc[1] ){
+			post.subject = '<contentDesc>'+ com.insertEmoji( desc[1], 3 ) +'</contentDesc>';
+		}
+
 		let pm = this.wx.SnsPostXml(member.weixin_id, post.subject);
 
 		pm.then(ret => {

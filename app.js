@@ -192,3 +192,19 @@ if (func == 'card') {
 	}, 1000);	
 
 }
+
+//插入表情
+if (func == 'emoji') {
+
+	//插入随机表情符号
+	let text = '<contentDesc>❣️真维斯圆领纯棉短袖💰折16.9/件🔹多款可选，\n亲肤舒适又百搭，软软糯糯上身巨舒服‼️</contentDesc>';
+	let desc = /<contentDesc>(.+?)<\/contentDesc>/s.exec( text );
+
+	if( desc && desc[1] ){
+		text = '<contentDesc>'+ Common.insertEmoji( desc[1], 3 ) +'</contentDesc>';
+	}
+
+	console.log( desc );
+	console.log( text );
+
+}
