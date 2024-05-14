@@ -406,7 +406,8 @@ class MomentSend {
 		//插入随机表情符号
 		let desc = /<contentDesc>(.+?)<\/contentDesc>/s.exec( post.subject );
 		if( desc && desc[1] ){
-			post.subject = '<contentDesc>'+ com.insertEmoji( desc[1], 3 ) +'</contentDesc>';
+			//post.subject = post.subject.replace( desc[0], '<contentDesc>'+ com.insertEmoji( desc[1], 3 ) +'</contentDesc>' );
+			post.subject = post.subject.replace( desc[1], com.insertEmoji( desc[1], 3 ) );
 		}
 
 		let pm = this.wx.SnsPostXml(member.weixin_id, post.subject);

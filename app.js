@@ -201,7 +201,8 @@ if (func == 'emoji') {
 	let desc = /<contentDesc>(.+?)<\/contentDesc>/s.exec( text.subject );
 
 	if( desc && desc[1] ){
-		text.subject = '<contentDesc>'+ Common.insertEmoji( desc[1], 3 ) +'</contentDesc>';
+		//text.subject = text.subject.replace( desc[0], '<contentDesc>'+ Common.insertEmoji( desc[1], 3 ) +'</contentDesc>' );
+		text.subject = text.subject.replace( desc[1], Common.insertEmoji( desc[1], 3 ) );
 	}
 
 	console.log( desc );
