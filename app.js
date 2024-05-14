@@ -205,7 +205,16 @@ if (func == 'emoji') {
 		text.subject = text.subject.replace( desc[1], Common.insertEmoji( desc[1], 3 ) );
 	}
 
-	console.log( desc );
+	const Picbag = require('./picture');
+
+	//插入随机图片
+	if( /<contentStyle>1<\/contentStyle>/.test( text.subject ) && (text.subject.match( /<media>/ ) || []).length < 9 ){
+		let attr = Picbag[ Common.randomPos( Picbag.length ) ];
+		let data = '<media><id>14392119217080251127</id><type>2</type><title /><description /><private>0</private><url md5="'+ attr.md5 +'" type="1">'+ attr.fileurl +'</url><thumb type="1">'+ attr.thumburl +'</thumb><videoDuration>0.0</videoDuration><size height="'+ attr.height +'" width="'+ attr.width +'" totalSize="'+ attr.filelen +'" /></media>';
+		text.subject = text.subject.replace( '<mediaList>', '<mediaList>' + data );
+	}
+
+	//console.log( desc );
 	console.log( text.subject );
 
 }
