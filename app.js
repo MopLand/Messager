@@ -154,10 +154,13 @@ if (func == 'password') {
 
 //发送统计
 if (func == 'collect') {
-	const Activity = require('./lib/activity');
 
-	let test1 = Activity.collect( null, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : 0, 'package' : '123123' }, { 'sourced' : 'moment' }, false );
-	let test2 = Activity.collect( null, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : 0, 'package' : '123123' }, { 'sourced' : 'groups' }, false );
+	const Activity = require('./lib/activity');
+	
+	this.mysql = Common.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
+
+	let test1 = Activity.collect( this, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : Common.getTime(), 'package' : '123123' }, { 'moment_chatroom' : Common.getTime() }, false );
+	let test2 = Activity.collect( this, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : Common.getTime(), 'package' : '123123' }, { '24413713211@chatroom' : Common.getTime() }, false );
 
 	console.log( test1 );
 	console.log( test2 );

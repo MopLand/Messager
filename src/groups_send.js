@@ -535,7 +535,7 @@ class GroupsSend {
 			}
 
 			//支持的消息类型：1 文字、3 图片、43 视频、47 表情、49 小程序、90 红包
-			if ([1, 3, 43, 47, 49, 90].indexOf(item.msgType) == -1) {
+			if ( [1, 3, 43, 47, 49, 90].indexOf(item.msgType) == -1 || !text ) {
 				continue;
 			}
 
