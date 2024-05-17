@@ -172,6 +172,11 @@ class MomentSend {
 				req.push(self.nodes, self.insid);
 			}
 
+			if( self.conf.region ){
+				sql += ' AND region = ? ';
+				req.push( self.conf.region );
+			}
+
 			sql += ' ORDER BY w.auto_id ASC';
 
 			//单实例时，走分页模式

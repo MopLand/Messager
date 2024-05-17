@@ -111,6 +111,11 @@ class ForwardNew {
 		//	sql += ' AND w.moment = 1';
 		}
 
+		if( self.conf.region ){
+			sql += ' AND w.region = ? ';
+			req.push( self.conf.region );
+		}
+
 		if ( msg.type == 'groups' ) {
 			sql += ' AND w.groups_num > 0';
 		}

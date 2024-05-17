@@ -295,6 +295,11 @@ class GroupsSend {
 			req.push(self.nodes, self.insid);
 		}
 
+		if( self.conf.region ){
+			sql += ' AND region = ? ';
+			req.push( self.conf.region );
+		}
+
 		if ( !forced ) {
 			sql += ' AND FIND_IN_SET( ?, roomids )';
 			req.push(sourced);

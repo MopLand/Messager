@@ -59,117 +59,6 @@ class Heartbeat {
 	/**
 	 * 同步心跳
 	 */
-	heartBeat2() {
-
-		var self = this;
-		var klas = new Account(this.conf);
-		var span = 200;
-		
-		//半小时以内有心跳
-		var time = () => {
-			return com.getTime() - 60 * 30;
-		};
-
-		//更新用户心跳时间
-		var beat = ( member_id, weixin_id ) => {
-			self.mysql.query('UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [ member_id, weixin_id ] );
-		}
-
-		///////////////
-
-		var calc = () => {
-
-			self.mysql.query('SELECT COUNT(*) AS count FROM `pre_weixin_list` WHERE heartbeat_time >= ?', [time()], function (err, res) {
-
-				if( err ){
-					return log.error( '心跳统计', err );
-				}
-	
-				//以十分钟一轮，每次心跳数量
-				span = parseInt( res[0].count / 10 );
-	
-				log.info( '心跳计划', '总人数 ' + res[0].count + '，每次心跳 ' + span );
-				
-			});
-
-		};
-
-		//每半小时，计算一次心跳量
-		setInterval( calc, 60 * 1000 * 30 );
-
-		///////////////
-
-		var send = () => {
-
-			self.mysql.query('SELECT auto_id, member_id, weixin_id, device_id FROM `pre_weixin_list` WHERE heartbeat_time >= ? ORDER BY heartbeat_time ASC LIMIT ?', [time(), span], function (err, res) {
-
-				if( err ){
-					log.error( err );
-					return;
-				}else{
-					log.info( '本次心跳', res.length + ' 人' );
-				}
-
-				var clok = setInterval(() => {
-
-					if( res.length == 0 ){
-						clearInterval( clok );
-						return log.info( '心跳完成' );
-					}
-
-					//弹出一个人
-					let row = res.shift();
-	
-					//获取群消息
-					let pm = self.wx.Heartbeat( row.weixin_id );
-	
-					pm.then(ret => {
-	
-						beat( row.member_id, row.weixin_id );
-						
-						log.info( '心跳成功', [row.weixin_id, row.member_id] );
-	
-					}).catch( err => {
-	
-						log.debug( '心跳失败', [row.weixin_id, err] );
-	
-						//autoauth -> pushlogin -> qrcodelogin
-						if( err.indexOf('退出微信') > -1 ){
-							
-							let pa = self.wx.AutoAuth( row.weixin_id );
-	
-							pa.then( ret => {
-								beat( row.member_id, row.weixin_id );
-								log.info( '登录成功', [row.weixin_id, ret] );
-							}).catch( err => {
-								log.debug( '登录失败', [row.weixin_id, err] );
-								klas.init( row.weixin_id, row.device_id );
-							});
-							
-						}
-	
-					} );
-
-				 }, 100);
-	
-			});
-
-		};
-		
-		//每分钟，分批次发送心跳
-		setInterval( send, 60 * 1000 );
-
-		///////////////
-
-		//主动心跳一次
-		calc();
-		send();
-
-	}
-
-	/**
-	 * 同步心跳
-	 */
 	heartBeat() {
 
 		var self = this;
@@ -179,7 +68,18 @@ class Heartbeat {
 
 		log.info( '心跳范围', this.range + ' / ' + date + ' / INST ' + this.insid );
 
-		self.mysql.query('SELECT auto_id, member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 1 AND auto_id % ? = ? ORDER BY heartbeat_time ASC LIMIT ?', [this.nodes, this.insid, this.count], function (err, res) {
+		var sql = 'SELECT auto_id, member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 1 AND auto_id % ? = ?';
+		var req = [this.nodes, this.insid];
+
+		if( self.conf.region ){
+			sql += ' AND region = ? ';
+			req.push( self.conf.region );
+		}
+		
+		sql += ' ORDER BY heartbeat_time ASC LIMIT ?';
+		req.push( this.count );
+
+		self.mysql.query( sql, req, function (err, res) {
 
 			if( err ){
 				log.error( err );

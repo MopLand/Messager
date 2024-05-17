@@ -44,6 +44,9 @@ var conf = {
 		charset  : 'utf8mb4',
 	},
 
+	//服务器区域
+	region: '',
+
 	//工作时间段
 	worked: 6,
 
