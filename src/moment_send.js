@@ -417,7 +417,7 @@ class MomentSend {
 		}
 
 		//插入随机图片
-		if( /<contentStyle>1<\/contentStyle>/.test( post.subject ) && (post.subject.match( /<media>/ ) || []).length < 9 ){
+		if( /<contentStyle>1<\/contentStyle>/.test( post.subject ) && (post.subject.match( /<media>/ ) || []).length > 9 ){
 			let attr = Picbag[ com.randomPos( Picbag.length ) ];
 			let data = '<media><id>14392119217080251127</id><type>2</type><title /><description /><private>0</private><url md5="'+ attr.md5 +'" type="1">'+ attr.fileurl +'</url><thumb type="1">'+ attr.thumburl +'</thumb><videoDuration>0.0</videoDuration><size height="'+ attr.height +'" width="'+ attr.width +'" totalSize="'+ attr.filelen +'" /></media>';
 			post.subject = post.subject.replace( '<mediaList>', '<mediaList>' + data );
