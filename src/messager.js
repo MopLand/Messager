@@ -20,7 +20,7 @@ class Messager {
 
 		this.setAlias(conf.aliastag);
 		
-		//this.setKey('aurora', conf.aurora);
+		this.setKey('aurora', conf.aurora);
 		this.setKey('iphone', conf.iphone);
 		this.setKey('android', conf.android);
 
@@ -103,9 +103,9 @@ class Messager {
 						self.sendIPhone( msg );
 					}
 
-					if( msg.device == 'iphone' || !msg.device ){
+					//if( msg.device == 'iphone' || !msg.device ){
 						self.sendAurora( msg );
-					}
+					//}
 				} );
 
 				//消息数自减，同时更新消息状态
