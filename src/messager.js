@@ -3,8 +3,8 @@
 const common = require('../lib/common');
 const logger = require('../lib/logger');
 const request = require('../lib/request');
-//const JPush = require('jpush-async').JPushAsync;
-const JPush = require('../node_modules/jpush-async/lib/JPush/JPushAsync.js');
+const JPush = require('jpush-async').JPushAsync;
+//const JPush = require('../node_modules/jpush-async/lib/JPush/JPushAsync.js');
 const umsdk = require('umeng-push-server-sdk');
 const umeng = new umsdk.client();
 
