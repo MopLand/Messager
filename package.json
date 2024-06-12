@@ -34,11 +34,12 @@
 	"dependencies": {
 		"callback-promise-union": "^1.0.1",
 		"crypto": "*",
-		"fast-xml-parser": "*",
-		"mysql": "^2.18.1",
-		"redis": "^4.6.13",
-		"request": "^2.88.2",
 		"debug": "^3.1.0",
+		"fast-xml-parser": "*",
+		"jpush-async": "^4.1.0",
+		"mysql": "^2.18.1",
+		"redis": "^3.1.2",
+		"request": "^2.88.2",
 		"umeng-push-server-sdk": "*",
 		"ws": "*",
 		"xml2js": "^0.6.2"

@@ -3,7 +3,7 @@
 const common = require('../lib/common');
 const logger = require('../lib/logger');
 const request = require('../lib/request');
-//const JPush = require('jpush-async').JPushAsync;
+const JPush = require('jpush-async').JPushAsync;
 const umsdk = require('umeng-push-server-sdk');
 const umeng = new umsdk.client();
 
@@ -104,7 +104,7 @@ class Messager {
 					}
 
 					if( msg.device == 'iphone' || !msg.device ){
-					//	self.sendAurora( msg );
+						self.sendAurora( msg );
 					}
 				} );
 
