@@ -5,7 +5,6 @@ const Logger = require('./lib/logger');
 const Groups = require('./src/groups');
 const Moment = require('./src/moment');
 const Account = require('./src/account');
-const Messager = require('./src/messager');
 const Heartbeat = require('./src/heartbeat');
 const Forward = require('./src/forward');
 const MomentSend = require('./src/moment_send');
@@ -26,6 +25,7 @@ console.log( '-------------' + Common.getTime() +'-------------' );
 
 //消息推送，默认方法
 if (!func || func == 'messager') {
+	const Messager = require('./src/messager');
 	let test = Common.getArgv('debug');
 	let klas = new Messager(conf, test);
 }
