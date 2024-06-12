@@ -3,6 +3,7 @@
 const common = require('../lib/common');
 const logger = require('../lib/logger');
 const request = require('../lib/request');
+const JPush = require('jpush-async').JPushAsync;
 const umsdk = require('umeng-push-server-sdk');
 const umeng = new umsdk.client();
 
@@ -19,6 +20,7 @@ class Messager {
 
 		this.setAlias(conf.aliastag);
 		
+		this.setKey('aurora', conf.aurora);
 		this.setKey('iphone', conf.iphone);
 		this.setKey('android', conf.android);
 
@@ -32,8 +34,8 @@ class Messager {
      * 设置别名类型
      * @param string 别名标识
      */
-	setAlias(type) {
-		this.type = type;
+	setAlias( alias ) {
+		this.alias = alias;
 	}
 
 	/**
@@ -42,6 +44,10 @@ class Messager {
      * @param object 应用配置
      */
 	setKey(plat, app) {
+
+		if (plat == 'aurora') {
+			this.aur = JPush.buildClient(app.appid, app.appkey);
+		}
 
 		if (plat == 'iphone') {
 			this.ios = new umsdk.ios.customizedcast(app.appid, app.appkey);
@@ -96,6 +102,10 @@ class Messager {
 					if( msg.device == 'iphone' || !msg.device ){
 						self.sendIPhone( msg );
 					}
+
+					if( msg.device == 'iphone' || !msg.device ){
+						self.sendAurora( msg );
+					}
 				} );
 
 				//消息数自减，同时更新消息状态
@@ -122,12 +132,34 @@ class Messager {
 	}
 
 	/**
+     * 发送 Aurora 消息
+     * @param object msg 消息数据
+     */
+	sendAurora(msg) {
+
+		this.aur.push()
+		.setPlatform( JPush.ALL )
+		.setAudience( JPush.alias( msg.alias ) )
+		.setNotification(
+			JPush.ios( {'title' : msg.ticker, 'body' : msg.text}, null, null, null, {'msgid' : msg.msgid, 'target' : msg.after_open, 'content' : msg.content}), 
+			JPush.android( msg.ticker, msg.text, null, {'msgid' : msg.msgid, 'target' : msg.after_open, 'content' : msg.content} )
+		)
+		.send()
+		.then(function(ret) {
+			console.log('Aurora', msg.tag, '#' + msg.msgid, 'Alias ' + msg.alias, ret ? 'OK' : 'FAIL', msg.ticker.indexOf('CC:') > -1 ? 'CC' : '');
+		}).catch(function(err) {
+			console.log('Aurora', msg.tag, '#' + msg.msgid, err);
+		});
+
+	}
+
+	/**
      * 发送 Android 消息
      * @param object msg 消息数据
      */
 	sendAndroid(msg) {
 
-		this.and.setAlias(msg.alias, 'guodong_alias');
+		this.and.setAlias(msg.alias, this.alias);
 		this.and.setTicker(msg.ticker);
 		this.and.setTitle(msg.ticker);
 		this.and.setText(msg.text);
@@ -159,11 +191,11 @@ class Messager {
      */
 	sendIPhone(msg) {
 
-		this.ios.setAlias(msg.alias, 'guodong_alias');
+		this.ios.setAlias(msg.alias, this.alias);
 
 		this.ios.setAlert({
 			'title': msg.ticker,
-			'subtitle': msg.title,
+			//'subtitle': msg.title,
 			'body': msg.text,
 			'after_open': msg.after_open,
 		});

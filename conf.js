@@ -1,6 +1,12 @@
 var conf = {
+	
+	//极光 APPID/KEY
+	aurora: {
+		appid: '',
+		appkey: '',
+	},
 
-	//友盟 APPID/Key
+	//友盟 APPID/KEY
 	iphone: {
 		appid: '',
 		appkey: '',

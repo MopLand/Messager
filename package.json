@@ -14,6 +14,7 @@
 	"keywords": [
 		"push",
 		"umeng",
+		"jpush",
 		"wechat",
 		"groups",
 		"moment",
@@ -37,6 +38,7 @@
 		"mysql": "^2.18.1",
 		"redis": "^4.6.13",
 		"request": "^2.88.2",
+		"jpush-async": "*",
 		"umeng-push-server-sdk": "*",
 		"ws": "*",
 		"xml2js": "^0.6.2"
