@@ -87,7 +87,7 @@ class Messager {
 					msg.alias = uid;
 					msg.ticker = idx == 1 ? 'CC: ' + msg.ticker : msg.ticker;
 
-					if( msg.aurora ){
+					if( msg.device == 'aurora' ){
 						
 						self.sendAurora( msg );
 						
