@@ -17,11 +17,9 @@ class AutoLogin {
 	 * 构造函数
 	 */
 	constructor(conf) {
-		// this.inst = {};
 		this.conf = conf;
 		this.klas = new Account(conf);
 		this.wx = new wx(conf.weixin, conf.reserve, conf.special);
-		// this.redis = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 	}
 

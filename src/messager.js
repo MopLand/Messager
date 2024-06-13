@@ -48,6 +48,7 @@ class Messager {
 
 		if (plat == 'aurora') {
 			this.aur = JPush.buildClient(app.appid, app.appkey);
+			console.log( this.aur, this.aur.push )
 		}
 
 		if (plat == 'iphone') {
@@ -72,6 +73,8 @@ class Messager {
 		var copyed = common.redis(self.conf.redis);
 
 		request.status(conf.report, 'Messager', 0, {});
+
+		//self.sendAurora( {'alias':'10008', 'ticker' : 'ticker', 'text' : 'text'} );
 
 		client.on('message', function (channel, message) {
 
