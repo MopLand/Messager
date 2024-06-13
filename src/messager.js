@@ -18,33 +18,21 @@ class Messager {
 	constructor(conf, test) {
 
 		this.conf = conf;
-
-		this.setAlias(conf.aliastag);
 		
-		this.setKey('aurora', conf.aurora);
-		this.setKey('iphone', conf.iphone);
-		this.setKey('android', conf.android);
+		this.instance('aurora', conf.aurora);
+		this.instance('iphone', conf.iphone);
+		this.instance('android', conf.android);
 
-		console.log('----------------------------');
-
-		this.batch(test);
+		this.subscribe(test);
 
 	}
 
 	/**
-     * 设置别名类型
-     * @param string 别名标识
-     */
-	setAlias( alias ) {
-		this.alias = alias;
-	}
-
-	/**
-     * 设置各平台 Key
+     * 推送平台实例化
      * @param string 平台标识
      * @param object 应用配置
      */
-	setKey(plat, app) {
+	instance(plat, app) {
 
 		if (plat == 'aurora') {
 			this.aur = JPush.buildClient(app.appid, app.appkey);
@@ -65,7 +53,7 @@ class Messager {
      * 批量推送消息
      * @param boolean test 是否测试
      */
-	batch(test) {
+	subscribe(test) {
 
 		var self = this;
 		var conf = this.conf;
@@ -167,7 +155,7 @@ class Messager {
      */
 	sendAndroid(msg) {
 
-		this.and.setAlias(msg.alias, this.alias);
+		this.and.setAlias(msg.alias, this.conf.aliastag);
 		this.and.setTicker(msg.ticker);
 		this.and.setTitle(msg.ticker);
 		this.and.setText(msg.text);
@@ -175,7 +163,7 @@ class Messager {
 		this.and.setExtraField('msgid', msg.msgid);
 		this.and.setExtraField('target', msg.after_open);
 		this.and.setExtraField('content', msg.content);
-		this.and.setExtraField('category', msg.category);
+		//this.and.setExtraField('category', msg.category);
 
 		this.and.setMipush(true);
 		this.and.setMi_activity(this.conf.activity);
@@ -199,7 +187,7 @@ class Messager {
      */
 	sendIPhone(msg) {
 
-		this.ios.setAlias(msg.alias, this.alias);
+		this.ios.setAlias(msg.alias, this.conf.aliastag);
 
 		this.ios.setAlert({
 			'title': msg.ticker,
@@ -211,7 +199,7 @@ class Messager {
 		this.ios.setCustomizedField('msgid', msg.msgid);
 		this.ios.setCustomizedField('target', msg.after_open);
 		this.ios.setCustomizedField('content', msg.content);
-		this.ios.setCustomizedField('category', msg.category);
+		//this.ios.setCustomizedField('category', msg.category);
 
 		this.ios.setBadge(0);
 		this.ios.setSound('default');
