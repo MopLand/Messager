@@ -48,7 +48,7 @@ class Messager {
 
 		if (plat == 'aurora') {
 			this.aur = JPush.buildClient(app.appid, app.appkey);
-			console.log( this.aur, this.aur.push )
+			//console.log( this.aur, this.aur.push )
 		}
 
 		if (plat == 'iphone') {
@@ -98,18 +98,22 @@ class Messager {
 				alias.forEach( ( uid, idx ) => {
 					msg.alias = uid;
 					msg.ticker = idx == 1 ? 'CC: ' + msg.ticker : msg.ticker;
-					
-					if( msg.device == 'android' || !msg.device ){
-						self.sendAndroid( msg );
-					}
 
-					if( msg.device == 'iphone' || !msg.device ){
-						self.sendIPhone( msg );
-					}
-
-					//if( msg.device == 'iphone' || !msg.device ){
+					if( msg.aurora ){
+						
 						self.sendAurora( msg );
-					//}
+						
+					}else{
+
+						if( msg.device == 'android' || !msg.device ){
+							self.sendAndroid( msg );
+						}
+	
+						if( msg.device == 'iphone' || !msg.device ){
+							self.sendIPhone( msg );
+						}
+					}
+
 				} );
 
 				//消息数自减，同时更新消息状态
