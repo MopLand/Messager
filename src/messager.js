@@ -143,7 +143,7 @@ class Messager {
 
 		this.aur.push()
 		.setPlatform( JPush.ALL )
-		.setAudience( JPush.alias( msg.alias ) )
+		.setAudience( JPush.alias( msg.alias + '' ) )
 		.setNotification(
 			JPush.ios( {'title' : msg.ticker, 'body' : msg.text}, null, null, null, {'msgid' : msg.msgid, 'target' : msg.after_open, 'content' : msg.content}), 
 			JPush.android( msg.ticker, msg.text, null, {'msgid' : msg.msgid, 'target' : msg.after_open, 'content' : msg.content} )
