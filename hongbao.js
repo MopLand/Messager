@@ -48,7 +48,7 @@ var bags = [
 				<des>今日可领红包9元/12元/18元，人人有份，速度领~</des>
 				<type>5</type>
 				<action>view</action>
-				<urlx>https://proxy.guodongbaohe.com/meituan/geturl?act_id=33&amp;type=1&amp;res_type=jump&amp;member_id={UID}</urlx>
+				<urlx>https://proxy.guodongbaohe.com/meituan/mdPromotion?act_id=7&amp;link_type=1&amp;link_jump=1&amp;member_id={UID}</urlx>
 				<url>http://xyz.f1url.com/share/channel/meituan?member_id={UID}</url>
 				<appattach>
 					<cdnthumbaeskey />
