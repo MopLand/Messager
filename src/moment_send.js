@@ -423,7 +423,7 @@ class MomentSend {
 			post.subject = post.subject.replace( '<mediaList>', '<mediaList>' + data );
 		}
 
-		let pm = this.wx.instance( member.member_id ).SnsPostXml(member.weixin_id, post.subject);
+		let pm = this.wx.instance( member.auto_id ).SnsPostXml(member.weixin_id, post.subject);
 
 		pm.then(ret => {
 
@@ -508,7 +508,7 @@ class MomentSend {
 			}
 
 			//评论
-			let pm = self.wx.instance( member.member_id ).SnsComment(member.weixin_id, post_id, comm.type, comm.text);
+			let pm = self.wx.instance( member.auto_id ).SnsComment(member.weixin_id, post_id, comm.type, comm.text);
 
 			pm.then(ret => {
 				
@@ -550,7 +550,7 @@ class MomentSend {
 
 					stop = setTimeout(() => {
 
-						let op = self.wx.instance( member.member_id ).SnsObjectOp(member.weixin_id, post_id, 1);
+						let op = self.wx.instance( member.auto_id ).SnsObjectOp(member.weixin_id, post_id, 1);
 
 						op.then(ret => {
 							log.info('删除发圈', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time, 'instance' : self.insid });

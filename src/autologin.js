@@ -48,7 +48,7 @@ class AutoLogin {
 
 		///////////////
 
-		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 0 AND heartbeat_time > 1718640000 ORDER BY heartbeat_time ASC LIMIT ?', [this.count], function (err, res) {
+		self.mysql.query('SELECT auto_id, member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 0 AND heartbeat_time > 1718640000 ORDER BY heartbeat_time ASC LIMIT ?', [this.count], function (err, res) {
 
 			if (err) {
 				log.error(err);
@@ -93,7 +93,7 @@ class AutoLogin {
 				//弹出一个人
 				let row = res.shift();
 
-				let pa = self.wx.instance( row.member_id ).AutoAuth(row.weixin_id);
+				let pa = self.wx.instance( row.auto_id ).AutoAuth(row.weixin_id);
 
 				pa.then(ret => {
 					self.update(row.member_id, row.weixin_id);
