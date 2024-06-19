@@ -48,7 +48,7 @@ class AutoLogin {
 
 		///////////////
 
-		self.mysql.query('SELECT auto_id, member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 0 AND heartbeat_time > 1718640000 ORDER BY heartbeat_time ASC LIMIT ?', [this.count], function (err, res) {
+		self.mysql.query('SELECT auto_id, member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 0 ORDER BY heartbeat_time ASC LIMIT ?', [this.count], function (err, res) {
 
 			if (err) {
 				log.error(err);
@@ -96,16 +96,29 @@ class AutoLogin {
 				let pa = self.wx.instance( row.auto_id ).AutoAuth(row.weixin_id);
 
 				pa.then(ret => {
+
 					self.update(row.member_id, row.weixin_id);
+					
 					log.info('登录成功', [row.weixin_id, ret]);
+
 				}).catch(err => {
+
 					log.debug('登录失败', [row.weixin_id, err.string || err]);
 
 					// 判断登录接口是否正常返回 错误对象，正确则下线微信号，否则下次继续处理自动登录
 					// 微信账号未登陆成功，请重新获取二维码登陆
-					if (typeof err == 'object' || (typeof err == 'string' && err.indexOf('重新获取二维码登陆'))) {
-						self.update(row.member_id, row.weixin_id, false); // 更新本地库
+					//if (typeof err == 'object' || (typeof err == 'string' && err.indexOf('重新获取二维码登陆'))) {
+
+					//服务报错
+					if ( typeof err == 'string' && /二维码登陆|已经失效/.test( err ) ) {
+						self.update(row.member_id, row.weixin_id, false);
 					}
+
+					//微信报错
+					if ( typeof err.string == 'object' && /设备上登录|已退出微信/.test( err.string ) ) {
+						self.update(row.member_id, row.weixin_id, false);
+					}
+
 					// self.klas.init(row.weixin_id, row.device_id);
 				}).finally(() => {
 
