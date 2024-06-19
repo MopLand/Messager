@@ -115,7 +115,7 @@ class AutoLogin {
 					}
 
 					//微信报错
-					if ( typeof err.string == 'object' && /设备上登录|已退出微信/.test( err.string ) ) {
+					if ( typeof err.string == 'string' && /设备上登录|已退出微信/.test( err.string ) ) {
 						self.update( row.auto_id, -1 );
 					}
 
