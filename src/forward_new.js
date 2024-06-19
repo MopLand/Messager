@@ -1,10 +1,6 @@
 'use strict'
 
-const fxp = require("fast-xml-parser");
-const wx = require('../lib/weixin');
 const com = require('../lib/common');
-const req = require('../lib/request');
-const act = require('../lib/activity');
 const Logger = require('../lib/logger');
 const MomentSend = require('./moment_send');
 const GroupsSend = require('./groups_send');
@@ -21,7 +17,6 @@ class ForwardNew {
 	constructor(conf) {
 		this.inst = {};
 		this.conf = conf;
-		this.wx = new wx(conf.weixin, conf.reserve, conf.special);
 		this.redis = com.redis(conf.redis);
 		this.publish = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));

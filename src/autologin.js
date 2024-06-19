@@ -93,7 +93,7 @@ class AutoLogin {
 				//弹出一个人
 				let row = res.shift();
 
-				let pa = self.wx.AutoAuth(row.weixin_id);
+				let pa = self.wx.instance( row.member_id ).AutoAuth(row.weixin_id);
 
 				pa.then(ret => {
 					self.update(row.member_id, row.weixin_id);
