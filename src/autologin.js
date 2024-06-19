@@ -110,12 +110,12 @@ class AutoLogin {
 					//if (typeof err == 'object' || (typeof err == 'string' && err.indexOf('重新获取二维码登陆'))) {
 
 					//服务报错
-					if ( typeof err == 'string' && /二维码登陆|已经失效/.test( err ) ) {
+					if ( typeof err == 'string' && /二维码登陆|已经失效|微信账号/.test( err ) ) {
 						self.update( row.auto_id, -1 );
 					}
 
 					//微信报错
-					if ( typeof err.string == 'string' && /设备上登录|已退出微信/.test( err.string ) ) {
+					if ( typeof err.string == 'string' && /重新登录|账号安全|退出微信|退出登录/.test( err.string ) ) {
 						self.update( row.auto_id, -1 );
 					}
 
