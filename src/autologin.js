@@ -48,7 +48,7 @@ class AutoLogin {
 
 		///////////////
 
-		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 0 ORDER BY heartbeat_time ASC LIMIT ?', [this.count], function (err, res) {
+		self.mysql.query('SELECT member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 0 AND heartbeat_time > 1718640000 ORDER BY heartbeat_time ASC LIMIT ?', [this.count], function (err, res) {
 
 			if (err) {
 				log.error(err);
