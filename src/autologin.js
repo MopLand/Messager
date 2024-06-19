@@ -119,6 +119,11 @@ class AutoLogin {
 						self.update( row.auto_id, -1 );
 					}
 
+					//超过两个小时未心跳
+					if ( row.heartbeat_time && (date.getTime() - row.heartbeat_time) > 60 * 60 * 1000 * 2 ) {
+						self.update( row.auto_id, -1 );
+					}
+
 					// self.klas.init(row.weixin_id, row.device_id);
 				}).finally(() => {
 
