@@ -126,3 +126,11 @@ if (func == 'autologin') {
 	let klas = new AutoLogin(conf);
 		klas.init();
 }
+
+// 自动登陆
+if (func == 'instance') {
+	const wx = require('./lib/weixin');
+	let klas = new wx(conf.weixin, conf.reserve, conf.special);
+	let inst = klas.instance( 10008 ).GetProfile('veryide');
+	console.log( inst );
+}
