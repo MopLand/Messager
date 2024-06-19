@@ -134,14 +134,17 @@ class Heartbeat {
 					
 					log.info( '心跳成功', [row.weixin_id, row.member_id] );
 
-					self.update( row.auto_id );
+					self.update( row.auto_id, 1 );
 
 				}).catch( err => {
 
 					log.debug( '心跳失败', [row.weixin_id, err] );
 
-					// 更新为 暂时离线
-					self.update( row.auto_id, false );
+					if ( typeof err == 'string' && /退出微信|已经失效|没有登陆/.test( err ) ) {
+						self.update( row.auto_id, -1);
+					}else{
+						self.update( row.auto_id, 0 ); //更新为暂离状态，由 autoLogin 再次验证
+					}
 
 				} ).finally( () =>{
 
@@ -162,10 +165,10 @@ class Heartbeat {
 	/**
 	 * 完成心跳
 	 */
-	update( auto_id, online = true ) {
+	update( auto_id, online ) {
 		
 		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ? WHERE auto_id = ?';
-		let req = [ ( online ? 1 : 0 ), auto_id ];
+		let req = [ online, auto_id ];
 
 		this.mysql.query(sql, req, function( err, ret ){
 			if( err ){

@@ -97,7 +97,7 @@ class AutoLogin {
 
 				pa.then(ret => {
 
-					self.update(row.member_id, row.weixin_id);
+					self.update( row.auto_id, 1 );
 					
 					log.info('登录成功', [row.weixin_id, ret]);
 
@@ -111,12 +111,12 @@ class AutoLogin {
 
 					//服务报错
 					if ( typeof err == 'string' && /二维码登陆|已经失效/.test( err ) ) {
-						self.update(row.member_id, row.weixin_id, false);
+						self.update( row.auto_id, -1 );
 					}
 
 					//微信报错
 					if ( typeof err.string == 'object' && /设备上登录|已退出微信/.test( err.string ) ) {
-						self.update(row.member_id, row.weixin_id, false);
+						self.update( row.auto_id, -1 );
 					}
 
 					// self.klas.init(row.weixin_id, row.device_id);
@@ -139,15 +139,17 @@ class AutoLogin {
 	/**
 	 * 完成心跳
 	 */
-	update(member_id, weixin_id, online = true) {
+	update( auto_id, online ) {
 
-		let set = 'online = -1';
+		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ? WHERE auto_id = ?';
+		let req = [ online, auto_id ];
 
-		if (online) {
-			set = 'heartbeat_time = UNIX_TIMESTAMP(), online = 1';
-		}
+		this.mysql.query(sql, req, function( err, ret ){
+			if( err ){
+				return console.error( err );
+			}
+		});
 
-		this.mysql.query('UPDATE `pre_weixin_list` SET ' + set + ' WHERE member_id = ? AND weixin_id = ?', [member_id, weixin_id]);
 	}
 
 }
