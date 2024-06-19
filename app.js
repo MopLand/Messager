@@ -127,10 +127,11 @@ if (func == 'autologin') {
 		klas.init();
 }
 
-// 自动登陆
+// 微信实例
 if (func == 'instance') {
 	const wx = require('./lib/weixin');
+	let wxid = Common.getArgv('wxid', 'veryide');
 	let klas = new wx(conf.weixin, conf.reserve, conf.special);
-	let inst = klas.instance( 10008 ).GetProfile('veryide');
+	let inst = klas.instance( 10008 ).GetProfile( wxid );
 	console.log( inst );
 }
