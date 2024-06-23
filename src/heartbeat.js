@@ -140,11 +140,16 @@ class Heartbeat {
 
 					log.debug( '心跳失败', [row.weixin_id, err] );
 
+					/*
 					if ( typeof err == 'string' && /退出微信|已经失效|没有登陆/.test( err ) ) {
 						self.update( row.auto_id, -1);
 					}else{
 						self.update( row.auto_id, 0 ); //更新为暂离状态，由 autoLogin 再次验证
 					}
+					*/
+
+					//心跳全部为假离线 online = 0
+					self.update( row.auto_id, 0 );
 
 				} ).finally( () =>{
 
