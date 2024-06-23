@@ -103,25 +103,27 @@ class AutoLogin {
 
 				}).catch(err => {
 
-					log.debug('登录失败', [row.weixin_id, err.string || err]);
+					log.debug('登录失败', [row.weixin_id, err]);
 
 					// 判断登录接口是否正常返回 错误对象，正确则下线微信号，否则下次继续处理自动登录
 					// 微信账号未登陆成功，请重新获取二维码登陆
 					//if (typeof err == 'object' || (typeof err == 'string' && err.indexOf('重新获取二维码登陆'))) {
 
 					//服务报错
-					if ( typeof err == 'string' && /二维码登陆|已经失效|微信账号/.test( err ) ) {
+					if ( typeof err == 'string' && /二维码登陆|已经失效|微信账号|重新登录|账号安全|退出微信|退出登录|稍后再试/.test( err ) ) {
 						self.update( row.auto_id, -1, err );
 					}
 
 					//微信报错
+					/*
 					if ( typeof err.string == 'string' && /重新登录|账号安全|退出微信|退出登录|稍后再试/.test( err.string ) ) {
 						self.update( row.auto_id, -1, /<!\[CDATA\[(.+?)\]\]>/.exec( err.string )[1] || err.string );
 					}
+					*/
 
 					//超过两个小时未心跳
 					if ( row.heartbeat_time && (date.getTime() - row.heartbeat_time) > 60 * 60 * 1000 * 2 ) {
-						self.update( row.auto_id, -1 );
+						self.update( row.auto_id, -1, err );
 					}
 
 					// self.klas.init(row.weixin_id, row.device_id);
