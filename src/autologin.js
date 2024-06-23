@@ -147,7 +147,7 @@ class AutoLogin {
 	update( auto_id, online, err = '' ) {
 
 		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ?, status = ? WHERE auto_id = ?';
-		let req = [ online, auto_id, err ];
+		let req = [ online, err, auto_id ];
 
 		this.mysql.query(sql, req, function( err, ret ){
 			if( err ){
