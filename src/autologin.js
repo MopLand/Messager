@@ -111,12 +111,12 @@ class AutoLogin {
 
 					//服务报错
 					if ( typeof err == 'string' && /二维码登陆|已经失效|微信账号/.test( err ) ) {
-						self.update( row.auto_id, -1 );
+						self.update( row.auto_id, -1, err );
 					}
 
 					//微信报错
 					if ( typeof err.string == 'string' && /重新登录|账号安全|退出微信|退出登录|稍后再试/.test( err.string ) ) {
-						self.update( row.auto_id, -1 );
+						self.update( row.auto_id, -1, /<!\[CDATA\[(.+?)\]\]>/.exec( err.string )[1] || err.string );
 					}
 
 					//超过两个小时未心跳
@@ -142,12 +142,12 @@ class AutoLogin {
 	}
 
 	/**
-	 * 完成心跳
+	 * 心跳更新
 	 */
-	update( auto_id, online ) {
+	update( auto_id, online, err ) {
 
-		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ? WHERE auto_id = ?';
-		let req = [ online, auto_id ];
+		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ?, status = ? WHERE auto_id = ?';
+		let req = [ online, auto_id, err ];
 
 		this.mysql.query(sql, req, function( err, ret ){
 			if( err ){
