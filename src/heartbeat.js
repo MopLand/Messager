@@ -149,7 +149,7 @@ class Heartbeat {
 					*/
 
 					//心跳全部为假离线 online = 0
-					self.update( row.auto_id, 0 );
+					self.update( row.auto_id, 0, err );
 
 				} ).finally( () =>{
 
@@ -168,12 +168,12 @@ class Heartbeat {
 	}
 
 	/**
-	 * 完成心跳
+	 * 心跳更新
 	 */
-	update( auto_id, online ) {
+	update( auto_id, online, err = '' ) {
 		
-		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ? WHERE auto_id = ?';
-		let req = [ online, auto_id ];
+		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ?, status = ? WHERE auto_id = ?';
+		let req = [ online, err, auto_id ];
 
 		this.mysql.query(sql, req, function( err, ret ){
 			if( err ){
