@@ -1162,7 +1162,7 @@ class GroupsSend {
 			//针对图片和表情，多个微信群，适当延迟
 			//if ( [3, 43].indexOf( msg.msgtype ) > -1 && rooms.length > 1 && i < rooms.length - 1 ) {
 			if ( rooms.length > 1 && i < rooms.length - 1 ) {
-				await com.sleep(1000);
+				await com.sleep( 1500 );
 			}
 
 		}
