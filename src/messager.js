@@ -87,11 +87,11 @@ class Messager {
 					msg.alias = uid;
 					msg.ticker = idx == 1 ? 'CC: ' + msg.ticker : msg.ticker;
 
-					if( msg.device == 'aurora' ){
+					//if( msg.device == 'aurora' ){
 						
-						self.sendAurora( msg );
+					//	self.sendAurora( msg );
 						
-					}else{
+					//}else{
 
 						if( msg.device == 'android' || !msg.device ){
 							self.sendAndroid( msg );
@@ -100,7 +100,7 @@ class Messager {
 						if( msg.device == 'iphone' || !msg.device ){
 							self.sendIPhone( msg );
 						}
-					}
+					//}
 
 				} );
 
