@@ -130,7 +130,7 @@ class Heartbeat {
 				let row = res.shift();
 
 				//获取群消息
-				let pm = self.wx.instance( row.member_id, member.device_id ).Heartbeat( row.weixin_id );
+				let pm = self.wx.instance( row.member_id, row.device_id ).Heartbeat( row.weixin_id );
 
 				//更新心跳范围
 				self.range = row.heartbeat_time;
