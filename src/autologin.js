@@ -11,6 +11,11 @@ const Account = require('./account');
 const tag = com.fileName(__filename, false);
 const log = new Logger(tag);
 
+let conf = com.getConf('../');
+if( conf && conf.region ){
+	const wx = require('../lib/region');
+}
+
 class AutoLogin {
 
 	/**
@@ -48,7 +53,18 @@ class AutoLogin {
 
 		///////////////
 
-		self.mysql.query('SELECT auto_id, member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 0 ORDER BY heartbeat_time ASC LIMIT ?', [this.count], function (err, res) {
+		var sql = 'SELECT auto_id, member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 0';
+		var req = [];
+
+		if( self.conf.region ){
+			sql += ' AND region = ? ';
+			req.push( self.conf.region );
+		}
+		
+		sql += ' ORDER BY heartbeat_time ASC LIMIT ?';
+		req.push( this.count );
+
+		self.mysql.query( sql, req, function (err, res) {
 
 			if (err) {
 				log.error(err);
@@ -93,7 +109,7 @@ class AutoLogin {
 				//弹出一个人
 				let row = res.shift();
 
-				let pa = self.wx.instance( row.auto_id ).AutoAuth(row.weixin_id);
+				let pa = self.wx.instance( row.auto_id, row.device_id ).AutoAuth(row.weixin_id);
 
 				pa.then(ret => {
 

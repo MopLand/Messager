@@ -12,6 +12,11 @@ const Account = require('./account');
 const tag = com.fileName( __filename, false );
 const log = new Logger( tag );
 
+let conf = com.getConf('../');
+if( conf && conf.region ){
+	const wx = require('../lib/region');
+}
+
 class Heartbeat {
 
 	/**
@@ -125,7 +130,7 @@ class Heartbeat {
 				let row = res.shift();
 
 				//获取群消息
-				let pm = self.wx.instance( row.member_id ).Heartbeat( row.weixin_id );
+				let pm = self.wx.instance( row.member_id, member.device_id ).Heartbeat( row.weixin_id );
 
 				//更新心跳范围
 				self.range = row.heartbeat_time;

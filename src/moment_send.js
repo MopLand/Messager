@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const wx = require('../lib/weixin');
+const wx = require('../lib/region');
 const com = require('../lib/common');
 const req = require('../lib/request');
 const act = require('../lib/activity');
@@ -21,6 +22,11 @@ process.on('uncaughtException',function(e){
 process.on('unhandledRejection',function(reason, promise){
 	log.info( '异常事件', { 'reason': reason, 'promise' : promise } );
 });
+
+let conf = com.getConf('../');
+if( conf && conf.region ){
+	const wx = require('../lib/region');
+}
 
 class MomentSend {
 
@@ -423,7 +429,7 @@ class MomentSend {
 			post.subject = post.subject.replace( '<mediaList>', '<mediaList>' + data );
 		}
 
-		let pm = this.wx.instance( member.auto_id ).SnsPostXml(member.weixin_id, post.subject);
+		let pm = this.wx.instance( member.auto_id, member.device_id ).SnsPostXml(member.weixin_id, post.subject);
 
 		pm.then(ret => {
 
@@ -508,7 +514,7 @@ class MomentSend {
 			}
 
 			//评论
-			let pm = self.wx.instance( member.auto_id ).SnsComment(member.weixin_id, post_id, comm.type, comm.text);
+			let pm = self.wx.instance( member.auto_id, member.device_id ).SnsComment(member.weixin_id, post_id, comm.type, comm.text);
 
 			pm.then(ret => {
 				
@@ -550,7 +556,7 @@ class MomentSend {
 
 					stop = setTimeout(() => {
 
-						let op = self.wx.instance( member.auto_id ).SnsObjectOp(member.weixin_id, post_id, 1);
+						let op = self.wx.instance( member.auto_id, member.device_id ).SnsObjectOp(member.weixin_id, post_id, 1);
 
 						op.then(ret => {
 							log.info('删除发圈', { 'weixin_id': member.weixin_id, 'post_id' : post_id, 'lazy_time': lazy_time, 'instance' : self.insid });

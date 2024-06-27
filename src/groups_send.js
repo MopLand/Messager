@@ -14,6 +14,11 @@ const Logger = require('../lib/logger');
 const tag = com.fileName(__filename, false);
 var	  log = new Logger( tag, true, true );
 
+let conf = com.getConf('../');
+if( conf && conf.region ){
+	const wx = require('../lib/region');
+}
+
 /**
  * 用户 TAG
  * 1 ： '测试通道'
@@ -1051,7 +1056,7 @@ class GroupsSend {
 				return com.Promise(true, [member, msg]);
 			}
 
-			let fn = this.wx.instance( member.auto_id ).NewSendMsg(member.weixin_id, chats, body, msg.source, 1);
+			let fn = this.wx.instance( member.auto_id, member.device_id ).NewSendMsg(member.weixin_id, chats, body, msg.source, 1);
 
 			fn.then(ret => {
 				log.info('文本成功', { 'member' : member.member_id, 'count' : ret.count, 'instance' : self.insid });
@@ -1082,7 +1087,7 @@ class GroupsSend {
 			//图片
 			if (msg.msgtype == 3) {
 
-				var fn = this.wx.instance( member.auto_id ).UploadMsgImgXml(member.weixin_id, chat, body);
+				var fn = this.wx.instance( member.auto_id, member.device_id ).UploadMsgImgXml(member.weixin_id, chat, body, msg.source);
 
 				fn.then(ret => {
 					log.info('发图成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
@@ -1094,7 +1099,7 @@ class GroupsSend {
 			//视频
 			if (msg.msgtype == 43) {
 
-				var fn = this.wx.instance( member.auto_id ).UploadVideoXml(member.weixin_id, chat, body);
+				var fn = this.wx.instance( member.auto_id, member.device_id ).UploadVideoXml(member.weixin_id, chat, body, msg.source);
 
 				fn.then(ret => {
 					log.info('视频成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
@@ -1106,7 +1111,7 @@ class GroupsSend {
 			//表情
 			if (msg.msgtype == 47) {
 
-				var fn = this.wx.instance( member.auto_id ).SendEmojiXml(member.weixin_id, chat, body);
+				var fn = this.wx.instance( member.auto_id, member.device_id ).SendEmojiXml(member.weixin_id, chat, body, msg.source);
 
 				fn.then(ret => {
 					log.info('表情成功', { 'member' : member.member_id, chat, 'msgid' : ret.emojiItem.map(emj => emj.msgId), 'instance' : self.insid });
@@ -1122,7 +1127,7 @@ class GroupsSend {
 				//发送小程序
 				if ((member.tag & 2) == 0) {
 
-					var fn = this.wx.instance( member.auto_id ).SendAppMsgXml(member.weixin_id, chat, body);
+					var fn = this.wx.instance( member.auto_id, member.device_id ).SendAppMsgXml(member.weixin_id, chat, body, msg.source);
 
 					fn.then(ret => {
 						log.info('小程序成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
@@ -1146,7 +1151,7 @@ class GroupsSend {
 
 				// 发送卡片信息 类似小程序
 				//var fn = this.wx.SendAppMsg(member.weixin_id, chat, '', 0, 5, '', '', body);
-				var fn = this.wx.instance( member.auto_id ).SendAppMsgXml(member.weixin_id, chat, body);
+				var fn = this.wx.instance( member.auto_id, member.device_id ).SendAppMsgXml(member.weixin_id, chat, body);
 
 				fn.then(ret => {
 

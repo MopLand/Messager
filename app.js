@@ -2,14 +2,6 @@
 const Common = require('./lib/common');
 const Loader = require('./lib/loader');
 const Logger = require('./lib/logger');
-const Groups = require('./src/groups');
-const Moment = require('./src/moment');
-const Account = require('./src/account');
-const Forward = require('./src/forward');
-const Heartbeat = require('./src/heartbeat');
-const MomentSend = require('./src/moment_send');
-const GroupsSend = require('./src/groups_send');
-const SocketSend = require('./src/socket_send');
 
 let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
@@ -41,6 +33,7 @@ if (func == 'loader') {
 
 //用户自主推送（作废）
 if (func == 'forward') {
+	const Forward = require('./src/forward');
 	let klas = new Forward(conf);
 		klas.init();
 }
@@ -61,36 +54,42 @@ if (func == 'materiel_groups') {
 
 //多群消息源（在用）
 if (func == 'groups_send') {
+	const GroupsSend = require('./src/groups_send');
 	let klas = new GroupsSend(conf);
 		klas.init();
 }
 
 //群消息SW（在用）
 if (func == 'socket_send') {
+	const SocketSend = require('./src/socket_send');
 	let klas = new SocketSend(conf);
 		klas.init();
 }
 
 //朋友圈发送（在用，先转链后发送）
 if (func == 'moment_send') {
+	const MomentSend = require('./src/moment_send');
 	let klas = new MomentSend(conf);
 		klas.init(func);
 }
 
 //营销素材发圈（在用）
 if (func == 'moment_mtl') {
+	const MomentSend = require('./src/moment_send');
 	let klas = new MomentSend(conf);
 		klas.init( func );
 }
 
 //营销商品发圈（作废）
 if (func == 'moment') {
+	const Moment = require('./src/moment');
 	let klas = new Moment(conf);
 		klas.init();
 }
 
 //微信群（作废）
 if (func == 'groups') {
+	const Groups = require('./src/groups');
 	let item = Common.getArgv('item', 'groups');
 	let klas = new Groups(conf);
 		klas.init( item );
@@ -98,6 +97,7 @@ if (func == 'groups') {
 
 //云课程
 if (func == 'course') {
+	const Groups = require('./src/course');
 	let item = Common.getArgv('item', 'course');
 	let klas = new Course(conf);
 		klas.init( item );
@@ -105,6 +105,7 @@ if (func == 'course') {
 
 //联系人
 if (func == 'contact') {
+	const Account = require('./src/account');
 
 	let room = Common.getArgv('room');
 	let weixin = Common.getArgv('weixin', conf.wechat);
@@ -116,6 +117,7 @@ if (func == 'contact') {
 
 //心跳
 if (func == 'heartbeat') {
+	const Heartbeat = require('./src/heartbeat');
 	let klas = new Heartbeat(conf);
 		klas.init();
 }
