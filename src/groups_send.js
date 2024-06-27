@@ -5,7 +5,6 @@
  */
 
 const fs = require('fs');
-const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const req = require('../lib/request');
 const act = require('../lib/activity');
@@ -17,6 +16,8 @@ var	  log = new Logger( tag, true, true );
 let conf = com.getConf('../');
 if( conf && conf.region ){
 	const wx = require('../lib/region');
+}else{
+	const wx = require('../lib/weixin');
 }
 
 /**

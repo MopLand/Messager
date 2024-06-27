@@ -5,7 +5,6 @@
  */
 
 const fs = require('fs');
-const wx = require('../lib/weixin');
 const com = require('../lib/common');
 const Logger = require('../lib/logger');
 const Account = require('./account');
@@ -15,6 +14,8 @@ const log = new Logger( tag );
 let conf = com.getConf('../');
 if( conf && conf.region ){
 	const wx = require('../lib/region');
+}else{
+	const wx = require('../lib/weixin');
 }
 
 class Heartbeat {
