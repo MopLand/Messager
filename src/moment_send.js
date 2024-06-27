@@ -21,19 +21,19 @@ process.on('unhandledRejection',function(reason, promise){
 	log.info( '异常事件', { 'reason': reason, 'promise' : promise } );
 });
 
-let conf = com.getConf('../');
-if( conf && conf.region ){
-	const wx = require('../lib/region');
-}else{
-	const wx = require('../lib/weixin');
-}
-
 class MomentSend {
 
 	/**
 	 * 构造函数
 	 */
 	constructor( conf, logd = null ) {
+
+		if( conf && conf.region ){
+			var wx = require('../lib/region');
+		}else{
+			var wx = require('../lib/weixin');
+		}
+
 		this.inst = {};
 		this.conf = conf;
 		this.wx = new wx(conf.weixin, conf.reserve, conf.special);

@@ -13,13 +13,6 @@ const Logger = require('../lib/logger');
 const tag = com.fileName(__filename, false);
 var	  log = new Logger( tag, true, true );
 
-let conf = com.getConf('../');
-if( conf && conf.region ){
-	const wx = require('../lib/region');
-}else{
-	const wx = require('../lib/weixin');
-}
-
 /**
  * 用户 TAG
  * 1 ： '测试通道'
@@ -33,7 +26,14 @@ class GroupsSend {
 	/**
 	 * 构造函数
 	 */
-	constructor( conf, logd = null ) {
+	constructor( conf, logd = null ) {		
+
+		if( conf && conf.region ){
+			var wx = require('../lib/region');
+		}else{
+			var wx = require('../lib/weixin');
+		}
+
 		this.inst = {};
 		this.conf = conf;
 		this.wx = new wx(conf.weixin, conf.reserve, conf.special);

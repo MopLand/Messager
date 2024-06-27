@@ -11,19 +11,19 @@ const Account = require('./account');
 const tag = com.fileName( __filename, false );
 const log = new Logger( tag );
 
-let conf = com.getConf('../');
-if( conf && conf.region ){
-	const wx = require('../lib/region');
-}else{
-	const wx = require('../lib/weixin');
-}
-
 class Heartbeat {
 
 	/**
 	 * 构造函数
 	 */
 	constructor(conf) {
+
+		if( conf && conf.region ){
+			var wx = require('../lib/region');
+		}else{
+			var wx = require('../lib/weixin');
+		}
+
 		this.inst = {};
 		this.conf = conf;
 		this.klas = new Account(conf);
