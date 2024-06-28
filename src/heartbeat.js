@@ -69,7 +69,7 @@ class Heartbeat {
 
 		var self = this;
 		var date = new Date( this.range * 1000 ).format("yyyy-M-d h:m:s");
-		var span = new Date().getTime() - 1000 * 60 * 15;
+		var span = (new Date().getTime() / 1000) - 60 * 15;
 
 		///////////////
 
