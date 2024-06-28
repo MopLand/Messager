@@ -17,7 +17,7 @@ class AutoLogin {
 	 */
 	constructor(conf) {
 
-		if( conf && conf.region ){
+		if( conf && conf.region == 'aliyun' ){
 			var wx = require('../lib/region');
 		}else{
 			var wx = require('../lib/weixin');

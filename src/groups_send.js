@@ -28,7 +28,7 @@ class GroupsSend {
 	 */
 	constructor( conf, logd = null ) {		
 
-		if( conf && conf.region ){
+		if( conf && conf.region == 'aliyun' ){
 			var wx = require('../lib/region');
 		}else{
 			var wx = require('../lib/weixin');
