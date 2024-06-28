@@ -69,13 +69,15 @@ class Heartbeat {
 
 		var self = this;
 		var date = new Date( this.range * 1000 ).format("yyyy-M-d h:m:s");
+		var span = new Date().getTime() - 1000 * 60 * 15;
 
 		///////////////
 
 		log.info( '心跳范围', this.range + ' / ' + date + ' / INST ' + this.insid );
 
-		var sql = 'SELECT auto_id, member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 1 AND auto_id % ? = ?';
-		var req = [this.nodes, this.insid];
+		//限制心跳时间为 15 分钟前
+		var sql = 'SELECT auto_id, member_id, weixin_id, device_id, heartbeat_time FROM `pre_weixin_list` WHERE online = 1 AND heartbeat_time < ? AND auto_id % ? = ?';
+		var req = [ span, this.nodes, this.insid];
 
 		if( self.conf.region ){
 			sql += ' AND region = ? ';
@@ -91,7 +93,7 @@ class Heartbeat {
 				log.error( err );
 				return;
 			}else{
-				log.info( '本次心跳', res.length + ' 人，间隔 ' + self.space + ' 毫秒' );
+				log.info( '本次心跳', res.length + ' 人，间隔 ' + self.space + ' 毫秒，上次心跳 < ' + span );
 			}
 
 			if( res.length == 0 ){
