@@ -293,7 +293,7 @@ class GroupsSend {
 		//二十分钟
 		// var time = com.getTime() - self.conf.active;
 
-		var sql = 'SELECT auto_id, member_id, weixin_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1';
+		var sql = 'SELECT auto_id, member_id, weixin_id, device_id, groups_list, tag FROM `pre_weixin_list` WHERE groups_num > 0 AND created_date <= ? AND online = 1';
 		var req = [ Number( date ) ];
 
 		if ( self.nodes > 1 ) {
