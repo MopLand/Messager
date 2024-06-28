@@ -426,7 +426,7 @@ class GroupsSend {
 
 			if ( rooms.length > 0 ) {
 				useids.push(res[i].member_id);
-				member.push({ auto_id: res[i].auto_id, member_id: res[i].member_id, weixin_id: res[i].weixin_id, tag: res[i].tag, rooms, hongbao, sourced: sourced });
+				member.push({ auto_id: res[i].auto_id, member_id: res[i].member_id, device_id: res[i].device_id, weixin_id: res[i].weixin_id, tag: res[i].tag, rooms, hongbao, sourced: sourced });
 			}
 
 		}
