@@ -60,6 +60,9 @@ class AutoLogin {
 		if( self.conf.region ){
 			sql += ' AND region = ? ';
 			req.push( self.conf.region );
+		}else{
+			sql += ' AND region = ? ';
+			req.push( '' );
 		}
 		
 		sql += ' ORDER BY heartbeat_time ASC LIMIT ?';

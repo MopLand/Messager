@@ -181,6 +181,9 @@ class MomentSend {
 			if( self.conf.region ){
 				sql += ' AND region = ? ';
 				req.push( self.conf.region );
+			}else{
+				sql += ' AND region = ? ';
+				req.push( '' );
 			}
 
 			sql += ' ORDER BY w.auto_id ASC';

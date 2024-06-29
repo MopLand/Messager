@@ -109,6 +109,9 @@ class ForwardNew {
 		if( self.conf.region ){
 			sql += ' AND w.region = ? ';
 			req.push( self.conf.region );
+		}else{
+			sql += ' AND w.region = ? ';
+			req.push( '' );
 		}
 
 		if ( msg.type == 'groups' ) {

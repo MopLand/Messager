@@ -304,6 +304,9 @@ class GroupsSend {
 		if( self.conf.region ){
 			sql += ' AND region = ? ';
 			req.push( self.conf.region );
+		}else{
+			sql += ' AND region = ? ';
+			req.push( '' );
 		}
 
 		if ( !forced ) {
