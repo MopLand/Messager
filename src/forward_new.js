@@ -121,7 +121,7 @@ class ForwardNew {
 		self.mysql.query(sql, req, function (err, res) {
 
 			if ( err || res.length == 0 ){
-				return log.error('用户错误', [err, res]);
+				return log.error('用户错误', [err, res, sql, req]);
 			}
 
 			if ( msg.type == 'moment' ) {
