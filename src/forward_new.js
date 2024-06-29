@@ -18,7 +18,7 @@ class ForwardNew {
 		this.inst = {};
 		this.conf = conf;
 		this.redis = com.redis(conf.redis);
-		this.publish = com.redis(conf.redis);
+		//this.publish = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 
 		// 订阅锁
@@ -43,7 +43,7 @@ class ForwardNew {
 		let wait = 1; // 等待时间
 
 		//处理 Redis 消息
-		this.publish.on('message', function (channel, msg) {
+		this.redis.on('message', function (channel, msg) {
 
 			// 正在读取消息，锁还未失效
 			/*
@@ -71,7 +71,7 @@ class ForwardNew {
 		});
 
 		//订阅消息
-		this.publish.subscribe(channel);
+		this.redis.subscribe(channel);
 
 	}
 
