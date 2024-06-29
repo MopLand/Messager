@@ -28,7 +28,7 @@ class MomentSend {
 	 */
 	constructor( conf, logd = null ) {
 
-		if( conf && conf.region == 'aliyun' ){
+		if( conf && conf.region ){
 			var wx = require('../lib/region');
 		}else{
 			var wx = require('../lib/weixin');
