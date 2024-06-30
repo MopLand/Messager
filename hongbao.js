@@ -50,8 +50,15 @@ var bags = [
 				<action>view</action>
 				<url>http://xyz.f1url.com/share/channel/meituan?member_id={UID}</url>
 				<appattach>
-					<cdnthumbaeskey />
-					<aeskey />
+					<cdnthumburl>3057020100044b30490201000204777d344602032f5081020413eff98c020466814993042465383832393337382d353831362d343235632d383139342d3164373532323639336566660204051830010201000405004c51e500</cdnthumburl>
+					<cdnthumbmd5>4397c6d1707e3e5fcc14225027b24961</cdnthumbmd5>
+					<cdnthumblength>9357</cdnthumblength>
+					<cdnthumbwidth>150</cdnthumbwidth>
+					<cdnthumbheight>150</cdnthumbheight>
+					<cdnthumbaeskey>c4e6826836d811efbb0100163e33f4ce</cdnthumbaeskey>
+					<aeskey>c4e6826836d811efbb0100163e33f4ce</aeskey>
+					<encryver>0</encryver>
+					<filekey>e8829378-5816-425c-8194-1d7522693eff</filekey>
 				</appattach>
 				<thumburl>http://xyz.f1url.com/static/sprite/mt.jpg</thumburl>
 				<webviewshared>
@@ -80,8 +87,15 @@ var bags = [
 				<action>view</action>
 				<url>http://act.f2url.com/share/channel/ele?member_id={UID}</url>
 				<appattach>
-					<cdnthumbaeskey />
-					<aeskey />
+					<cdnthumburl>3057020100044b30490201000204777d344602032f50810204d8eff98c020466814a88042462333334363633352d393233342d343264332d386362662d3363663038613338326536370204051830010201000405004c4d3500</cdnthumburl>
+					<cdnthumbmd5>581a72c7b6a77a56f28b3ff702d75d0a</cdnthumbmd5>
+					<cdnthumblength>20177</cdnthumblength>
+					<cdnthumbwidth>150</cdnthumbwidth>
+					<cdnthumbheight>150</cdnthumbheight>
+					<cdnthumbaeskey>56be2cc236d911efbb0100163e33f4ce</cdnthumbaeskey>
+					<aeskey>56be2cc236d911efbb0100163e33f4ce</aeskey>
+					<encryver>0</encryver>
+					<filekey>b3346635-9234-42d3-8cbf-3cf08a382e67</filekey>
 				</appattach>
 				<thumburl>http://act.f2url.com/static/sprite/ele.jpg</thumburl>
 				<webviewshared>
