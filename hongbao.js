@@ -48,13 +48,12 @@ var bags = [
 				<des>今日可领红包9元/12元/18元，人人有份，速度领~</des>
 				<type>5</type>
 				<action>view</action>
-				<urlx>https://proxy.guodongbaohe.com/meituan/mdPromotion?act_id=7&amp;link_type=1&amp;link_jump=1&amp;member_id={UID}</urlx>
 				<url>http://xyz.f1url.com/share/channel/meituan?member_id={UID}</url>
 				<appattach>
 					<cdnthumbaeskey />
 					<aeskey />
 				</appattach>
-				<thumburl>https://static.baohe.rexcdn.com/sprite/mt.jpg</thumburl>
+				<thumburl>http://xyz.f1url.com/static/sprite/mt.jpg</thumburl>
 				<webviewshared>
 					<jsAppId><![CDATA[]]></jsAppId>
 					<publisherReqId><![CDATA[0]]></publisherReqId>
@@ -79,13 +78,12 @@ var bags = [
 				<des>饿了么外卖升级，18元红包限时限量抢，手慢无~</des>
 				<type>5</type>
 				<action>view</action>
-				<urlx>http://proxy.guodongbaohe.com/builder/elePromotion?activity_id=10883&amp;redirect=true&amp;member_id={UID}</urlx>
 				<url>http://act.f2url.com/share/channel/ele?member_id={UID}</url>
 				<appattach>
 					<cdnthumbaeskey />
 					<aeskey />
 				</appattach>
-				<thumburl>https://static.baohe.rexcdn.com/sprite/ele.jpg</thumburl>
+				<thumburl>http://act.f2url.com/static/sprite/ele.jpg</thumburl>
 				<webviewshared>
 					<jsAppId><![CDATA[]]></jsAppId>
 					<publisherReqId><![CDATA[0]]></publisherReqId>
