@@ -132,6 +132,8 @@ class AutoLogin {
 					//服务报错
 					if ( typeof err == 'string' && /二维码登陆|已经失效|微信账号|重新登录|账号安全|退出微信|退出登录|稍后再试/.test( err ) ) {
 						self.update( row.auto_id, -1, err );
+					}else{
+						self.update( row.auto_id, 0, err );
 					}
 
 					//微信报错
@@ -142,9 +144,9 @@ class AutoLogin {
 					*/
 
 					//超过两个小时未心跳
-					if ( row.heartbeat_time && (date.getTime() - row.heartbeat_time) > 60 * 60 * 1000 * 2 ) {
-						self.update( row.auto_id, -1, err );
-					}
+					//if ( row.heartbeat_time && (date.getTime() - row.heartbeat_time) > 60 * 60 * 1000 * 2 ) {
+					//	self.update( row.auto_id, -1, err );
+					//}
 
 					// self.klas.init(row.weixin_id, row.device_id);
 				}).finally(() => {
