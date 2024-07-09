@@ -161,8 +161,9 @@ class AutoLogin {
 			if( res.length ){
 				setTimeout(() => { self.handle(res); }, self.space);
 			}else{
-				log.info('登陆完成', row.weixin_id);
-			}			
+				//log.info('登陆完成', row.weixin_id);
+				setTimeout( () => { self.autoLogin(); }, self.space );
+			}
 
 		//}
 

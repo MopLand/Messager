@@ -174,7 +174,8 @@ class Heartbeat {
 			if( res.length ){
 				setTimeout( () => { self.handle( res ); }, self.space );
 			}else{
-				log.info('心跳完成', row.weixin_id);
+				//log.info('心跳完成', row.weixin_id);
+				setTimeout( () => { self.heartBeat(); }, self.space );
 			}
 
 		//}
