@@ -116,21 +116,21 @@ class Heartbeat {
 
 		var self = this;
 
-		if( res.length == 0 ){
+		//if( res.length == 0 ){
 
-			log.info( '心跳完成' );
+		//	log.info( '心跳完成' );
 
-			self.heartBeat();
+		//	self.heartBeat();
 
-		}else{
+		//}else{
 
 			//当前时间
-			var date = new Date();
+			//var date = new Date();
 
 			//重启时段
-			var stop = date.format('hh:mm') == self.pause && date.format('ss') <= 20;
+			//var stop = date.format('hh:mm') == self.pause && date.format('ss') <= 20;
 
-			if( stop == false ){
+			//if( stop == false ){
 				
 				//弹出一个人
 				let row = res.shift();
@@ -163,18 +163,21 @@ class Heartbeat {
 					self.update( row.auto_id, 0, err );
 
 				} ).finally( () =>{
-
 				} );
 
-			}else{
-				log.info( '暂停心跳' );
-			}
+			//}else{
+			//	log.info( '暂停心跳' );
+			//}
 
 			///////////////
 
-			setTimeout( () => { self.handle( res ); }, self.space );
+			if( res.length ){
+				setTimeout( () => { self.handle( res ); }, self.space );
+			}else{
+				log.info('心跳完成', row.weixin_id);
+			}
 
-		}
+		//}
 
 	}
 
