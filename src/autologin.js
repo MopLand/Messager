@@ -103,7 +103,7 @@ class AutoLogin {
 		//} else {
 
 			//当前时间
-			//var date = new Date();
+			var date = new Date();
 
 			//重启时段
 			//var stop = date.format('hh:mm') == self.pause && date.format('ss') <= 20;
