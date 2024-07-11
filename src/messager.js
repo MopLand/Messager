@@ -137,8 +137,8 @@ class Messager {
 		.setPlatform( JPush.ALL )
 		.setAudience( JPush.alias( msg.alias + '' ) )
 		.setNotification(
-			JPush.ios( {'title' : msg.ticker, 'body' : msg.text}, null, null, null, {'msgid' : msg.msgid, 'target' : msg.after_open, 'content' : msg.content}), 
-			JPush.android( msg.ticker, msg.text, null, {'msgid' : msg.msgid, 'target' : msg.after_open, 'content' : msg.content} )
+			JPush.ios( {'title' : msg.ticker, 'body' : msg.text}, null, null, null, {'msgid' : msg.msgid, 'target' : msg.target, 'content' : msg.content}), 
+			JPush.android( msg.ticker, msg.text, null, {'msgid' : msg.msgid, 'target' : msg.target, 'content' : msg.content} )
 		)
 		.send()
 		.then(function(ret) {
@@ -161,7 +161,7 @@ class Messager {
 		this.and.setText(msg.text);
 
 		this.and.setExtraField('msgid', msg.msgid);
-		this.and.setExtraField('target', msg.after_open);
+		this.and.setExtraField('target', msg.target);
 		this.and.setExtraField('content', msg.content);
 		//this.and.setExtraField('category', msg.category);
 
@@ -193,11 +193,11 @@ class Messager {
 			'title': msg.ticker,
 			//'subtitle': msg.title,
 			'body': msg.text,
-			'after_open': msg.after_open,
+			'after_open': msg.target,
 		});
 
 		this.ios.setCustomizedField('msgid', msg.msgid);
-		this.ios.setCustomizedField('target', msg.after_open);
+		this.ios.setCustomizedField('target', msg.target);
 		this.ios.setCustomizedField('content', msg.content);
 		//this.ios.setCustomizedField('category', msg.category);
 
