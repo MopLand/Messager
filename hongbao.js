@@ -25,6 +25,7 @@ var bags = [
 			"thumburl": "https://static.baohe.rexcdn.com/sprite/mt.jpg"
 		}
 	},
+	
 	{
 		'msgtype': 90,
 		'subtype': 'elment',
@@ -41,7 +42,7 @@ var bags = [
 	{
 		'msgtype': 90,
 		'subtype': 'meituan',
-		'quantum': [11,17],
+		'quantum': [23],
 		'content': `<?xml version="1.0"?><msg>
 			<appmsg appid="" sdkver="0">
 				<title>【美团红包】免费领</title>
@@ -75,10 +76,11 @@ var bags = [
 			<commenturl></commenturl>
 		</msg>`
 	},
+	
 	{
 		'msgtype': 90,
 		'subtype': 'elment',
-		'quantum': [11,17],
+		'quantum': [23],
 		'content': `<?xml version="1.0"?><msg>
 			<appmsg appid="" sdkver="0">
 				<title>【饿了么外卖】第5个人领最大红包！</title>
@@ -111,6 +113,39 @@ var bags = [
 			</appinfo>
 			<commenturl></commenturl>
 		</msg>`
+	},
+	
+	{
+		'msgtype': 3,
+		'quantum': [11,17],
+		'content': `<?xml version="1.0"?><msg><img aeskey="09a9775b5a2e13333ae555c15d0feaf5" encryver="1" cdnthumbaeskey="09a9775b5a2e13333ae555c15d0feaf5" cdnthumburl="3057020100044b304902010002047269e0ca02032f7f6102041de6a03d02046699e3b8042433636266373861612d666565342d346361662d393537652d6338343466666431633531620204051818020201000405004c550500" cdnthumblength="15565" cdnthumbheight="150" cdnthumbwidth="150" cdnmidheight="0" cdnmidwidth="0" cdnhdheight="0" cdnhdwidth="0" cdnmidimgurl="3057020100044b304902010002047269e0ca02032f7f6102041de6a03d02046699e3b8042433636266373861612d666565342d346361662d393537652d6338343466666431633531620204051818020201000405004c550500" length="28530" md5="1d0078f1a0ba148be16c98fbd0959fc3" originsourcemd5="1d0078f1a0ba148be16c98fbd0959fc3" /><platform_signature /><imgdatahash /><ImgSourceInfo><ImgSourceUrl /><BizType>0</BizType></ImgSourceInfo></msg>`
+	},
+	
+	{
+		'msgtype': 1,
+		'subtype': 'meituan',
+		'quantum': [11,17],
+		'content': `美团外卖，领外卖券📢
+
+可领【15元】🧧，还有【9/8/3元券】
+
+吃饱吃好，工作有劲儿！！
+领取：https://el-sharep.kuaizhan.com/?uid={UID}&mt_actId=7`
+	},
+	{
+		'msgtype': 1,
+		'subtype': 'elment',
+		'quantum': [11,17],
+		'content': `饿了么&外卖券📢
+
+可领【6元/13元券】🧧
+
+❶先领 城市消费券：https://el-sharep.kuaizhan.com/?uid={UID}&actid=10607
+
+❷再点这里领：https://el-sharep.kuaizhan.com/?uid={UID}&actid=10144
+
+
+省省省省钱！！！！！`
 	},
 
 	{
