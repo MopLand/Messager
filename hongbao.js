@@ -10,7 +10,7 @@ var bags = [
 
 	{
 		'msgtype': 1,
-		'quantum': [11,17],
+		'quantum': [23],
 		'content': '叮！吃饭时间到了，给你们准备好了紅包，快来领吧'
 	},
 
