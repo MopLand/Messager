@@ -68,8 +68,8 @@ class Messager {
 
 			var msgs = JSON.parse(message);
 
-			if (test || !msgs) {
-				console.log(msgs);
+			if ( test || !Array.isArray(msgs) ) {
+				console.log( msgs );
 			}
 
 			!test && msgs.forEach( msg => {
