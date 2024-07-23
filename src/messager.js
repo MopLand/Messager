@@ -107,7 +107,11 @@ class Messager {
 				//消息数自减，同时更新消息状态
 				var ret = copyed.decrby(msg.tag, 1, function (err, len) {
 
-					if (!err) {
+					if( err ){
+						
+						console.log( err );
+
+					}else{
 
 						var status = { 'popid': msg.msgid, 'length': len, 'pushing_time': common.getTime() };
 
@@ -115,6 +119,7 @@ class Messager {
 
 						//一定机率上报日志
 						request.status(conf.report, 'Messager', msg.msgid, status, null, 0.01 );
+
 					}
 
 				});
