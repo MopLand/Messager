@@ -68,7 +68,7 @@ class Messager {
 
 			var msgs = JSON.parse(message);
 
-			if (test) {
+			if (test || !msgs) {
 				console.log(msgs);
 			}
 
