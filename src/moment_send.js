@@ -355,7 +355,7 @@ class MomentSend {
 
 			//req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc }, (code, body) => {
 
-			//let pipe = self.conf.convert + '?' + qs.stringify( { 'member_id': member.member_id, 'keyword': comm.exch, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc } );
+			let pipe = self.conf.convert + '?' + qs.stringify( { 'member_id': member.member_id, 'keyword': comm.exch, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc } );
 
 			req.form( pipe, { 'content': comm.text }, (code, body) => {
 
