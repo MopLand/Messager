@@ -681,11 +681,11 @@ class GroupsSend {
 
 			///////////////
 
-			//req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
+			req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
 
-			let pipe = self.conf.convert + '?' + qs.stringify( { 'member_id': user.member_id, 'keyword': comm.keyword, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc } );
+			//let pipe = self.conf.convert + '?' + qs.stringify( { 'member_id': user.member_id, 'keyword': comm.keyword, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc } );
 
-			req.form( pipe, { 'content': comm.content }, (code, body) => {
+			//req.form( pipe, { 'content': comm.content }, (code, body) => {
 
 				try {
 					if (typeof body == 'string') {
