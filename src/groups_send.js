@@ -5,6 +5,7 @@
  */
 
 const fs = require('fs');
+const qs = require('querystring');
 const com = require('../lib/common');
 const req = require('../lib/request');
 const act = require('../lib/activity');
@@ -678,7 +679,11 @@ class GroupsSend {
 			let exch = comm.msgtype == 1 && comm.keyword;
 			let misc = exch ? act.getExternal( comm.content ) : '';
 
-			req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
+			///////////////
+
+			let pipe = self.conf.convert + '?' + qs.stringify( { 'member_id': user.member_id, 'keyword': comm.keyword, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc } );
+
+			req.post( pipe, { 'content': comm.content }, (code, body) => {
 
 				try {
 					if (typeof body == 'string') {

@@ -18,7 +18,6 @@ class ForwardNew {
 		this.inst = {};
 		this.conf = conf;
 		this.redis = com.redis(conf.redis);
-		//this.publish = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 
 		// 订阅锁
