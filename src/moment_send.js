@@ -353,11 +353,11 @@ class MomentSend {
 
 			///////////////
 
-			req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc }, (code, body) => {
+			//req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc }, (code, body) => {
 
 			//let pipe = self.conf.convert + '?' + qs.stringify( { 'member_id': member.member_id, 'keyword': comm.exch, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc } );
 
-			//req.form( pipe, { 'content': comm.text }, (code, body) => {
+			req.form( pipe, { 'content': comm.text }, (code, body) => {
 
 				try {
 					if (typeof body == 'string') {
@@ -402,7 +402,7 @@ class MomentSend {
 				if (comm.exch && (member.tag & 4) == 0) {
 					return { 'request': true };
 				} else {
-					return { 'request': false, 'respond': { 'status': 1, 'result': data.text } };
+					return { 'request': false, 'respond': { 'status': 1, 'result': data.content || data.text } };
 				}
 
 			}, self.conf.options);
