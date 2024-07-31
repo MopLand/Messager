@@ -72,12 +72,12 @@ class AutoLogin {
 
 			if (err) {
 				log.error(err);
-				return;
+				//return;
 			} else {
 				log.info('自动登陆', res.length + ' 人，间隔 ' + self.space + ' 毫秒');
 			}
 
-			if (res.length == 0) {
+			if ( err || res.length == 0 ) {
 				return setTimeout(self.autoLogin.bind(self), 60 * 1000);
 			} else {
 				self.handle(res);

@@ -94,12 +94,12 @@ class Heartbeat {
 
 			if( err ){
 				log.error( err );
-				return;
+				//return;
 			}else{
 				log.info( '本次心跳', res.length + ' 人，间隔 ' + self.space + ' 毫秒，上次心跳 < ' + span );
 			}
 
-			if( res.length == 0 ){
+			if( err || res.length == 0 ){
 				return setTimeout( self.heartBeat.bind(self), 1000 * 60 );
 			}else{
 				self.handle( res );
