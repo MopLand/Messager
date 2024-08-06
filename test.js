@@ -3,10 +3,7 @@ const Common = require('./lib/common');
 const Loader = require('./lib/loader');
 const Weixin = require('./lib/weixin');
 const Activity = require('./lib/activity');
-const Groups = require('./src/groups');
-const Moment = require('./src/moment');
 const Account = require('./src/account');
-const Messager = require('./src/messager');
 
 let conf = Common.getConf( __dirname );
 let func = Common.getFunc();
@@ -396,7 +393,7 @@ if (func == 'collect') {
 	this.mysql = Common.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 
 	let test1 = Activity.collect( this, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : Common.getTime(), 'package' : '123123' }, { 'moment_chatroom' : Common.getTime() }, false );
-	let test2 = Activity.collect( this, 'moment', { 'item_id' : '123456', 'platform' : 'taobao' }, { 'created' : Common.getTime(), 'package' : '123123' }, { '24413713211@chatroom' : Common.getTime() }, false );
+	let test2 = Activity.collect( this, 'moment', { 'item_id' : 'E9P2xm-oFXdARqExweHdrpuRhk8R9UFN_JUJe6wFv5', 'platform' : 'taobao' }, { 'created' : Common.getTime(), 'package' : '123123' }, { '24413713211@chatroom' : Common.getTime() }, false );
 
 	console.log( test1 );
 	console.log( test2 );

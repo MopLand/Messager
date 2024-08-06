@@ -117,7 +117,7 @@ class AutoLogin {
 
 				pa.then(ret => {
 
-					self.update( row.auto_id, 1 );
+					self.update( row.auto_id, 1, '', ret.userInfo );
 					
 					log.info('登录成功', [row.weixin_id, ret]);
 
@@ -172,10 +172,18 @@ class AutoLogin {
 	/**
 	 * 心跳更新
 	 */
-	update( auto_id, online, err = '' ) {
+	update( auto_id, online, err = '', userInfo ) {
 
-		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ?, status = ? WHERE auto_id = ?';
-		let req = [ online, err, auto_id ];
+		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ?, status = ?';
+		let req = [ online, err ];
+
+		if( online == 1 && userInfo ){
+			sql += ', weixin_name = ?, weixin_avatar = ?';
+			req.push( userInfo.nickName, userInfo.headImgUrl );
+		}
+
+		sql += ' WHERE auto_id = ?';
+		req.push( auto_id );
 
 		this.mysql.query(sql, req, function( err, ret ){
 			if( err ){
