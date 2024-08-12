@@ -38,6 +38,33 @@
 	pm2 start run/groups_send.json
 	pm2 start run/messager.json
 	
+# Example
+	cd /disk/www/Messager/
+	git pull
+
+	pm2 delete Messager
+	pm2 start run/messager.json
+
+	pm2 delete MM_AutoLogin
+	pm2 start run/autologin.json
+
+	pm2 delete MM_Groups_Send
+	pm2 start run/groups_send.json
+
+	pm2 delete MM_Heartbeat
+	pm2 start run/heartbeat.json
+
+	pm2 delete MM_Moment_Send
+	pm2 start run/moment_send.json
+
+	pm2 delete MM_Socket_Send
+	pm2 start run/socket_send.json
+
+	pm2 delete MM_Forward_New
+	pm2 start run/forward_new.json
+
+	pm2 save
+	
 # Logs
 	tail -f /disk/www/Messager/logs/wx_groups_out.log
 	
