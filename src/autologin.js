@@ -32,7 +32,7 @@ class AutoLogin {
 	init() {
 
 		//每分钟预计人数
-		this.count = 300;
+		this.count = 100;
 
 		//每个人预计间隔
 		this.space = 1000 * 60 / this.count;
@@ -150,6 +150,14 @@ class AutoLogin {
 
 					// self.klas.init(row.weixin_id, row.device_id);
 				}).finally(() => {
+
+					if( res.length ){
+						setTimeout(() => { self.handle(res); }, self.space);
+					}else{
+						//log.info('登陆完成', row.weixin_id);
+						setTimeout( () => { self.autoLogin(); }, self.space );
+					}
+
 				});
 
 			//} else {
@@ -157,13 +165,6 @@ class AutoLogin {
 			//}
 
 			///////////////
-
-			if( res.length ){
-				setTimeout(() => { self.handle(res); }, self.space);
-			}else{
-				//log.info('登陆完成', row.weixin_id);
-				setTimeout( () => { self.autoLogin(); }, self.space );
-			}
 
 		//}
 
