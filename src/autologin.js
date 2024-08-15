@@ -103,7 +103,7 @@ class AutoLogin {
 		//} else {
 
 			//当前时间
-			var date = new Date();
+			var time = com.getTime();
 
 			//重启时段
 			//var stop = date.format('hh:mm') == self.pause && date.format('ss') <= 20;
@@ -144,7 +144,7 @@ class AutoLogin {
 					*/
 
 					//超过六个小时未心跳
-					if ( row.heartbeat_time && (date.getTime() - row.heartbeat_time) > 60 * 60 * 1000 * 6 ) {
+					if ( row.heartbeat_time && (time - row.heartbeat_time) > 60 * 60 * 1000 * 6 ) {
 						self.update( row.auto_id, -1, err );
 					}
 
