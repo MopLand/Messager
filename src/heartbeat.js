@@ -149,7 +149,7 @@ class Heartbeat {
 
 				}).catch( err => {
 
-					log.debug( '心跳失败', [row.weixin_id, err] );
+					log.debug( '心跳失败', [row.weixin_id, self.wx.code, err] );
 
 					/*
 					if ( typeof err == 'string' && /退出微信|已经失效|没有登陆/.test( err ) ) {
