@@ -159,8 +159,10 @@ class Heartbeat {
 					}
 					*/
 
-					//心跳全部为假离线 online = 0
-					self.update( row.auto_id, 0, err );
+					//心跳失败，更新为假离线 online = 0
+					if( self.wx.code < 500 ){
+						self.update( row.auto_id, 0, err );
+					}
 
 				} ).finally( () =>{
 				} );
