@@ -423,11 +423,13 @@ class MomentSend {
 		let post = com.clone(data);
 
 		//插入随机表情
+		/*
 		let desc = /<contentDesc>(.+?)<\/contentDesc>/s.exec( post.subject );
 		if( desc && desc[1] ){
 			//post.subject = post.subject.replace( desc[0], '<contentDesc>'+ com.insertEmoji( desc[1], 3 ) +'</contentDesc>' );
 			post.subject = post.subject.replace( desc[1], com.insertEmoji( desc[1], 1 ) );
 		}
+		*/
 
 		//插入随机图片
 		if( /<contentStyle>1<\/contentStyle>/.test( post.subject ) && (post.subject.match( /<media>/ ) || []).length > 9 ){
