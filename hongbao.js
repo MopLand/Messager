@@ -138,7 +138,7 @@ var bags = [
 ❷再点这里领：https://mt-ele1.kuaizhan.com/?uid=0&actid=10144
 
 
-省省省省钱！！！！！`
+省省省省钱！！！！`
 	},
 
 	{
