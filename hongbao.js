@@ -123,7 +123,7 @@ var bags = [
 可领【15元】🧧，还有【9/8/3元券】
 
 吃饱吃好，工作有劲儿！！
-领取：https://mt-ele1.kuaizhan.com/?uid=0&mt_actId=7`
+领取：https://mt-ele2.kuaizhan.com/?uid=0&mt_actId=7`
 	},
 	{
 		'msgtype': 1,
@@ -133,9 +133,9 @@ var bags = [
 
 可领【6元/13元券】🧧
 
-❶先领 城市消费券：https://mt-ele1.kuaizhan.com/?uid=0&actid=10607
+❶先领 城市消费券：https://mt-ele2.kuaizhan.com/?uid=0&actid=10607
 
-❷再点这里领：https://mt-ele1.kuaizhan.com/?uid=0&actid=10144
+❷再点这里领：https://mt-ele2.kuaizhan.com/?uid=0&actid=10144
 
 
 省省省省钱！！！！`
