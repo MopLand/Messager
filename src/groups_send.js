@@ -312,7 +312,7 @@ class GroupsSend {
 
 		if ( !forced ) {
 			sql += ' AND FIND_IN_SET( ?, roomids )';
-			req.push(sourced);
+			req.push( sourced.replace('@chatroom','') );
 		}
 
 		sql += ' ORDER BY auto_id ASC';
@@ -469,7 +469,7 @@ class GroupsSend {
 			});
 
 			var roomids = newgrp.map( ele => {
-				return ele.roomid;
+				return ele.roomid.replace('@chatroom','');
 			}).filter( function( ele, pos, arr) {
 				return arr.indexOf( ele, 0) === pos;
 			});
@@ -827,7 +827,12 @@ class GroupsSend {
 
 			}).catch(err => {
 
-				log.error('发群失败', [user.member_id, data.package, err]);
+				log.error('发群失败', { 'member' : user.member_id, 'package' : data.package, 'msgtype' : msg.msgtype, 'error' : err } );
+
+				//用户已退出，中断发送
+				if( err && err.indexOf('退出微信') >= 0 ){
+					data.message = [];
+				}
 
 			}).finally(() => {
 
