@@ -84,7 +84,7 @@ class GroupsSend {
 		this.insid = process.env.NODE_APP_INSTANCE || 0;
 
 		//log.info( 'Process', process.env );
-		log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid );		
+		log.info( '应用实例', '实例数量 ' + this.nodes + '，当前实例 ' + this.insid );
 
 		if ( this.nodes == 1 && this.insid > 0 ) {
 			log.info('实例错误', '实例数量与实例不匹配');
@@ -589,6 +589,11 @@ class GroupsSend {
 			//		 continue;
 			//	 }
 			// }
+
+			//文本消息，检查是否有 @所有人
+			if( item.msgType == 1 && text.indexOf( '@所有人 ' ) == 0 ){
+				item.msgSource = '<msgsource><atuserlist>notify@all</atuserlist></msgsource>';
+			}
 
 			//文本消息，检查是否有非白名单链接
 			if( item.msgType == 1 && this.inst.whited ){
