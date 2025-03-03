@@ -591,7 +591,7 @@ class GroupsSend {
 			// }
 
 			//文本消息，检查是否有 @所有人
-			if( item.msgType == 1 && text.indexOf( '@所有人 ' ) == 0 ){
+			if( item.msgType == 1 && /^@所有人( | )/.test( text ) ){
 				item.msgSource = '<msgsource><atuserlist>notify@all</atuserlist></msgsource>';
 			}
 
