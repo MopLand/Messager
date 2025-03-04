@@ -1066,9 +1066,17 @@ class GroupsSend {
 			let chats = [];
 
 			for (var i = 0; i < rooms.length; i++) {
-				if ( msg.keyword && !rooms[i].anchor && act.detectUrl(body) ) {
+
+				//群设置关闭链接时，跳过本消息
+				if ( msg.keyword && !rooms[i].anchor && act.detectUrl( body ) ) {
 					continue;
 				}
+
+				//非群主时，移除 @all 标记
+				if( msg.source && msg.source.indexOf('notify@all') > -1 && rooms[i].master != member.weixin_id ){
+					msg.source = '';
+				}
+
 				chats.push(rooms[i].roomid);
 			}
 
