@@ -1088,9 +1088,9 @@ class GroupsSend {
 			let fn = this.wx.instance( member.auto_id, member.device_id ).NewSendMsg(member.weixin_id, chats, body, msg.source, 1);
 
 			fn.then(ret => {
-				log.info('文本成功', { 'member' : member.member_id, 'count' : ret.count, 'instance' : self.insid });
+				log.info('文本成功', { 'member' : member.member_id, 'chat' : chats.join(','), 'msgid' : msg.msgid, 'newid' : ret.msgId, 'count' : ret.count, 'instance' : self.insid });
 			}).catch(err => {
-				self.sendErr(member, 'NewSendMsg', err);
+				self.sendErr(member, 'NewSendMsg', err, chats, body);
 			});
 
 			return fn;
@@ -1119,7 +1119,7 @@ class GroupsSend {
 				var fn = this.wx.instance( member.auto_id, member.device_id ).UploadMsgImgXml(member.weixin_id, chat, body, msg.source);
 
 				fn.then(ret => {
-					log.info('发图成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
+					log.info('发图成功', { 'member' : member.member_id, chat, 'msgid' : msg.msgid, 'newid' : ret.msgId, 'instance' : self.insid });
 				}).catch(err => {
 					self.sendErr(member, 'UploadMsgImgXml', err, chat, body);
 				});
@@ -1131,7 +1131,7 @@ class GroupsSend {
 				var fn = this.wx.instance( member.auto_id, member.device_id ).UploadVideoXml(member.weixin_id, chat, body, msg.source);
 
 				fn.then(ret => {
-					log.info('视频成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
+					log.info('视频成功', { 'member' : member.member_id, chat, 'msgid' : msg.msgid, 'newid' : ret.msgId, 'instance' : self.insid });
 				}).catch(err => {
 					self.sendErr(member, 'UploadVideoXml', err, chat, body);
 				});
@@ -1143,7 +1143,7 @@ class GroupsSend {
 				var fn = this.wx.instance( member.auto_id, member.device_id ).SendEmojiXml(member.weixin_id, chat, body, msg.source);
 
 				fn.then(ret => {
-					log.info('表情成功', { 'member' : member.member_id, chat, 'msgid' : ret.emojiItem.map(emj => emj.msgId), 'instance' : self.insid });
+					log.info('表情成功', { 'member' : member.member_id, chat, 'msgid' : msg.msgid, 'newid' : ret.emojiItem.map(emj => emj.msgId), 'instance' : self.insid });
 				}).catch(err => {
 					self.sendErr(member, 'SendEmojiXml', err, chat, body);
 				});
@@ -1159,7 +1159,7 @@ class GroupsSend {
 					var fn = this.wx.instance( member.auto_id, member.device_id ).SendAppMsgXml(member.weixin_id, chat, body, msg.source);
 
 					fn.then(ret => {
-						log.info('小程序成功', { 'member' : member.member_id, chat, 'msgid' : ret.msgId, 'instance' : self.insid });
+						log.info('小程序成功', { 'member' : member.member_id, chat, 'msgid' : msg.msgid, 'newid' : ret.msgId, 'instance' : self.insid });
 					}).catch(err => {
 						self.sendErr(member, 'SendAppMsgXml', err, chat, body);
 					});
@@ -1184,7 +1184,7 @@ class GroupsSend {
 
 				fn.then(ret => {
 
-					log.info('卡片消息', { 'member' : member.member_id, 'msgid' : ret.msgId, 'instance' : self.insid });
+					log.info('卡片消息', { 'member' : member.member_id, chat, 'msgid' : msg.msgid, 'newid' : ret.msgId, 'instance' : self.insid });
 
 				}).catch(err => {
 
