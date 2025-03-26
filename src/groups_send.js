@@ -229,10 +229,11 @@ class GroupsSend {
 				return;
 			}
 
+			//计算每个用户间隔时间（基数 1000）
 			var size = user.length;
 			//var mins = size / 500;
 			//var span = (mins * 60 * 1000) / size;
-			var span = 200 - Math.round( size / 500 );
+			var span = 1000 - Math.round( size / 10 );
 
 			var func = (i) => {
 
