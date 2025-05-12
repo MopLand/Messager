@@ -133,7 +133,7 @@ var bags=[
 
 可领【6元/13元券】🧧
 
-❶先领 城市消费券：http://x.f2url.com/MOW6es?uid=0
+❶先领 城市消费券：http://x.f2url.com/xOW6es?uid=0
 
 ❷再点这里领：http://x.f3url.com/fqhPot?uid=0
 
