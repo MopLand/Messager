@@ -143,7 +143,7 @@ var bags=[
 	
 	{
 		'msgtype': 1,
-		'subtype': 'meituan',
+		'subtype': 'jingdong',
 		'quantum': [11,17],
 		'content': `京东外卖百亿补贴⚡
 				
