@@ -125,6 +125,7 @@ var bags=[
 吃饱吃好，工作有劲儿！！
 领取：http://x.f1url.com/oKVaP8?uid=0`
 	},
+	
 	{
 		'msgtype': 1,
 		'subtype': 'elment',
@@ -137,8 +138,19 @@ var bags=[
 
 ❷再点这里领：http://x.f3url.com/fqhPot?uid=0
 
-
 省省省省钱！！！！`
+	},
+	
+	{
+		'msgtype': 1,
+		'subtype': 'meituan',
+		'quantum': [11,17],
+		'content': `京东外卖百亿补贴⚡
+				
+超值爆品全天在线‼
+最高减23元🧧
+
+领取：http://x.f1url.com/4X7Tku?uid=0`
 	},
 
 	{
