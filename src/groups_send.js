@@ -424,6 +424,7 @@ class GroupsSend {
 					roomid: ele.userName,
 					minapp: ele.minapp,
 					anchor: ele.anchor,
+					master: ele.master,
 				};
 			});
 
@@ -1089,7 +1090,7 @@ class GroupsSend {
 			let fn = this.wx.instance( member.auto_id, member.device_id ).NewSendMsg(member.weixin_id, chats, body, msg.source, 1);
 
 			fn.then(ret => {
-				log.info('文本成功', { 'member' : member.member_id, 'chat' : chats.join(','), 'msgid' : msg.msgid, 'newid' : ret.msgId, 'count' : ret.count, 'instance' : self.insid });
+				log.info('文本成功', { 'member' : member.member_id, 'chat' : chats.join(','), 'source' : msg.source, 'msgid' : msg.msgid, 'newid' : ret.msgId, 'count' : ret.count, 'instance' : self.insid });
 			}).catch(err => {
 				self.sendErr(member, 'NewSendMsg', err, chats, body);
 			});
