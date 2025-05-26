@@ -39,7 +39,7 @@ class MomentSend {
 		this.conf = conf;
 		this.wx = new wx(conf.weixin, conf.reserve, conf.special);
 		this.redis = com.redis(conf.redis);
-		this.sider = com.redis(conf.redis);
+		//this.sider = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 		this.delay = [];
 		this.twice = {};

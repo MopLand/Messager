@@ -39,7 +39,7 @@ class GroupsSend {
 		this.conf = conf;
 		this.wx = new wx(conf.weixin, conf.reserve, conf.special);
 		this.redis = com.redis(conf.redis);
-		this.sider = com.redis(conf.redis);
+		//this.sider = com.redis(conf.redis);
 		this.mysql = com.mysql(conf.mysql, (db => { this.mysql = db; }).bind(this));
 
 		this.members = {};
@@ -1066,6 +1066,7 @@ class GroupsSend {
 
 			// 从 rooms 发群对象中获取 群数组同时发送文本
 			let chats = [];
+			let rawtg = msg.source;
 
 			for (var i = 0; i < rooms.length; i++) {
 
@@ -1077,9 +1078,16 @@ class GroupsSend {
 				//非群主时，移除 @all 标记
 				if( msg.source && msg.source.indexOf('notify@all') > -1 && ( rooms[i].master !== true && rooms[i].master != member.weixin_id ) ){
 					msg.source = '';
+					rawtg = rooms[i].roomid;
 				}
 
 				chats.push(rooms[i].roomid);
+			}
+
+			//标记需要检查的微信和群
+			if( rawtg != msg.source ){
+				self.mysql.query('UPDATE `pre_weixin_list` SET tag = ?, status = ?, updated_time = UNIX_TIMESTAMP() WHERE member_id = ? AND weixin_id = ?', [401, rawtg, member.member_id, member.weixin_id]);
+				log.info('群主验证', { 'member' : member.member_id, 'weixin' : member.weixin_id, 'chat' : chats.join(','), 'source' : rawtg });
 			}
 
 			if ( chats.length == 0 ) {
