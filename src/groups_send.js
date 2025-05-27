@@ -1076,7 +1076,7 @@ class GroupsSend {
 				}
 
 				//非群主时，移除 @all 标记
-				if( msg.source && msg.source.indexOf('notify@all') > -1 && ( rooms[i].master !== true && rooms[i].master != member.weixin_id ) ){
+				if( msg.source && msg.source.indexOf('notify@all') > -1 && ( rooms[i].master !== 1 && rooms[i].master != member.weixin_id ) ){
 					msg.source = '';
 					rawtg = rooms[i].roomid;
 				}
