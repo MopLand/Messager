@@ -109,6 +109,14 @@ if (func == 'instance') {
 	console.log( inst );
 }
 
+// 活动实例
+if (func == 'activity') {
+	const act = require('./lib/activity');
+	let text = Common.getArgv('text', '?uid=10000&rnd={RND}');
+	let inst = act.replaceUserid( text, 10008 );
+	console.log( inst );
+}
+
 // 批量转链
 if (func == 'transfer') {
 

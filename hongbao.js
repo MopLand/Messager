@@ -1,112 +1,4 @@
 var bags=[
-
-	{
-		'msgtype': 1,
-		'quantum': [23],
-		'content': '叮！吃饭时间到了，给你们准备好了紅包，快来领吧'
-	},
-
-	{
-		'msgtype': 90,
-		'subtype': 'meituan',
-		'quantum': [23],
-		'content': {
-			"title": "【美团红包】免费领",
-			"status": "on",
-			"des": "今日可领红包9元/12元/18元，人人有份，速度领~",
-			"api": "https://proxy.guodongbaohe.com/meituan/geturl?act_id=33&type=1",
-			"thumburl": "https://static.baohe.rexcdn.com/sprite/mt.jpg"
-		}
-	},
-	
-	{
-		'msgtype': 90,
-		'subtype': 'elment',
-		'quantum': [23],
-		'content': {
-			"title": "【饿了么外卖】第5个人领最大红包！",
-			"status": "on",
-			"des": "饿了么外卖升级，18元红包限时限量抢，手慢无~",
-			"api": "http://proxy.guodongbaohe.com/builder/elePromotion?activity_id=10883",
-			"thumburl": "https://static.baohe.rexcdn.com/sprite/ele.jpg"
-		}
-	},
-
-	{
-		'msgtype': 90,
-		'subtype': 'meituan',
-		'quantum': [23],
-		'content': `<?xml version="1.0"?><msg>
-			<appmsg appid="" sdkver="0">
-				<title>【美团红包】免费领</title>
-				<des>今日可领红包9元/12元/18元，人人有份，速度领~</des>
-				<type>5</type>
-				<action>view</action>
-				<url>http://xyz.f1url.com/share/channel/meituan?member_id={UID}</url>
-				<appattach>
-					<cdnthumburl>3057020100044b30490201000204777d344602032f5081020413eff98c020466814993042465383832393337382d353831362d343235632d383139342d3164373532323639336566660204051830010201000405004c51e500</cdnthumburl>
-					<cdnthumbmd5>4397c6d1707e3e5fcc14225027b24961</cdnthumbmd5>
-					<cdnthumblength>9357</cdnthumblength>
-					<cdnthumbwidth>150</cdnthumbwidth>
-					<cdnthumbheight>150</cdnthumbheight>
-					<cdnthumbaeskey>c4e6826836d811efbb0100163e33f4ce</cdnthumbaeskey>
-					<aeskey>c4e6826836d811efbb0100163e33f4ce</aeskey>
-					<encryver>0</encryver>
-					<filekey>e8829378-5816-425c-8194-1d7522693eff</filekey>
-				</appattach>
-				<thumburl>http://xyz.f1url.com/static/sprite/mt.jpg</thumburl>
-				<webviewshared>
-					<jsAppId><![CDATA[]]></jsAppId>
-					<publisherReqId><![CDATA[0]]></publisherReqId>
-				</webviewshared>
-			</appmsg>
-			<fromusername>filehelper</fromusername>
-			<scene>0</scene>
-			<appinfo>
-				<version>1</version>
-				<appname></appname>
-			</appinfo>
-			<commenturl></commenturl>
-		</msg>`
-	},
-	
-	{
-		'msgtype': 90,
-		'subtype': 'elment',
-		'quantum': [23],
-		'content': `<?xml version="1.0"?><msg>
-			<appmsg appid="" sdkver="0">
-				<title>【饿了么外卖】第5个人领最大红包！</title>
-				<des>饿了么外卖升级，18元红包限时限量抢，手慢无~</des>
-				<type>5</type>
-				<action>view</action>
-				<url>http://act.f2url.com/share/channel/ele?member_id={UID}</url>
-				<appattach>
-					<cdnthumburl>3057020100044b30490201000204777d344602032f50810204d8eff98c020466814a88042462333334363633352d393233342d343264332d386362662d3363663038613338326536370204051830010201000405004c4d3500</cdnthumburl>
-					<cdnthumbmd5>581a72c7b6a77a56f28b3ff702d75d0a</cdnthumbmd5>
-					<cdnthumblength>20177</cdnthumblength>
-					<cdnthumbwidth>150</cdnthumbwidth>
-					<cdnthumbheight>150</cdnthumbheight>
-					<cdnthumbaeskey>56be2cc236d911efbb0100163e33f4ce</cdnthumbaeskey>
-					<aeskey>56be2cc236d911efbb0100163e33f4ce</aeskey>
-					<encryver>0</encryver>
-					<filekey>b3346635-9234-42d3-8cbf-3cf08a382e67</filekey>
-				</appattach>
-				<thumburl>http://act.f2url.com/static/sprite/ele.jpg</thumburl>
-				<webviewshared>
-					<jsAppId><![CDATA[]]></jsAppId>
-					<publisherReqId><![CDATA[0]]></publisherReqId>
-				</webviewshared>
-			</appmsg>
-			<fromusername>filehelper</fromusername>
-			<scene>0</scene>
-			<appinfo>
-				<version>1</version>
-				<appname></appname>
-			</appinfo>
-			<commenturl></commenturl>
-		</msg>`
-	},
 	
 	{
 		'msgtype': 47,
@@ -134,7 +26,7 @@ var bags=[
 
 可领【14元大额券】🧧
 
-http://x.f2url.com/Cccahs?uid=0
+http://x.f2url.com/Cccahs?uid=0&rnd={RND}
 
 省省省省钱！！！！`
 	},
@@ -151,19 +43,6 @@ http://x.f2url.com/Cccahs?uid=0
 20元补贴券：http://x.f2url.com/kXWhIP?uid=0
 
 领取：http://x.f1url.com/4X7Tku?uid=0`
-	},
-
-	{
-		'msgtype': 90,
-		'subtype': 'didi',
-		'quantum': [23],
-		'content': {
-			"title": "【滴滴打车】限时领最大红包！",
-			"status": "on",
-			"des": "滴滴打车福利，超级红包限时限量抢，手慢无~",
-			"api": "http://proxy.guodongbaohe.com/cps/didi?activity_id=207059212323&userid={UID}",
-			"thumburl": "https://static.baohe.rexcdn.com/dt/img/dd/ddbloack_icon0.png"
-		}
 	},
 
 	{
