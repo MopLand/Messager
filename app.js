@@ -109,6 +109,15 @@ if (func == 'instance') {
 	console.log( inst );
 }
 
+// 调试单元
+if (func == 'test') {
+	let inst = new Date().format('h');
+	console.log( inst );
+	let zone = ['sh', 'sz'].indexOf( conf.region );
+	console.log( conf.region );
+	console.log( zone );
+}
+
 // 活动实例
 if (func == 'activity') {
 	const act = require('./lib/activity');
