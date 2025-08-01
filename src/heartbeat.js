@@ -87,9 +87,9 @@ class Heartbeat {
 			req.push( '' );
 		}
 
-		//临时，1-6 点休眠
+		//临时，23-6 点休眠
 		let hour = ( new Date() ).format('h');
-		if( ['sh', 'sz'].indexOf( self.conf.region ) > -1 && hour >= 1 && hour <= 6 ){
+		if( ['sh', 'sz'].indexOf( self.conf.region ) > -1 && ( hour >= 23 || hour <= 6 ) ){
 			sql += ' AND region = ? ';
 			req.push( 'uk' );
 		}
