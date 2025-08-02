@@ -162,11 +162,11 @@ class GroupsSend {
 		this.redis.on('message', function (channel, message) {
 
 			//临时，23-6 点休眠
-			let hour = ( new Date() ).format('h');
-			if( ['sh', 'sz'].indexOf( self.conf.region ) > -1 && ( hour >= 23 || hour <= 6 ) ){
-				log.info('实例休眠', hour );
-				return;
-			}
+			//let hour = ( new Date() ).format('h');
+			//if( ['sh', 'sz'].indexOf( self.conf.region ) > -1 && ( hour >= 23 || hour <= 6 ) ){
+				//log.info('实例休眠', hour );
+				//return;
+			//}
 
 			let recv;
 			try {
