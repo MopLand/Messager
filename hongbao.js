@@ -36,13 +36,16 @@ http://x.f2url.com/Cccahs?uid=0&rnd={RND}
 		'subtype': 'jingdong',
 		'quantum': [11,17],
 		'content': `京东外卖百亿补贴⚡
-				
+http://x.f1url.com/5lISQS?uid=0
+                                
 超值爆品全天在线‼
 最高减23元🧧
 
-20元补贴券：http://x.f2url.com/kXWhIP?uid=0
+20元补贴券：
+http://x.f2url.com/jd4X8x?uid=0
 
-领取：http://x.f1url.com/4X7Tku?uid=0`
+百亿补贴券：
+http://x.f3url.com/1go33A?uid=0`
 	},
 
 	{
