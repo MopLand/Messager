@@ -558,7 +558,8 @@ class GroupsSend {
 
 			}
 
-			//支持的消息类型：1 文字、3 图片、43 视频、47 表情、49 小程序、90 红包
+			//支持的消息类型：1 文字、3 图片、43 视频、47 表情、49 混合、90 红包
+			//支持的混合消息：1 小程序、2 视频号、3 消息集合
 			if ( [1, 3, 43, 47, 49, 90].indexOf(item.msgType) == -1 || !text ) {
 				continue;
 			}
@@ -634,6 +635,7 @@ class GroupsSend {
 					rowid: item.newMsgId, 
 					source: item.msgSource, 
 					msgtype: item.msgType, 
+					pattern: item.pattern, 
 					content: text, 
 					product: null, 
 					keyword: exch 
@@ -1167,7 +1169,7 @@ class GroupsSend {
 
 			}
 
-			//小程序
+			//小程序 和 消息集合
 			if (msg.msgtype == 49 && mini) {
 
 				//发送小程序

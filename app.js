@@ -142,3 +142,10 @@ if (func == 'transfer') {
 	}, null, conf.options);
 
 }
+
+// 处理集合
+if (func == 'collect') {
+	const GroupsSend = require('./src/groups_send');
+	let klas = new GroupsSend(conf);
+		klas.init();
+}
