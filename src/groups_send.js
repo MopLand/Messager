@@ -48,6 +48,7 @@ class GroupsSend {
 		this.queues = [];
 		this.locked = 0;
 		this.sender = 0;
+		this.spliter = '_,,_';
 		this.hongbao = Redbag;	//红包卡片配置
 
 		if( logd ){
@@ -538,6 +539,7 @@ class GroupsSend {
 			var item = msgs[i];
 			let keep = item.fixedly;
 			let text = item.content;
+			let wrap = '';
 
 			item.msgType = Number(item.msgType);
 
@@ -618,6 +620,13 @@ class GroupsSend {
 				}
 			}
 
+			//消息集合，提取文本内容块 datadesc
+			if( item.msgType == 49 && item.pattern == 3 ){
+				wrap = text;
+				text = this.parseRecord( text );
+				log.info('合集消息', { roomid, pakId, text });
+			}
+
 			//满足所有条件
 			if ( size == Object.keys(where).length ) {
 
@@ -625,6 +634,12 @@ class GroupsSend {
 
 				//不转链，文本类型，没有配置原样规则 或 文本不匹配
 				if ( !keep && item.msgType == 1 && ( !this.inst.origin || !this.inst.origin.test(text) ) ) {
+					exch = (act.extractTbc(text) || act.detectUrl(text) || act.detectApp(text));
+					exch && data.convert++;
+				}
+
+				//检测合集中有无口令或链接需要转链
+				if ( !keep && item.msgType == 49 && item.package == 3 ) {
 					exch = (act.extractTbc(text) || act.detectUrl(text) || act.detectApp(text));
 					exch && data.convert++;
 				}
@@ -637,6 +652,7 @@ class GroupsSend {
 					msgtype: item.msgType, 
 					pattern: item.pattern, 
 					content: text, 
+					wrapper: wrap, 
 					product: null, 
 					keyword: exch 
 				});
@@ -660,6 +676,29 @@ class GroupsSend {
 		data.msgsize = data.message.length;
 
 		return data;
+
+	}
+
+	/**
+	 * 提取消息块
+	 * @param string 原始消息
+	 * @return String 
+	 */
+	parseRecord( text ){
+
+		let desc = [];
+		let item = /<recorditem><!\[CDATA\[(.*)\]\]><\/recorditem>/s.exec( text );
+
+		let info = com.parseXml( item[1] );
+			//console.log( info.recordinfo.datalist.dataitem );
+			info.recordinfo.datalist.dataitem.forEach( ele => {
+				//console.log( ele );
+				if( ele['@datatype'] == 1 && !ele.emojiitem ){
+					desc.push( '<datadesc>' + ele.datadesc + '</datadesc>' );
+				}
+			});
+
+		return desc.join( this.spliter );
 
 	}
 
@@ -691,8 +730,8 @@ class GroupsSend {
 
 		for (let i = 0; i < data.message.length; i++) {
 
-			let comm = data.message[i];
-			let exch = comm.msgtype == 1 && comm.keyword;
+			let comm = data.message[i];	//文本或合集，需要转链
+			let exch = [1, 49].indexOf(comm.msgtype) >= 0 && comm.keyword;
 			let misc = exch ? act.getExternal( comm.content ) : '';
 
 			///////////////
@@ -716,7 +755,21 @@ class GroupsSend {
 				//成功转链数量 或 没有失败（原样返回）
 				if ( body.status > 0 || ( body.status == body.fail && body.fail == 0 ) ) {
 
-					//文本
+					//将转链结果替换进原消息模板
+					if( comm.msgtype == 19 && comm.pattern == 3 ){
+						let tpl = comm.content.split( self.spliter );
+						let val = body.result.split( self.spliter );
+
+						body.result = comm.wrapper;
+
+						tpl.forEach( ( bk, ps ) => {
+							body.result = body.result.replace( bk, val[ps] );
+						} );
+
+						log.info('处理合集', { 'member_id': user.member_id, 'templet': tpl, 'values': val });
+					}
+
+					//返回文本
 					comm.content = body.result;
 
 					//原始商品信息
@@ -1170,15 +1223,15 @@ class GroupsSend {
 			}
 
 			//小程序 和 消息集合
-			if (msg.msgtype == 49 && mini) {
+			if (msg.msgtype == 49) {
 
-				//发送小程序
-				if ((member.tag & 2) == 0) {
+				//支持的混合消息：1 小程序、2 视频号、3 消息集合
+				if ( ( msg.pattern == 1 && mini ) || msg.pattern == 2 || msg.pattern == 3 ) {
 
 					var fn = this.wx.instance( member.auto_id, member.device_id ).SendAppMsgXml(member.weixin_id, chat, body, msg.source);
 
 					fn.then(ret => {
-						log.info('小程序成功', { 'member' : member.member_id, chat, 'msgid' : msg.msgid, 'newid' : ret.msgId, 'instance' : self.insid });
+						log.info('混合消息', { 'pattern' : msg.pattern, 'member' : member.member_id, chat, 'msgid' : msg.msgid, 'newid' : ret.msgId, 'instance' : self.insid });
 					}).catch(err => {
 						self.sendErr(member, 'SendAppMsgXml', err, chat, body);
 					});

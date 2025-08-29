@@ -1,0 +1,167 @@
+<msg>
+	<appmsg appid="" sdkver="0">
+		<title>群聊的聊天记录</title>
+		<des>小林': [动画表情]
+小林': [图片]
+小林': [图片]
+小林': 🌟享佳恬攀枝花彩虹芒 💰 13.9🉐5斤（带箱） 🔹海南原产，新鲜当季 🔹坏果包赔，品质保证 https</des>
+		<action />
+		<type>19</type>
+		<showtype>0</showtype>
+		<soundtype>0</soundtype>
+		<mediatagname />
+		<messageext />
+		<messageaction />
+		<content />
+		<contentattr>0</contentattr>
+		<url />
+		<lowurl />
+		<dataurl />
+		<lowdataurl />
+		<songalbumurl />
+		<songlyric />
+		<template_id />
+		<appattach>
+			<totallen>0</totallen>
+			<attachid />
+			<emoticonmd5 />
+			<fileext />
+			<aeskey />
+		</appattach>
+		<extinfo />
+		<sourceusername />
+		<sourcedisplayname />
+		<thumburl />
+		<md5 />
+		<statextstr />
+		<recorditem><![CDATA[<recordinfo>
+	<fromscene>0</fromscene>
+	<favcreatetime>1756189439</favcreatetime>
+	<isChatRoom>0</isChatRoom>
+	<title>群聊的聊天记录</title>
+	<desc>小林': [动画表情]
+小林': [图片]
+小林': [图片]
+小林': 🌟享佳恬攀枝花彩虹芒 💰 13.9🉐5斤（带箱） 🔹海南原产，新鲜当季 🔹坏果包赔，品质保证 https</desc>
+	<datalist count="4">
+		<dataitem datatype="1" dataid="54331a312f97e9814a01fa1a45240694" htmlid="54331a312f97e9814a01fa1a45240694">
+			<sourcename>小林'</sourcename>
+			<sourceheadurl>https://wx.qlogo.cn/mmhead/ver_1/u4eDwf0ibt2WBzuAv3xuQfIlNvC1G7icgRsmGEic1ghwYCPlvwXuxSAFcsBuFI2TPhltp5D4tMOzjIdHznZUbreeg/132</sourceheadurl>
+			<sourcetime>2025-08-26 14:19</sourcetime>
+			<datadesc>[动画表情]</datadesc>
+			<srcMsgLocalid>48089</srcMsgLocalid>
+			<srcMsgCreateTime>1756189149</srcMsgCreateTime>
+			<fromnewmsgid>1946861636645223180</fromnewmsgid>
+			<dataitemsource>
+				<hashusername>eaaf7decfcfbb0243f0d1bf0c2ed3943f11f618bd51318301ec9e64a7465c0f9</hashusername>
+			</dataitemsource>
+			<emojiitem>
+				<md5>6e52293c3058902741a088d5f3220661</md5>
+				<uiemoticontype>2</uiemoticontype>
+				<uigametype>0</uigametype>
+				<uigamecontent>0</uigamecontent>
+				<cdnurlstring>http://wxapp.tc.qq.com/262/20304/stodownload?m=6e52293c3058902741a088d5f3220661&amp;filekey=30350201010421301f020201060402535a04106e52293c3058902741a088d5f32206610203056cd2040d00000004627466730000000132&amp;hy=SZ&amp;storeid=262fb57a6000d1e735e56bc010000010600004f50535a1740c950b6790346a&amp;bizid=1023</cdnurlstring>
+				<encrypturlstring>http://wxapp.tc.qq.com/262/20304/stodownload?m=5ad53e98a9e1a976e759b7dbaebf0838&amp;filekey=30350201010421301f020201060402535a04105ad53e98a9e1a976e759b7dbaebf08380203056ce0040d00000004627466730000000132&amp;hy=SZ&amp;storeid=262fb57a700012a2b5e56bc010000010600004f50535a2f70c950b683a0622&amp;bizid=1023</encrypturlstring>
+				<aeskey>2195a8da84d78b71467dd9727d304719</aeskey>
+				<externurl>http://wxapp.tc.qq.com/262/20304/stodownload?m=cf5df7c0feb0f9243c7b57e838817925&amp;filekey=30340201010420301e020201060402535a0410cf5df7c0feb0f9243c7b57e83881792502027c10040d00000004627466730000000132&amp;hy=SZ&amp;storeid=262fb57a7000a43965e56bc010000010600004f50535a0820c950b678859b9&amp;bizid=1023</externurl>
+				<externmd5>a9460208bcd324461d51986f7540ab1b</externmd5>
+				<showrewardtips>0</showrewardtips>
+				<uiemoticonwidth>580</uiemoticonwidth>
+				<uiemoticonheight>132</uiemoticonheight>
+			</emojiitem>
+		</dataitem>
+		<dataitem datatype="2" dataid="10e0f364f133d0ab08d49f808adaf631" htmlid="10e0f364f133d0ab08d49f808adaf631">
+			<datafmt>jpg</datafmt>
+			<sourcename>小林'</sourcename>
+			<sourceheadurl>https://wx.qlogo.cn/mmhead/ver_1/u4eDwf0ibt2WBzuAv3xuQfIlNvC1G7icgRsmGEic1ghwYCPlvwXuxSAFcsBuFI2TPhltp5D4tMOzjIdHznZUbreeg/132</sourceheadurl>
+			<sourcetime>2025-08-26 14:19</sourcetime>
+			<thumbsize>5081</thumbsize>
+			<cdndataurl>3057020100044b30490201000204ee0d021902032dcdc9020463b9d374020468ad52ff042463656364643239312d333838312d343537632d623964662d6663373866303438386164630204019420010201000405004c4d9900</cdndataurl>
+			<cdndatakey>d65bb13134374964626bc4ed8a786fdd</cdndatakey>
+			<filetype>1</filetype>
+			<thumbfiletype>1</thumbfiletype>
+			<cdnthumburl>3057020100044b30490201000204ee0d021902032dcdc9020463b9d374020468ad52ff042438616433623561642d396230372d343733662d626130622d3962323932363639626362610204019820010201000405004c54a100</cdnthumburl>
+			<cdnthumbkey>db71a912097ca935cd1f0906f019e983</cdnthumbkey>
+			<fullmd5>3ecde942177a3fe2d301308eab7ea3c9</fullmd5>
+			<thumbfullmd5>96473cb69c32dfeb6019bd39d6c4ac63</thumbfullmd5>
+			<datasize>642609</datasize>
+			<srcMsgLocalid>48090</srcMsgLocalid>
+			<srcMsgCreateTime>1756189168</srcMsgCreateTime>
+			<messageuuid>430511a6dab598ef77312f8a47705ef3_</messageuuid>
+			<fromnewmsgid>2540156088795517388</fromnewmsgid>
+			<dataitemsource>
+				<hashusername>eaaf7decfcfbb0243f0d1bf0c2ed3943f11f618bd51318301ec9e64a7465c0f9</hashusername>
+			</dataitemsource>
+		</dataitem>
+		<dataitem datatype="2" dataid="f8d1a3239b10bdcea78f2f65a0fe3dd5" htmlid="f8d1a3239b10bdcea78f2f65a0fe3dd5">
+			<datafmt>jpg</datafmt>
+			<sourcename>小林'</sourcename>
+			<sourceheadurl>https://wx.qlogo.cn/mmhead/ver_1/u4eDwf0ibt2WBzuAv3xuQfIlNvC1G7icgRsmGEic1ghwYCPlvwXuxSAFcsBuFI2TPhltp5D4tMOzjIdHznZUbreeg/132</sourceheadurl>
+			<sourcetime>2025-08-26 14:19</sourcetime>
+			<thumbsize>5374</thumbsize>
+			<cdndataurl>3057020100044b30490201000204ee0d021902032dcdc9020463b9d374020468ad5300042465633938613631382d636438642d343530622d626366392d6530306633316630373535350204059420010201000405004c51e500</cdndataurl>
+			<cdndatakey>0cf8bf7a2e227946716792e0f51e9739</cdndatakey>
+			<filetype>1</filetype>
+			<thumbfiletype>1</thumbfiletype>
+			<cdnthumburl>3057020100044b30490201000204ee0d021902032dcdc9020463b9d374020468ad5300042466313365386265642d316361332d346134632d383137632d3733613035313830613331370204019420010201000405004c53d900</cdnthumburl>
+			<cdnthumbkey>f8263458bc4291e4c38d4fcaeafe97da</cdnthumbkey>
+			<fullmd5>746d03df896c7a24071ebbfd89a9a8f3</fullmd5>
+			<thumbfullmd5>47135dac0ad0d35ea4e00961f0da9d59</thumbfullmd5>
+			<datasize>606505</datasize>
+			<srcMsgLocalid>48091</srcMsgLocalid>
+			<srcMsgCreateTime>1756189186</srcMsgCreateTime>
+			<messageuuid>e70a1c5cc8d649243ff4f72324c8ec77_</messageuuid>
+			<fromnewmsgid>7167117872058050162</fromnewmsgid>
+			<dataitemsource>
+				<hashusername>eaaf7decfcfbb0243f0d1bf0c2ed3943f11f618bd51318301ec9e64a7465c0f9</hashusername>
+			</dataitemsource>
+		</dataitem>
+		<dataitem datatype="1" dataid="74743b7f63ec3b6cc6a0aa21358c911e" htmlid="74743b7f63ec3b6cc6a0aa21358c911e">
+			<sourcename>小林'</sourcename>
+			<sourceheadurl>https://wx.qlogo.cn/mmhead/ver_1/u4eDwf0ibt2WBzuAv3xuQfIlNvC1G7icgRsmGEic1ghwYCPlvwXuxSAFcsBuFI2TPhltp5D4tMOzjIdHznZUbreeg/132</sourceheadurl>
+			<sourcetime>2025-08-26 14:10</sourcetime>
+			<datadesc>🌟享佳恬攀枝花彩虹芒
+💰 13.9🉐5斤（带箱）
+
+🔹海南原产，新鲜当季
+🔹坏果包赔，品质保证
+
+https://p.pinduoduo.com/rasMKnWD?sc=EFAC</datadesc>
+			<srcMsgLocalid>48092</srcMsgLocalid>
+			<srcMsgCreateTime>1756189203</srcMsgCreateTime>
+			<fromnewmsgid>114377945314441338</fromnewmsgid>
+			<dataitemsource>
+				<hashusername>eaaf7decfcfbb0243f0d1bf0c2ed3943f11f618bd51318301ec9e64a7465c0f9</hashusername>
+			</dataitemsource>
+		</dataitem>
+		<dataitem datatype="1" dataid="74743b7f63ec3b6cc6a0aa21358c911e" htmlid="74743b7f63ec3b6cc6a0aa21358c911e">
+			<sourcename>小林'</sourcename>
+			<sourceheadurl>https://wx.qlogo.cn/mmhead/ver_1/u4eDwf0ibt2WBzuAv3xuQfIlNvC1G7icgRsmGEic1ghwYCPlvwXuxSAFcsBuFI2TPhltp5D4tMOzjIdHznZUbreeg/132</sourceheadurl>
+			<sourcetime>2025-08-26 14:20</sourcetime>
+			
+			<datadesc>🌟享佳恬攀枝花彩虹芒
+💰 13.9🉐5斤（带箱）
+
+🔹海南原产，新鲜当季
+🔹坏果包赔，品质保证
+
+</datadesc>
+			<srcMsgLocalid>48092</srcMsgLocalid>
+			<srcMsgCreateTime>1756189203</srcMsgCreateTime>
+			<fromnewmsgid>114377945314441338</fromnewmsgid>
+			<dataitemsource>
+				<hashusername>eaaf7decfcfbb0243f0d1bf0c2ed3943f11f618bd51318301ec9e64a7465c0f9</hashusername>
+			</dataitemsource>
+		</dataitem>
+	</datalist>
+</recordinfo>
+]]></recorditem>
+	</appmsg>
+	<fromusername>wxid_xovtkbfqk01q22</fromusername>
+	<scene>0</scene>
+	<appinfo>
+		<version>1</version>
+		<appname />
+	</appinfo>
+	<commenturl />
+</msg>

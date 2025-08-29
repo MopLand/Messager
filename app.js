@@ -107,6 +107,7 @@ if (func == 'instance') {
 	let klas = new wx(conf.weixin, conf.reserve, conf.special);
 	let inst = klas.instance( 10008 ).GetProfile( wxid );
 	console.log( inst );
+	process.exit();
 }
 
 // 调试单元
@@ -116,6 +117,7 @@ if (func == 'test') {
 	let zone = ['sh', 'sz'].indexOf( conf.region );
 	console.log( conf.region );
 	console.log( zone );
+	process.exit();
 }
 
 // 活动实例
@@ -124,6 +126,7 @@ if (func == 'activity') {
 	let text = Common.getArgv('text', '?uid=10000&rnd={RND}');
 	let inst = act.replaceUserid( text, 10008 );
 	console.log( inst );
+	process.exit();
 }
 
 // 批量转链
@@ -141,11 +144,32 @@ if (func == 'transfer') {
 		console.log( code, body );
 	}, null, conf.options);
 
+	process.exit();
+
 }
 
 // 处理集合
 if (func == 'collect') {
+
+	const fs = require('fs');
 	const GroupsSend = require('./src/groups_send');
+
 	let klas = new GroupsSend(conf);
-		klas.init();
+	let text = fs.readFileSync('./tpl/collect.xml').toString();
+	let desc = klas.parseRecord( text );
+	//console.log( desc );
+
+	let tpl = desc.split( klas.spliter );
+	let val = desc.replace( /<datadesc>(.+?)<\/datadesc>/gs, () => { return '<datadesc>'+ Common.randomPos( 9999 ) +'<\/datadesc>'; } ).split( klas.spliter );
+	//console.log( tpl );
+	//console.log( val );
+
+	tpl.forEach( ( bk, ps ) => {
+		//console.log( bk, text.indexOf( bk ) );
+		text = text.replace( bk, val[ps] );
+	} );
+
+	console.log( text );
+	process.exit();
+
 }
