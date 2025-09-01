@@ -756,7 +756,7 @@ class GroupsSend {
 				if ( body.status > 0 || ( body.status == body.fail && body.fail == 0 ) ) {
 
 					//将转链结果替换进原消息模板
-					if( comm.msgtype == 19 && comm.pattern == 3 ){
+					if( comm.msgtype == 49 && comm.pattern == 3 ){
 						let tpl = comm.content.split( self.spliter );
 						let val = body.result.split( self.spliter );
 
