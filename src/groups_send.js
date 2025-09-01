@@ -639,7 +639,7 @@ class GroupsSend {
 				}
 
 				//检测合集中有无口令或链接需要转链
-				if ( !keep && item.msgType == 49 && item.package == 3 ) {
+				if ( !keep && item.msgType == 49 && item.pattern == 3 ) {
 					exch = (act.extractTbc(text) || act.detectUrl(text) || act.detectApp(text));
 					exch && data.convert++;
 				}
