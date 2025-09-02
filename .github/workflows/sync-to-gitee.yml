@@ -1,4 +1,4 @@
-name: GitHub同步到Gitee
+name: 同步代码到 Gitee
 on:
   push:
     branches: [ master ]  # 同步的主分支
@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0  # 拉取完整历史
 
       # 配置Gitee访问
-      - name: 配置Gitee SSH
+      - name: 配置 SSH
         env:
           GITEE_SSH_KEY: ${{ secrets.GITEE_SSH_KEY }}
           GITEE_USER: ${{ secrets.GITEE_USERNAME }}
@@ -42,7 +42,6 @@ jobs:
 
           # 添加Gitee远程仓库（如果已存在则忽略错误）
           git remote add gitee git@gitee.com:${GITEE_USER}/${REPO_NAME}.git
-          #git remote add gitee git@gitee.com:${GITEE_USER}/Messager.git
           
           # 强制同步（确保Gitee与GitHub代码完全一致）
           git push gitee ${{ github.ref_name }}
