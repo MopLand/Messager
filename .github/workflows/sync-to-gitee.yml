@@ -18,7 +18,7 @@ jobs:
       - name: 配置Gitee SSH
         env:
           GITEE_SSH_KEY: ${{ secrets.GITEE_SSH_KEY }}
-          GITEE_USER: ${{ secrets.GITEE_USER }}
+          GITEE_USER: ${{ secrets.GITEE_USERNAME }}
         run: |
           # 配置SSH
           mkdir -p ~/.ssh
