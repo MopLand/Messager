@@ -34,14 +34,11 @@ jobs:
       - name: 推送到Gitee
         env:
           GITEE_USER: ${{ secrets.GITEE_USERNAME }}
-          # REPO_NAME: ${{ github.repository_name }}
-          FULL_REPO_PATH: ${{ github.repository }} # 格式：所有者/仓库名（如MopLand/Messager）
           REPO_OWNER: ${{ github.repository_owner }} # 格式：所有者（如 MopLand）
+          FULL_REPO_PATH: ${{ github.repository }} # 格式：所有者/仓库名（如MopLand/Messager）
         run: |
-          # 从完整路径中剔除 "所有者 /" 前缀，得到纯仓库名
+          # 提取仓库名称
           REPO_NAME=$(echo "$FULL_REPO_PATH" | sed "s/^$REPO_OWNER\///")
-
-          echo $REPO_NAME
 
           # 添加Gitee远程仓库（如果已存在则忽略错误）
           git remote add gitee git@gitee.com:${GITEE_USER}/${REPO_NAME}.git
