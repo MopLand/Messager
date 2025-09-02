@@ -35,10 +35,15 @@ jobs:
         env:
           GITEE_USER: ${{ secrets.GITEE_USERNAME }}
           REPO_NAME: ${{ github.repository_name }}
+          FULL_REPO_PATH: ${{ env.GITHUB_REPOSITORY }} # 格式：所有者/仓库名（如MopLand/Messager）
+          REPO_OWNER: ${{env.GITHUB_REPOSITORY_OWNER}} # 格式：所有者（如 MopLand）
         run: |
+          # 从完整路径中剔除 "所有者 /" 前缀，得到纯仓库名
+          REPO_NAME=\((echo "\)FULL_REPO_PATH" | sed "s/^$REPO_OWNER///")
+
           # 添加Gitee远程仓库（如果已存在则忽略错误）
-          #git remote add gitee git@gitee.com:${GITEE_USER}/${REPO_NAME}.git
-          git remote add gitee git@gitee.com:${GITEE_USER}/Messager.git
+          git remote add gitee git@gitee.com:${GITEE_USER}/${REPO_NAME}.git
+          #git remote add gitee git@gitee.com:${GITEE_USER}/Messager.git
           
           # 强制同步（确保Gitee与GitHub代码完全一致）
           git push gitee master
