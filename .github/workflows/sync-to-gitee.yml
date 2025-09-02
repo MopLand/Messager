@@ -34,7 +34,7 @@ jobs:
       - name: 推送到Gitee
         env:
           GITEE_USER: ${{ secrets.GITEE_USERNAME }}
-          REPO_NAME: ${{ github.repository_name }}
+          # REPO_NAME: ${{ github.repository_name }}
           FULL_REPO_PATH: ${{ env.GITHUB_REPOSITORY }} # 格式：所有者/仓库名（如MopLand/Messager）
           REPO_OWNER: ${{env.GITHUB_REPOSITORY_OWNER}} # 格式：所有者（如 MopLand）
         run: |
