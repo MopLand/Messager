@@ -37,7 +37,8 @@ jobs:
           REPO_NAME: ${{ github.repository_name }}
         run: |
           # 添加Gitee远程仓库（如果已存在则忽略错误）
-          git remote add gitee git@gitee.com:${GITEE_USER}/${REPO_NAME}.git || true
+          #git remote add gitee git@gitee.com:${GITEE_USER}/${REPO_NAME}.git
+          git remote add gitee git@gitee.com:mopland/Messager.git
           
           # 强制同步（确保Gitee与GitHub代码完全一致）
           git push gitee master
