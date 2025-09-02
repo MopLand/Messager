@@ -3,8 +3,8 @@ const Common = require('./lib/common');
 const Loader = require('./lib/loader');
 const Logger = require('./lib/logger');
 
-let conf = Common.getConf(__dirname);
 let func = Common.getFunc();
+let conf = Common.getConf(__dirname);
 
 const tag = Common.fileName( __filename, false );
 const log = new Logger(tag);
