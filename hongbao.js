@@ -26,7 +26,7 @@ var bags=[
 
 可领【14元大额券】🧧
 
-http://x.f2url.com/Cccahs?uid=0&rnd={RND}
+http://x.f2url.com/h1estf?uid=0&rnd={RND}
 
 省省省省钱！！！！`
 	},
