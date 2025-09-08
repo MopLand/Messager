@@ -1,0 +1,44 @@
+name: Gitee同步到GitHub
+# 触发条件：接收Gitee的WebHook请求（需在Gitee配置）
+on:
+  repository_dispatch:
+    types: [gitee-push]  # 自定义事件类型，需与Gitee WebHook配置一致
+  workflow_dispatch:  # 支持手动触发测试
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      # 步骤1：拉取Gitee代码（而非GitHub代码）
+      - name: 拉取Gitee代码
+        uses: actions/checkout@v4
+        with:
+          # Gitee仓库地址（格式：git@gitee.com:用户名/仓库名.git）
+          repository: git@gitee.com:mopland/Messager.git  # 需手动替换为你的Gitee仓库地址
+          ssh-key: ${{ secrets.GITEE_SSH_KEY }}  # 用GitHub私钥拉取Gitee代码（Gitee需添加对应公钥）
+          fetch-depth: 0  # 拉取完整历史
+
+      # 步骤2：配置GitHub SSH授权（用于推送到GitHub）
+      - name: 配置GitHub SSH
+        env:
+          GITHUB_SSH_KEY: ${{ secrets.GITEE_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$GITHUB_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          # 配置Git提交身份
+          git config --global user.name "Gitee Sync Bot"
+          git config --global user.email "gitee-sync-bot@example.com"
+
+      # 步骤3：推送到GitHub仓库
+      - name: 推送到GitHub
+        run: |
+          # 添加GitHub远程仓库（若已存在则忽略）
+          git remote add github ${{ github.repositoryUrl }} || true
+          
+          # 强制同步（确保GitHub与Gitee代码一致）
+          git push github master
+    
