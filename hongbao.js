@@ -22,11 +22,11 @@ var bags=[
 		'msgtype': 1,
 		'subtype': 'elment',
 		'quantum': [11,17],
-		'content': `饿了么&外卖券📢
+		'content': `饿了.么&外.卖券📢
 
 可领【14元大额券】🧧
 
-http://x.f2url.com/h1estf?uid=0&rnd={RND}
+http://x.f2url.com/cZnQcr?uid=0&rnd={RND}
 
 省省省省钱！！！！`
 	},
