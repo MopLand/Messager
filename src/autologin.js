@@ -130,7 +130,7 @@ class AutoLogin {
 					//if (typeof err == 'object' || (typeof err == 'string' && err.indexOf('重新获取二维码登陆'))) {
 
 					//服务报错
-					if ( typeof err == 'string' && /二维码登陆|已经失效|微信账号|重新登录|申请注销|账号安全|退出微信|退出登录|稍后再试|设备上登录|设备上登录|解冻账号|weixin110/.test( err ) ) {
+					if ( typeof err == 'string' && /二维码登陆|已经失效|微信账号|重新登录|申请注销|账号安全|退出微信|退出登录|退出WeChat|稍后再试|设备上登录|设备上登录|解冻账号|weixin110/.test( err ) ) {
 						self.update( row.auto_id, -1, err );
 					}else{
 						self.update( row.auto_id, 0, err );
