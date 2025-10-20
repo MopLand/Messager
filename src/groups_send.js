@@ -690,6 +690,12 @@ class GroupsSend {
 
 		let info = com.parseXml( item[1] );
 			//console.log( info.recordinfo.datalist.dataitem );
+
+			//兼容单条消息聊天记录
+			if( info.recordinfo.datalist['@count'] == 1 ){
+				info.recordinfo.datalist.dataitem = [ info.recordinfo.datalist.dataitem ];
+			}
+
 			info.recordinfo.datalist.dataitem.forEach( ele => {
 				//console.log( ele );
 				if( ele['@datatype'] == 1 && !ele.emojiitem ){

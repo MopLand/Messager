@@ -155,9 +155,8 @@ if (func == 'collect') {
 	const GroupsSend = require('./src/groups_send');
 
 	let klas = new GroupsSend(conf);
-	let text = fs.readFileSync('./tpl/collect.xml').toString();
+	let text = fs.readFileSync('./tpl/single.xml').toString();
 	let desc = klas.parseRecord( text );
-	//console.log( desc );
 
 	let tpl = desc.split( klas.spliter );
 	let val = desc.replace( /<datadesc>(.+?)<\/datadesc>/gs, () => { return '<datadesc>'+ Common.randomPos( 9999 ) +'<\/datadesc>'; } ).split( klas.spliter );
