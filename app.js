@@ -9,8 +9,9 @@ let conf = Common.getConf(__dirname);
 const tag = Common.fileName( __filename, false );
 const log = new Logger(tag);
 
-// 清理日志;
+//清理日志，实例标识
 log.clean( 5 );
+log.insta( conf.region );
 
 process.env.UV_THREADPOOL_SIZE = 128;
 console.log( '-------------' + Common.getTime() +'-------------' );
