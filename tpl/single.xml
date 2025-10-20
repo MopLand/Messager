@@ -6,7 +6,9 @@
         <action>view</action>
         <type>19</type>
         <url>https://support.weixin.qq.com/cgi-bin/mmsupport-bin/readtemplate?t=page/favorite_record__w_unsupport&amp;from=singlemessage&amp;isappinstalled=0</url>
-        <recorditem><![CDATA[<recordinfo><title>企小赵的聊天记录</title><desc>企小赵: https://p.pinduoduo.com/QVct0Drp?sc=EFAC</desc><datalist count=\"1\"><dataitem dataid=\"813785c2015aab07c28584d6e710f92f\" datatype=\"1\"><datadesc>https://p.pinduoduo.com/ygZtsB0X?sc=EFAC</datadesc><sourcename>企小赵</sourcename><sourceheadurl>https://wx.qlogo.cn/mmhead/ver_1/Y6ZeGHyL9B54UoFmlouzSnshv4ZialXunAwNc0ewGAXibYu4qsA0m6gRr2Lzp8CdPYzSj7AymNksGY9uBjibElIVzOX0LrXKsnvCrFicQia2icsmEro8VbAKDrrdtoT4Y0F1kPHryQZ3BBLiau5nhTVL7ypMw/96</sourceheadurl><sourcetime>2025-10-18 13:40:12</sourcetime><srcMsgCreateTime>1760766012</srcMsgCreateTime><fromnewmsgid>4934094056114916224</fromnewmsgid><dataitemsource><hashusername>652d488fa064a7c3b56e93171c83b7bc6320b6706c013ffe0c4c04b425395ea9</hashusername></dataitemsource></dataitem></datalist></recordinfo>]]></recorditem>
+        <recorditem>
+		<![CDATA[<recordinfo><title>企小赵的聊天记录</title><desc>企小赵: https://p.pinduoduo.com/QVct0Drp?sc=EFAC</desc><datalist count=\"1\"><dataitem dataid=\"813785c2015aab07c28584d6e710f92f\" datatype=\"1\"><datadesc>https://p.pinduoduo.com/ygZtsB0X?sc=EFAC</datadesc><sourcename>企小赵</sourcename><sourceheadurl>https://wx.qlogo.cn/mmhead/ver_1/Y6ZeGHyL9B54UoFmlouzSnshv4ZialXunAwNc0ewGAXibYu4qsA0m6gRr2Lzp8CdPYzSj7AymNksGY9uBjibElIVzOX0LrXKsnvCrFicQia2icsmEro8VbAKDrrdtoT4Y0F1kPHryQZ3BBLiau5nhTVL7ypMw/96</sourceheadurl><sourcetime>2025-10-18 13:40:12</sourcetime><srcMsgCreateTime>1760766012</srcMsgCreateTime><fromnewmsgid>4934094056114916224</fromnewmsgid><dataitemsource><hashusername>652d488fa064a7c3b56e93171c83b7bc6320b6706c013ffe0c4c04b425395ea9</hashusername></dataitemsource></dataitem></datalist></recordinfo>]]>
+		</recorditem>
         <appattach />
     </appmsg>
     <fromusername>wxid_u556v6ugiuhv22</fromusername>

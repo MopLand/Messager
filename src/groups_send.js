@@ -686,9 +686,11 @@ class GroupsSend {
 	parseRecord( text ){
 
 		let desc = [];
-		let item = /<recorditem><!\[CDATA\[(.*)\]\]><\/recorditem>/s.exec( text );
+		//let item = /<recorditem><!\[CDATA\[(.*)\]\]><\/recorditem>/s.exec( text );
+		//let info = com.parseXml( item[1] );
+		let item = /<recorditem>(\s*)<!\[CDATA\[(.*)\]\]>(\s*)<\/recorditem>/s.exec( text );
+		let info = com.parseXml( item[2] );
 
-		let info = com.parseXml( item[1] );
 			//console.log( info.recordinfo.datalist.dataitem );
 
 			//兼容单条消息聊天记录

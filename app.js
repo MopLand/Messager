@@ -162,9 +162,10 @@ if (func == 'collect') {
 	let val = desc.replace( /<datadesc>(.+?)<\/datadesc>/gs, () => { return '<datadesc>'+ Common.randomPos( 9999 ) +'<\/datadesc>'; } ).split( klas.spliter );
 	//console.log( tpl );
 	//console.log( val );
+	//return;
 
 	tpl.forEach( ( bk, ps ) => {
-		//console.log( bk, text.indexOf( bk ) );
+		console.log( bk, text.indexOf( bk ) );
 		text = text.replace( bk, val[ps] );
 	} );
 
