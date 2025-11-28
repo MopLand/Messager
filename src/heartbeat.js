@@ -152,7 +152,7 @@ class Heartbeat {
 					
 					log.info( '心跳成功', [row.weixin_id, row.member_id, ret.proxy] );
 
-					self.update( row.auto_id, 1 );
+					self.update( row.auto_id, 1, ret.proxy ? 1 : 0 );
 
 				}).catch( err => {
 
@@ -168,7 +168,7 @@ class Heartbeat {
 
 					//心跳失败，更新为假离线 online = 0
 					if( self.wx.code < 500 ){
-						self.update( row.auto_id, 0, err );
+						self.offline( row.auto_id, 0, err );
 					}
 
 				} ).finally( () =>{
@@ -192,12 +192,28 @@ class Heartbeat {
 	}
 
 	/**
-	 * 心跳更新
+	 * 心跳失败
 	 */
-	update( auto_id, online, err = '' ) {
+	offline( auto_id, online, err = '' ) {
 		
 		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ?, status = ? WHERE auto_id = ?';
 		let req = [ online, err, auto_id ];
+
+		this.mysql.query(sql, req, function( err, ret ){
+			if( err ){
+				return console.error( err );
+			}
+		});
+
+	}
+
+	/**
+	 * 心跳更新
+	 */
+	update( auto_id, online, pxy = 0 ) {
+		
+		let sql = 'UPDATE `pre_weixin_list` SET heartbeat_time = UNIX_TIMESTAMP(), online = ?, proxy = ? WHERE auto_id = ?';
+		let req = [ online, pxy, auto_id ];
 
 		this.mysql.query(sql, req, function( err, ret ){
 			if( err ){
