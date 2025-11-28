@@ -150,7 +150,7 @@ class Heartbeat {
 
 				pm.then(ret => {
 					
-					log.info( '心跳成功', [row.weixin_id, row.member_id] );
+					log.info( '心跳成功', [row.weixin_id, row.member_id, ret.proxy] );
 
 					self.update( row.auto_id, 1 );
 
