@@ -70,7 +70,7 @@ http://x.f3url.com/1go33A?uid=0`
 出行单单享优惠🚗
 			
 最高110元券包限时抢🧧
-1⃣滴滴，优惠券包：https://vv.didi.cn/p/njoA0QE?source_id={UID}
+1⃣滴滴，优惠券包：https://v.didi.cn/p/ZMlx7Yk?source_id={UID}
 			
 2⃣花小猪，也有打车券咯！优惠券包：https://x.huaxz.cn/x/05po91e?source_id={UID}`
 	}
