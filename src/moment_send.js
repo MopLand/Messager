@@ -5,7 +5,6 @@
  */
 
 const fs = require('fs');
-const qs = require('querystring');
 const com = require('../lib/common');
 const req = require('../lib/request');
 const act = require('../lib/activity');
@@ -357,12 +356,13 @@ class MomentSend {
 			}
 
 			let misc = comm.exch ? act.getExternal(comm.text) : '';
+			let usex = new URLSearchParams( { 'member_id': member.member_id, 'keyword': comm.exch, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc } );
 
 			///////////////
 
 			//req.get(self.conf.convert, { 'member_id': member.member_id, 'text': comm.text, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc }, (code, body) => {
 
-			let pipe = self.conf.convert + '?' + qs.stringify( { 'member_id': member.member_id, 'keyword': comm.exch, 'product': product, 'lazy_time': lazy_time, 'weixin': data.sourced, 'source': 'yfd', 'external': misc } );
+			let pipe = self.conf.convert + '?' + usex.toString();
 
 			req.form( pipe, { 'content': comm.text }, (code, body) => {
 

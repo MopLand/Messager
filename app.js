@@ -133,10 +133,10 @@ if (func == 'activity') {
 // 批量转链
 if (func == 'transfer') {
 
-	const qs = require('querystring');
 	const req = require('./lib/request');
+	const usp = new URLSearchParams({ 'member_id': 10008, 'product': 'true', 'roomid': '', 'lazy_time': Common.getTime(), 'source': 'yfd', 'external': '' });
 
-	let url = conf.convert + '?' + qs.stringify( { 'member_id': 10008, 'product': 'true', 'roomid': '', 'lazy_time': Common.getTime(), 'source': 'yfd', 'external': '' } );
+	let url = conf.convert + '?' + usp.toString();
 	let txt = Common.getArgv('txt', '￥SSPV3XMlWRE￥');
 
 	console.log( url );

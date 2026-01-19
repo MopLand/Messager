@@ -5,7 +5,6 @@
  */
 
 const fs = require('fs');
-const qs = require('querystring');
 const com = require('../lib/common');
 const req = require('../lib/request');
 const act = require('../lib/activity');
@@ -740,12 +739,13 @@ class GroupsSend {
 			let comm = data.message[i];	//文本或合集，需要转链
 			let exch = [1, 49].indexOf(comm.msgtype) >= 0 && comm.keyword;
 			let misc = exch ? act.getExternal( comm.content ) : '';
+			let usex = new URLSearchParams( { 'member_id': user.member_id, 'keyword': comm.keyword, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc } );
 
 			///////////////
 
 			//req.get(self.conf.convert, { 'member_id': user.member_id, 'text': comm.content, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc }, (code, body) => {
 
-			let pipe = self.conf.convert + '?' + qs.stringify( { 'member_id': user.member_id, 'keyword': comm.keyword, 'product': product, 'roomid': data.sourced, 'lazy_time': lazy_time, 'source': 'yfd', 'external': misc } );
+			let pipe = self.conf.convert + '?' + usex.toString();
 
 			req.form( pipe, { 'content': comm.content }, (code, body) => {
 
