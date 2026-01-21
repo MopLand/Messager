@@ -2,7 +2,7 @@
     "name": "MM_Groups_Send",
     "script": "app.js",
     "args": "groups_send",
-    "cwd": "/disk/www/Messager",
+    "cwd": "./",
     "instances": "5",
     "error_file": "./logs/wx_groups_send_err.log",
     "out_file": "/dev/null",

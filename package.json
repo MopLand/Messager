@@ -33,16 +33,14 @@
 	},
 	"dependencies": {
 		"callback-promise-union": "^1.0.1",
-		"crypto": "*",
 		"debug": "^3.1.0",
 		"fast-xml-parser": "*",
 		"jpush-async": "^4.1.0",
-		"mysql": "^2.18.1",
+		"mysql2": "^3.16.1",
 		"redis": "^3.1.2",
 		"request": "^2.88.2",
 		"request-promise": "^4.2.2",
 		"umeng-push-server-sdk": "*",
-		"ws": "*",
-		"xml2js": "^0.6.2"
+		"ws": "*"
 	}
 }

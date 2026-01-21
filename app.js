@@ -113,12 +113,25 @@ if (func == 'instance') {
 
 // 调试单元
 if (func == 'test') {
+
 	let inst = new Date().format('h');
 	console.log( inst );
+
 	let zone = ['sh', 'sz'].indexOf( conf.region );
 	console.log( conf.region );
 	console.log( zone );
-	process.exit();
+
+	let mysql = Common.mysql(conf.mysql);
+
+	mysql.query('SELECT version()', [], ( err, ret ) => {
+		if( err ){
+			console.error( err );
+		}else{
+			console.log( ret );
+		}
+		process.exit();
+	});
+
 }
 
 // 活动实例
