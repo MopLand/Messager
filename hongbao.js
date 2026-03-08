@@ -26,7 +26,7 @@ var bags=[
 
 可领【14元大额券】🧧
 
-https://mt-ele55.kuaizhan.com/#/DNubpq?uid=0&rnd={RND}
+http://x.f4url.com/DNubpq?uid=0&rnd={RND}
 
 省省省省钱！！！！`
 	},
