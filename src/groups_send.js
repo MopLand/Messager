@@ -1020,6 +1020,13 @@ class GroupsSend {
 
 		//筛选有效红包消息
 		bags = bags.filter( msg => {
+
+			//不可见状态
+			if( msg.display && msg.display == 'off' ){
+				return false;
+			}
+
+			//限制时间段
 			if( msg.quantum && msg.quantum.indexOf( hour ) == -1 ){
 				return false;
 			}else{

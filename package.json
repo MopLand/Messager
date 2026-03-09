@@ -1,8 +1,8 @@
 {
-	"name": "messager",
-	"version": "0.0.1",
+	"name": "messenger",
+	"version": "1.0.1",
 	"license": "MIT",
-	"description": "Wechat Messager And Umeng Push Server",
+	"description": "WeChat Messenger And Umeng Push Service",
 	"author": "Lay <veryide@qq.com>",
 	"files": [
 		"lib",
@@ -29,7 +29,7 @@
 		"release": "npm publish --registry=https://registry.npmjs.org/"
 	},
 	"engines": {
-		"node": ">= 4"
+		"node": ">= 16"
 	},
 	"dependencies": {
 		"callback-promise-union": "^1.0.1",
