@@ -93,9 +93,9 @@ http://x.f3url.com/1go33A?uid=0`
 ❹【京东外卖】神券🧧
 
 🔹百亿补贴，超值爆品
-👉http://x.f4url.com/5lISQS?uid=0
+👉http://x.f0url.com/5lISQS?uid=0
 🔹20元补贴，个位数吃美食
-👉http://x.f4url.com/jd4X8x?uid=0
+👉http://x.f0url.com/jd4X8x?uid=0
 🔹PLUS外卖权益专区
 👉http://x.f6url.com/1go33A?uid=0
 🔹抢1分钱奶茶咖啡
