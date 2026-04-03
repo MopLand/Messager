@@ -120,13 +120,16 @@ http://x.f3url.com/1go33A?uid=0`
 		'msgtype': 1,
 		'subtype': 'didi',
 		'quantum': [16],
-		'content': `滴滴打车券天天领
-出行单单享优惠🚗
-			
-最高110元券包限时抢🧧
-1⃣滴滴，优惠券包：https://v.didi.cn/p/ZMlx7Yk?source_id={UID}
-			
-2⃣花小猪，也有打车券咯！优惠券包：https://x.huaxz.cn/x/05po91e?source_id={UID}`
+		'content': `打车出行，也能省钱，5折券❗️
+
+🚘滴滴打车，优惠券包
+🔗：https://vv.didi.cn/njoA0QE?source_id={UID}&ref_from=dunion
+
+🚘花小猪打车，百元券包
+🔗：https://x.huaxz.cn/x/05po91e?source_id={UID}
+
+🚘同程打车，至高百元券包
+🔗：http://u.f1url.com/b5UcoB?uid={UID}`
 	}
 
 ];
