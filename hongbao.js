@@ -68,38 +68,38 @@ http://x.f3url.com/1go33A?uid=0`
 
 🔹可领15/9/8/3元神券
 🔹最高可膨胀20元
-👉http://x.f1url.com/oKVaP8?uid=0
+👉http://x.f1url.com/iuKIDf?uid=0
 ------------
-❷【美团年卡】4.9元拿下🔥
+❷【美团年卡】9.9元拿下🔥
 
-4.9💰年卡🉐180元
-=5元×3张×12个月
+9.9💰年卡🉐360元
+=5元×6张×12个月
 4.9💰月卡(5元×12张)
 6.9💰季卡(5元×6张×3个月)
 
-👉http://x.f2url.com/lKN7zI?uid=0
+👉http://x.f2url.com/uK8kDG?uid=0
 
-‼一单回本，覆盖生活全场景！都可用，折0.13元/张👉🏻可膨到20元⚡️
+‼一单回本，覆盖生活全场景，都可用！折0.2元/张👉🏻可膨到20元⚡️
 ----------------
 ❸【淘宝闪购】神券🧧
 
 🔹领最高15元神券
 👉http://x.f3url.com/s3gL7x?uid=0
 🔹闪购品牌日，单单有福利
-👉http://x.f3url.com/VXIMeI?uid=0
+👉http://x.f3url.com/TPtXOA?uid=0
 🔹每晚8点抢免单
-👉http://x.f3url.com/nDzEWl?uid=0
+👉http://x.f3url.com/F0SLI8?uid=0
 ----------------
 ❹【京东外卖】神券🧧
 
 🔹百亿补贴，超值爆品
-👉http://x.f0url.com/5lISQS?uid=0
+👉http://x.f0url.com/M7tpyL?uid=0
 🔹20元补贴，个位数吃美食
-👉http://x.f0url.com/jd4X8x?uid=0
+👉http://x.f0url.com/3kmTyh?uid=0
 🔹PLUS外卖权益专区
-👉http://x.f6url.com/1go33A?uid=0
+👉http://x.f6url.com/IGA5u9?uid=0
 🔹抢1分钱奶茶咖啡
-👉http://x.f6url.com/tuvJRL?uid=0`
+👉http://x.f6url.com/K9ZIIV?uid=0`
 	},	
 
 	{
