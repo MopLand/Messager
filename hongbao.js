@@ -84,11 +84,11 @@ http://x.f3url.com/1go33A?uid=0`
 ❸【淘宝闪购】神券🧧
 
 🔹领最高15元神券
-👉http://x.f3url.com/s3gL7x?uid=0
+👉http://x.f8url.com/s3gL7x?uid=0
 🔹闪购品牌日，单单有福利
-👉http://x.f3url.com/TPtXOA?uid=0
+👉http://x.f8url.com/TPtXOA?uid=0
 🔹每晚8点抢免单
-👉http://x.f3url.com/F0SLI8?uid=0
+👉http://x.f8url.com/F0SLI8?uid=0
 ----------------
 ❹【京东外卖】神券🧧
 
