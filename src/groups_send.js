@@ -640,6 +640,10 @@ class GroupsSend {
 				if ( !keep && item.msgType == 49 && item.pattern == 3 ) {
 					exch = (act.extractTbc(text) || act.detectUrl(text) || act.detectApp(text));
 					exch && data.convert++;
+					//无需转链，还原文本，后续将直接原样转发
+					if( !exch ){
+						text = wrap;
+					}
 				}
 
 				//生成消息队结构
@@ -825,7 +829,7 @@ class GroupsSend {
 				if (exch && (user.tag & 4) == 0) {
 					return { 'request': true };
 				} else {
-					return { 'request': false, 'respond': { 'status': 1, 'result': data.content || data.text } };
+					return { 'request': false, 'respond': { 'status': 1, 'result': data.content } };
 				}
 
 			}, self.conf.options);
