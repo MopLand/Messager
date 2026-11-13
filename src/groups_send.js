@@ -1243,8 +1243,8 @@ class GroupsSend {
 			//小程序 和 消息集合
 			if (msg.msgtype == 49) {
 
-				//支持的混合消息：1 小程序、2 视频号、3 消息集合
-				if ( ( msg.pattern == 1 && mini ) || msg.pattern == 2 || msg.pattern == 3 ) {
+				//支持的混合消息：1 小程序、2 视频号、3 消息集合、4 笔记
+				if ( ( msg.pattern == 1 && mini ) || msg.pattern == 2 || msg.pattern == 3 || msg.pattern == 4 ) {
 
 					var fn = this.wx.instance( member.auto_id, member.device_id ).SendAppMsgXml(member.weixin_id, chat, body, msg.source);
 
@@ -1256,7 +1256,7 @@ class GroupsSend {
 
 				} else {
 
-					var fn = com.Promise(true, { 'status': 0, 'result': '已经忽略小程序发送' });
+					var fn = com.Promise(true, { 'status': 0, 'result': '已经忽略 XML 发送' });
 
 				}
 
