@@ -601,7 +601,8 @@ class GroupsSend {
 			// }
 
 			//文本消息，检查是否有 @所有人
-			if( item.msgType == 1 && /^@所有人( | )/.test( text ) ){
+			if( item.msgType == 1 && /^@所有人/.test( text ) ){
+				text = text.replace( '@所有人', '@所有人 ' );
 				item.msgSource = '<msgsource><atuserlist>notify@all</atuserlist></msgsource>';
 			}
 
